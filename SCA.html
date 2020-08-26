@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 5 Specification Curve Analysis | A Mega-Analysis of Personality Predictions: Robustness and Boundary Conditions</title>
+  <meta name="description" content="Decades of studies identify personality traits as an important predictor of life outcomes. However, previous investigations of personality-outcome associations have not taken a principled approach to covariate use or other sampling strategies to ensure the robustness of personality-outcome associations. The result is that it is unclear (1) whether personality predicts important outcomes after accounting for a range of background variables, (2) for whom and when personality predictions hold, and 3) for which background variables are most important to account. The present study examines the robustness and boundary conditions of personality prediction using the Big Five to predict 14 health, social, education/work, and societal life outcomes across eight different person- and study-level moderators in 10 longitudinal panel studies in a mega-analytic framework. Robustness and boundary conditions were systematically tested using two approaches: propensity score matching and specification curve analysis. Across 26/70 propensity score matched models and 37/70 specification curve models, personality traits were a robust predictor of outcomes. Main effects of personality traits were predominant, with few moderators of personality-outcome associations. However, such robustness was differential across covariates in nearly half of the tested models, with the inclusion or not inclusion of some of these flipping the direction of association. In sum, personality is a powerful predictor of life outcomes with few moderated associations. However, researchers need to be careful in their choices of covariates. We discuss how these findings can inform the pathways by which personality has effects, as well as recommendations for covariate inclusion." />
+  <meta name="generator" content="bookdown 0.19 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 5 Specification Curve Analysis | A Mega-Analysis of Personality Predictions: Robustness and Boundary Conditions" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="Decades of studies identify personality traits as an important predictor of life outcomes. However, previous investigations of personality-outcome associations have not taken a principled approach to covariate use or other sampling strategies to ensure the robustness of personality-outcome associations. The result is that it is unclear (1) whether personality predicts important outcomes after accounting for a range of background variables, (2) for whom and when personality predictions hold, and 3) for which background variables are most important to account. The present study examines the robustness and boundary conditions of personality prediction using the Big Five to predict 14 health, social, education/work, and societal life outcomes across eight different person- and study-level moderators in 10 longitudinal panel studies in a mega-analytic framework. Robustness and boundary conditions were systematically tested using two approaches: propensity score matching and specification curve analysis. Across 26/70 propensity score matched models and 37/70 specification curve models, personality traits were a robust predictor of outcomes. Main effects of personality traits were predominant, with few moderators of personality-outcome associations. However, such robustness was differential across covariates in nearly half of the tested models, with the inclusion or not inclusion of some of these flipping the direction of association. In sum, personality is a powerful predictor of life outcomes with few moderated associations. However, researchers need to be careful in their choices of covariates. We discuss how these findings can inform the pathways by which personality has effects, as well as recommendations for covariate inclusion." />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 5 Specification Curve Analysis | A Mega-Analysis of Personality Predictions: Robustness and Boundary Conditions" />
+  
+  <meta name="twitter:description" content="Decades of studies identify personality traits as an important predictor of life outcomes. However, previous investigations of personality-outcome associations have not taken a principled approach to covariate use or other sampling strategies to ensure the robustness of personality-outcome associations. The result is that it is unclear (1) whether personality predicts important outcomes after accounting for a range of background variables, (2) for whom and when personality predictions hold, and 3) for which background variables are most important to account. The present study examines the robustness and boundary conditions of personality prediction using the Big Five to predict 14 health, social, education/work, and societal life outcomes across eight different person- and study-level moderators in 10 longitudinal panel studies in a mega-analytic framework. Robustness and boundary conditions were systematically tested using two approaches: propensity score matching and specification curve analysis. Across 26/70 propensity score matched models and 37/70 specification curve models, personality traits were a robust predictor of outcomes. Main effects of personality traits were predominant, with few moderators of personality-outcome associations. However, such robustness was differential across covariates in nearly half of the tested models, with the inclusion or not inclusion of some of these flipping the direction of association. In sum, personality is a powerful predictor of life outcomes with few moderated associations. However, researchers need to be careful in their choices of covariates. We discuss how these findings can inform the pathways by which personality has effects, as well as recommendations for covariate inclusion." />
+  
+
+
+
+<meta name="date" content="2020-08-26" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="psm-models-psm-mods.html"/>
+<link rel="next" href="Summary.html"/>
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">A Minimal Book Example</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Workspace</a><ul>
+<li class="chapter" data-level="1.1" data-path="index.html"><a href="index.html#packages"><i class="fa fa-check"></i><b>1.1</b> Packages</a></li>
+<li class="chapter" data-level="1.2" data-path="index.html"><a href="index.html#directory-path"><i class="fa fa-check"></i><b>1.2</b> Directory Path</a></li>
+<li class="chapter" data-level="1.3" data-path="index.html"><a href="index.html#codebook"><i class="fa fa-check"></i><b>1.3</b> Codebook</a></li>
+<li class="chapter" data-level="1.4" data-path="index.html"><a href="index.html#other-supporting-documents"><i class="fa fa-check"></i><b>1.4</b> Other Supporting Documents</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="dataCleaning.html"><a href="dataCleaning.html"><i class="fa fa-check"></i><b>2</b> Data Cleaning</a><ul>
+<li class="chapter" data-level="2.1" data-path="dataCleaning.html"><a href="dataCleaning.html#add-health"><i class="fa fa-check"></i><b>2.1</b> Add Health</a><ul>
+<li class="chapter" data-level="2.1.1" data-path="dataCleaning.html"><a href="dataCleaning.html#load-data"><i class="fa fa-check"></i><b>2.1.1</b> Load Data</a></li>
+<li class="chapter" data-level="2.1.2" data-path="dataCleaning.html"><a href="dataCleaning.html#matching-variables"><i class="fa fa-check"></i><b>2.1.2</b> Matching Variables</a></li>
+<li class="chapter" data-level="2.1.3" data-path="dataCleaning.html"><a href="dataCleaning.html#personality-variables"><i class="fa fa-check"></i><b>2.1.3</b> Personality Variables</a></li>
+<li class="chapter" data-level="2.1.4" data-path="dataCleaning.html"><a href="dataCleaning.html#outcome-variables"><i class="fa fa-check"></i><b>2.1.4</b> Outcome Variables</a></li>
+<li class="chapter" data-level="2.1.5" data-path="dataCleaning.html"><a href="dataCleaning.html#covariates"><i class="fa fa-check"></i><b>2.1.5</b> Covariates</a></li>
+<li class="chapter" data-level="2.1.6" data-path="dataCleaning.html"><a href="dataCleaning.html#imputation"><i class="fa fa-check"></i><b>2.1.6</b> Imputation</a></li>
+</ul></li>
+<li class="chapter" data-level="2.2" data-path="dataCleaning.html"><a href="dataCleaning.html#us"><i class="fa fa-check"></i><b>2.2</b> US</a><ul>
+<li class="chapter" data-level="2.2.1" data-path="dataCleaning.html"><a href="dataCleaning.html#load-data-1"><i class="fa fa-check"></i><b>2.2.1</b> Load Data</a></li>
+<li class="chapter" data-level="2.2.2" data-path="dataCleaning.html"><a href="dataCleaning.html#outcome-variables-1"><i class="fa fa-check"></i><b>2.2.2</b> Outcome Variables</a></li>
+</ul></li>
+<li class="chapter" data-level="2.3" data-path="dataCleaning.html"><a href="dataCleaning.html#bhps"><i class="fa fa-check"></i><b>2.3</b> BHPS</a><ul>
+<li class="chapter" data-level="2.3.1" data-path="dataCleaning.html"><a href="dataCleaning.html#load-data-2"><i class="fa fa-check"></i><b>2.3.1</b> Load Data</a></li>
+<li class="chapter" data-level="2.3.2" data-path="dataCleaning.html"><a href="dataCleaning.html#matching-variables-1"><i class="fa fa-check"></i><b>2.3.2</b> Matching Variables</a></li>
+<li class="chapter" data-level="2.3.3" data-path="dataCleaning.html"><a href="dataCleaning.html#personality-variables-1"><i class="fa fa-check"></i><b>2.3.3</b> Personality Variables</a></li>
+<li class="chapter" data-level="2.3.4" data-path="dataCleaning.html"><a href="dataCleaning.html#outcome-variables-2"><i class="fa fa-check"></i><b>2.3.4</b> Outcome Variables</a></li>
+<li class="chapter" data-level="2.3.5" data-path="dataCleaning.html"><a href="dataCleaning.html#covariates-1"><i class="fa fa-check"></i><b>2.3.5</b> Covariates</a></li>
+<li class="chapter" data-level="2.3.6" data-path="dataCleaning.html"><a href="dataCleaning.html#imputation-1"><i class="fa fa-check"></i><b>2.3.6</b> Imputation</a></li>
+</ul></li>
+<li class="chapter" data-level="2.4" data-path="dataCleaning.html"><a href="dataCleaning.html#gsoep"><i class="fa fa-check"></i><b>2.4</b> GSOEP</a><ul>
+<li class="chapter" data-level="2.4.1" data-path="dataCleaning.html"><a href="dataCleaning.html#load-data-3"><i class="fa fa-check"></i><b>2.4.1</b> Load Data</a></li>
+<li class="chapter" data-level="2.4.2" data-path="dataCleaning.html"><a href="dataCleaning.html#matching-variables-2"><i class="fa fa-check"></i><b>2.4.2</b> Matching Variables</a></li>
+<li class="chapter" data-level="2.4.3" data-path="dataCleaning.html"><a href="dataCleaning.html#personality-variables-2"><i class="fa fa-check"></i><b>2.4.3</b> Personality Variables</a></li>
+<li class="chapter" data-level="2.4.4" data-path="dataCleaning.html"><a href="dataCleaning.html#outcome-variables-3"><i class="fa fa-check"></i><b>2.4.4</b> Outcome Variables</a></li>
+<li class="chapter" data-level="2.4.5" data-path="dataCleaning.html"><a href="dataCleaning.html#covariates-2"><i class="fa fa-check"></i><b>2.4.5</b> Covariates</a></li>
+<li class="chapter" data-level="2.4.6" data-path="dataCleaning.html"><a href="dataCleaning.html#imputation-2"><i class="fa fa-check"></i><b>2.4.6</b> Imputation</a></li>
+</ul></li>
+<li class="chapter" data-level="2.5" data-path="dataCleaning.html"><a href="dataCleaning.html#hilda"><i class="fa fa-check"></i><b>2.5</b> HILDA</a><ul>
+<li class="chapter" data-level="2.5.1" data-path="dataCleaning.html"><a href="dataCleaning.html#load-data-4"><i class="fa fa-check"></i><b>2.5.1</b> Load Data</a></li>
+<li class="chapter" data-level="2.5.2" data-path="dataCleaning.html"><a href="dataCleaning.html#matching-variables-3"><i class="fa fa-check"></i><b>2.5.2</b> Matching Variables</a></li>
+<li class="chapter" data-level="2.5.3" data-path="dataCleaning.html"><a href="dataCleaning.html#personality-variables-3"><i class="fa fa-check"></i><b>2.5.3</b> Personality Variables</a></li>
+<li class="chapter" data-level="2.5.4" data-path="dataCleaning.html"><a href="dataCleaning.html#outcome-variables-4"><i class="fa fa-check"></i><b>2.5.4</b> Outcome Variables</a></li>
+<li class="chapter" data-level="2.5.5" data-path="dataCleaning.html"><a href="dataCleaning.html#covariates-3"><i class="fa fa-check"></i><b>2.5.5</b> Covariates</a></li>
+<li class="chapter" data-level="2.5.6" data-path="dataCleaning.html"><a href="dataCleaning.html#imputation-3"><i class="fa fa-check"></i><b>2.5.6</b> Imputation</a></li>
+</ul></li>
+<li class="chapter" data-level="2.6" data-path="dataCleaning.html"><a href="dataCleaning.html#hrs"><i class="fa fa-check"></i><b>2.6</b> HRS</a><ul>
+<li class="chapter" data-level="2.6.1" data-path="dataCleaning.html"><a href="dataCleaning.html#load-data-5"><i class="fa fa-check"></i><b>2.6.1</b> Load Data</a></li>
+<li class="chapter" data-level="2.6.2" data-path="dataCleaning.html"><a href="dataCleaning.html#matching-variables-4"><i class="fa fa-check"></i><b>2.6.2</b> Matching Variables</a></li>
+<li class="chapter" data-level="2.6.3" data-path="dataCleaning.html"><a href="dataCleaning.html#personality-variables-4"><i class="fa fa-check"></i><b>2.6.3</b> Personality Variables</a></li>
+<li class="chapter" data-level="2.6.4" data-path="dataCleaning.html"><a href="dataCleaning.html#outcome-variables-5"><i class="fa fa-check"></i><b>2.6.4</b> Outcome Variables</a></li>
+<li class="chapter" data-level="2.6.5" data-path="dataCleaning.html"><a href="dataCleaning.html#covariates-4"><i class="fa fa-check"></i><b>2.6.5</b> Covariates</a></li>
+<li class="chapter" data-level="2.6.6" data-path="dataCleaning.html"><a href="dataCleaning.html#imputation-4"><i class="fa fa-check"></i><b>2.6.6</b> Imputation</a></li>
+</ul></li>
+<li class="chapter" data-level="2.7" data-path="dataCleaning.html"><a href="dataCleaning.html#liss"><i class="fa fa-check"></i><b>2.7</b> LISS</a><ul>
+<li class="chapter" data-level="2.7.1" data-path="dataCleaning.html"><a href="dataCleaning.html#load-data-6"><i class="fa fa-check"></i><b>2.7.1</b> Load Data</a></li>
+<li class="chapter" data-level="2.7.2" data-path="dataCleaning.html"><a href="dataCleaning.html#matching-variables-5"><i class="fa fa-check"></i><b>2.7.2</b> Matching Variables</a></li>
+<li class="chapter" data-level="2.7.3" data-path="dataCleaning.html"><a href="dataCleaning.html#personality-variables-5"><i class="fa fa-check"></i><b>2.7.3</b> Personality Variables</a></li>
+<li class="chapter" data-level="2.7.4" data-path="dataCleaning.html"><a href="dataCleaning.html#outcome-variables-6"><i class="fa fa-check"></i><b>2.7.4</b> Outcome Variables</a></li>
+<li class="chapter" data-level="2.7.5" data-path="dataCleaning.html"><a href="dataCleaning.html#covariates-5"><i class="fa fa-check"></i><b>2.7.5</b> Covariates</a></li>
+<li class="chapter" data-level="2.7.6" data-path="dataCleaning.html"><a href="dataCleaning.html#imputation-5"><i class="fa fa-check"></i><b>2.7.6</b> Imputation</a></li>
+</ul></li>
+<li class="chapter" data-level="2.8" data-path="dataCleaning.html"><a href="dataCleaning.html#midus"><i class="fa fa-check"></i><b>2.8</b> MIDUS</a><ul>
+<li class="chapter" data-level="2.8.1" data-path="dataCleaning.html"><a href="dataCleaning.html#load-data-7"><i class="fa fa-check"></i><b>2.8.1</b> Load Data</a></li>
+<li class="chapter" data-level="2.8.2" data-path="dataCleaning.html"><a href="dataCleaning.html#matching-variables-6"><i class="fa fa-check"></i><b>2.8.2</b> Matching Variables</a></li>
+<li class="chapter" data-level="2.8.3" data-path="dataCleaning.html"><a href="dataCleaning.html#personality-variables-6"><i class="fa fa-check"></i><b>2.8.3</b> Personality Variables</a></li>
+<li class="chapter" data-level="2.8.4" data-path="dataCleaning.html"><a href="dataCleaning.html#outcome-variables-7"><i class="fa fa-check"></i><b>2.8.4</b> Outcome Variables</a></li>
+<li class="chapter" data-level="2.8.5" data-path="dataCleaning.html"><a href="dataCleaning.html#covariates-6"><i class="fa fa-check"></i><b>2.8.5</b> Covariates</a></li>
+<li class="chapter" data-level="2.8.6" data-path="dataCleaning.html"><a href="dataCleaning.html#imputation-6"><i class="fa fa-check"></i><b>2.8.6</b> Imputation</a></li>
+</ul></li>
+<li class="chapter" data-level="2.9" data-path="dataCleaning.html"><a href="dataCleaning.html#nlsy"><i class="fa fa-check"></i><b>2.9</b> NLSY</a><ul>
+<li class="chapter" data-level="2.9.1" data-path="dataCleaning.html"><a href="dataCleaning.html#load-data-8"><i class="fa fa-check"></i><b>2.9.1</b> Load Data</a></li>
+<li class="chapter" data-level="2.9.2" data-path="dataCleaning.html"><a href="dataCleaning.html#matching-variables-7"><i class="fa fa-check"></i><b>2.9.2</b> Matching Variables</a></li>
+<li class="chapter" data-level="2.9.3" data-path="dataCleaning.html"><a href="dataCleaning.html#personality-variables-7"><i class="fa fa-check"></i><b>2.9.3</b> Personality Variables</a></li>
+<li class="chapter" data-level="2.9.4" data-path="dataCleaning.html"><a href="dataCleaning.html#outcome-variables-8"><i class="fa fa-check"></i><b>2.9.4</b> Outcome Variables</a></li>
+<li class="chapter" data-level="2.9.5" data-path="dataCleaning.html"><a href="dataCleaning.html#covariates-7"><i class="fa fa-check"></i><b>2.9.5</b> Covariates</a></li>
+<li class="chapter" data-level="2.9.6" data-path="dataCleaning.html"><a href="dataCleaning.html#imputation-7"><i class="fa fa-check"></i><b>2.9.6</b> Imputation</a></li>
+</ul></li>
+<li class="chapter" data-level="2.10" data-path="dataCleaning.html"><a href="dataCleaning.html#shp"><i class="fa fa-check"></i><b>2.10</b> SHP</a><ul>
+<li class="chapter" data-level="2.10.1" data-path="dataCleaning.html"><a href="dataCleaning.html#load-data-9"><i class="fa fa-check"></i><b>2.10.1</b> Load Data</a></li>
+<li class="chapter" data-level="2.10.2" data-path="dataCleaning.html"><a href="dataCleaning.html#matching-variables-8"><i class="fa fa-check"></i><b>2.10.2</b> Matching Variables</a></li>
+<li class="chapter" data-level="2.10.3" data-path="dataCleaning.html"><a href="dataCleaning.html#personality-variables-8"><i class="fa fa-check"></i><b>2.10.3</b> Personality Variables</a></li>
+<li class="chapter" data-level="2.10.4" data-path="dataCleaning.html"><a href="dataCleaning.html#outcome-variables-9"><i class="fa fa-check"></i><b>2.10.4</b> Outcome Variables</a></li>
+<li class="chapter" data-level="2.10.5" data-path="dataCleaning.html"><a href="dataCleaning.html#covariates-8"><i class="fa fa-check"></i><b>2.10.5</b> Covariates</a></li>
+<li class="chapter" data-level="2.10.6" data-path="dataCleaning.html"><a href="dataCleaning.html#imputation-8"><i class="fa fa-check"></i><b>2.10.6</b> Imputation</a></li>
+</ul></li>
+<li class="chapter" data-level="2.11" data-path="dataCleaning.html"><a href="dataCleaning.html#wls"><i class="fa fa-check"></i><b>2.11</b> WLS</a><ul>
+<li class="chapter" data-level="2.11.1" data-path="dataCleaning.html"><a href="dataCleaning.html#load-data-10"><i class="fa fa-check"></i><b>2.11.1</b> Load Data</a></li>
+<li class="chapter" data-level="2.11.2" data-path="dataCleaning.html"><a href="dataCleaning.html#matching-variables-9"><i class="fa fa-check"></i><b>2.11.2</b> Matching Variables</a></li>
+<li class="chapter" data-level="2.11.3" data-path="dataCleaning.html"><a href="dataCleaning.html#personality-variables-9"><i class="fa fa-check"></i><b>2.11.3</b> Personality Variables</a></li>
+<li class="chapter" data-level="2.11.4" data-path="dataCleaning.html"><a href="dataCleaning.html#outcome-variables-10"><i class="fa fa-check"></i><b>2.11.4</b> Outcome Variables</a></li>
+<li class="chapter" data-level="2.11.5" data-path="dataCleaning.html"><a href="dataCleaning.html#covariates-9"><i class="fa fa-check"></i><b>2.11.5</b> Covariates</a></li>
+<li class="chapter" data-level="2.11.6" data-path="dataCleaning.html"><a href="dataCleaning.html#imputation-9"><i class="fa fa-check"></i><b>2.11.6</b> Imputation</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="PSM.html"><a href="PSM.html"><i class="fa fa-check"></i><b>3</b> Propensity Score Matching</a><ul>
+<li class="chapter" data-level="3.1" data-path="PSM.html"><a href="PSM.html#part-1-data"><i class="fa fa-check"></i><b>3.1</b> Part 1: Data</a><ul>
+<li class="chapter" data-level="3.1.1" data-path="PSM.html"><a href="PSM.html#outcomes-and-personality"><i class="fa fa-check"></i><b>3.1.1</b> Outcomes and Personality</a></li>
+<li class="chapter" data-level="3.1.2" data-path="PSM.html"><a href="PSM.html#combine-matching-and-outcome-variables"><i class="fa fa-check"></i><b>3.1.2</b> Combine Matching and Outcome Variables</a></li>
+</ul></li>
+<li class="chapter" data-level="3.2" data-path="PSM.html"><a href="PSM.html#part-2-run-matching"><i class="fa fa-check"></i><b>3.2</b> Part 2: Run Matching</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="PSM.html"><a href="PSM.html#run-models"><i class="fa fa-check"></i><b>3.2.1</b> Run Models</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="PSM.html"><a href="PSM.html#part-3-balance"><i class="fa fa-check"></i><b>3.3</b> Part 3: Balance</a><ul>
+<li class="chapter" data-level="3.3.1" data-path="PSM.html"><a href="PSM.html#run"><i class="fa fa-check"></i><b>3.3.1</b> Run</a></li>
+</ul></li>
+<li class="chapter" data-level="3.4" data-path="PSM.html"><a href="PSM.html#part-4-descriptives"><i class="fa fa-check"></i><b>3.4</b> Part 4: Descriptives</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html"><i class="fa fa-check"></i><b>4</b> PSM Models {#PSM Mods}</a><ul>
+<li class="chapter" data-level="4.1" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#part-5-data-setup"><i class="fa fa-check"></i><b>4.1</b> Part 5: Data Setup</a><ul>
+<li class="chapter" data-level="4.1.1" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#personality"><i class="fa fa-check"></i><b>4.1.1</b> Personality</a></li>
+<li class="chapter" data-level="4.1.2" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#moderators"><i class="fa fa-check"></i><b>4.1.2</b> Moderators</a></li>
+<li class="chapter" data-level="4.1.3" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#outcomes"><i class="fa fa-check"></i><b>4.1.3</b> Outcomes</a></li>
+</ul></li>
+<li class="chapter" data-level="4.2" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#part-6-models"><i class="fa fa-check"></i><b>4.2</b> Part 6: Models</a><ul>
+<li class="chapter" data-level="4.2.1" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#matched-model-function"><i class="fa fa-check"></i><b>4.2.1</b> Matched Model Function</a></li>
+<li class="chapter" data-level="4.2.2" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#setup-cluster-jobs"><i class="fa fa-check"></i><b>4.2.2</b> Setup Cluster Jobs</a></li>
+</ul></li>
+<li class="chapter" data-level="4.3" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#part-7-compile-cluster-jobs"><i class="fa fa-check"></i><b>4.3</b> Part 7: Compile Cluster Jobs</a><ul>
+<li class="chapter" data-level="4.3.1" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#moderator-predicted-values"><i class="fa fa-check"></i><b>4.3.1</b> Moderator Predicted Values</a></li>
+<li class="chapter" data-level="4.3.2" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#compilation-and-summary-function"><i class="fa fa-check"></i><b>4.3.2</b> Compilation and Summary Function</a></li>
+<li class="chapter" data-level="4.3.3" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#run-compilation"><i class="fa fa-check"></i><b>4.3.3</b> Run Compilation</a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#part-8-tables-and-plots"><i class="fa fa-check"></i><b>4.4</b> Part 8: Tables and Plots</a><ul>
+<li class="chapter" data-level="4.4.1" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#summaries"><i class="fa fa-check"></i><b>4.4.1</b> Summaries</a></li>
+<li class="chapter" data-level="4.4.2" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#variance-covariance-matrices"><i class="fa fa-check"></i><b>4.4.2</b> Variance-Covariance Matrices</a></li>
+<li class="chapter" data-level="4.4.3" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#simple-effects"><i class="fa fa-check"></i><b>4.4.3</b> Simple Effects</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="SCA.html"><a href="SCA.html"><i class="fa fa-check"></i><b>5</b> Specification Curve Analysis</a><ul>
+<li class="chapter" data-level="5.1" data-path="SCA.html"><a href="SCA.html#load-data-11"><i class="fa fa-check"></i><b>5.1</b> Load Data</a><ul>
+<li class="chapter" data-level="5.1.1" data-path="SCA.html"><a href="SCA.html#covariates-10"><i class="fa fa-check"></i><b>5.1.1</b> Covariates</a></li>
+<li class="chapter" data-level="5.1.2" data-path="SCA.html"><a href="SCA.html#outcomes-1"><i class="fa fa-check"></i><b>5.1.2</b> Outcomes</a></li>
+<li class="chapter" data-level="5.1.3" data-path="SCA.html"><a href="SCA.html#personality-1"><i class="fa fa-check"></i><b>5.1.3</b> Personality</a></li>
+<li class="chapter" data-level="5.1.4" data-path="SCA.html"><a href="SCA.html#moderators-1"><i class="fa fa-check"></i><b>5.1.4</b> Moderators</a></li>
+</ul></li>
+<li class="chapter" data-level="5.2" data-path="SCA.html"><a href="SCA.html#sca-data-setup"><i class="fa fa-check"></i><b>5.2</b> SCA Data Setup</a></li>
+<li class="chapter" data-level="5.3" data-path="SCA.html"><a href="SCA.html#functions"><i class="fa fa-check"></i><b>5.3</b> Functions</a><ul>
+<li class="chapter" data-level="5.3.1" data-path="SCA.html"><a href="SCA.html#permutation-samples"><i class="fa fa-check"></i><b>5.3.1</b> Permutation Samples</a></li>
+<li class="chapter" data-level="5.3.2" data-path="SCA.html"><a href="SCA.html#permutation-models"><i class="fa fa-check"></i><b>5.3.2</b> Permutation Models</a></li>
+<li class="chapter" data-level="5.3.3" data-path="SCA.html"><a href="SCA.html#terms-and-formulas"><i class="fa fa-check"></i><b>5.3.3</b> Terms and Formulas</a></li>
+<li class="chapter" data-level="5.3.4" data-path="SCA.html"><a href="SCA.html#full-models-and-workspace-setup"><i class="fa fa-check"></i><b>5.3.4</b> Full Models and Workspace Setup</a></li>
+<li class="chapter" data-level="5.3.5" data-path="SCA.html"><a href="SCA.html#specifications-and-permutations-for-cluster"><i class="fa fa-check"></i><b>5.3.5</b> Specifications and Permutations for Cluster</a></li>
+</ul></li>
+<li class="chapter" data-level="5.4" data-path="SCA.html"><a href="SCA.html#setup"><i class="fa fa-check"></i><b>5.4</b> Setup</a><ul>
+<li class="chapter" data-level="5.4.1" data-path="SCA.html"><a href="SCA.html#workspace-1"><i class="fa fa-check"></i><b>5.4.1</b> Workspace</a></li>
+<li class="chapter" data-level="5.4.2" data-path="SCA.html"><a href="SCA.html#job-arrays-for-the-cluster"><i class="fa fa-check"></i><b>5.4.2</b> Job Arrays for the Cluster</a></li>
+</ul></li>
+<li class="chapter" data-level="5.5" data-path="SCA.html"><a href="SCA.html#re-compiling"><i class="fa fa-check"></i><b>5.5</b> Re-Compiling</a><ul>
+<li class="chapter" data-level="5.5.1" data-path="SCA.html"><a href="SCA.html#raw-data-functions"><i class="fa fa-check"></i><b>5.5.1</b> Raw Data Functions</a></li>
+<li class="chapter" data-level="5.5.2" data-path="SCA.html"><a href="SCA.html#perm-data-functions"><i class="fa fa-check"></i><b>5.5.2</b> Perm Data Functions</a></li>
+<li class="chapter" data-level="5.5.3" data-path="SCA.html"><a href="SCA.html#inferential-based-tests"><i class="fa fa-check"></i><b>5.5.3</b> Inferential-Based Tests</a></li>
+<li class="chapter" data-level="5.5.4" data-path="SCA.html"><a href="SCA.html#plotting-function"><i class="fa fa-check"></i><b>5.5.4</b> Plotting Function</a></li>
+<li class="chapter" data-level="5.5.5" data-path="SCA.html"><a href="SCA.html#compiling-function"><i class="fa fa-check"></i><b>5.5.5</b> Compiling Function</a></li>
+</ul></li>
+<li class="chapter" data-level="5.6" data-path="SCA.html"><a href="SCA.html#results"><i class="fa fa-check"></i><b>5.6</b> Results</a><ul>
+<li class="chapter" data-level="5.6.1" data-path="SCA.html"><a href="SCA.html#tables-2"><i class="fa fa-check"></i><b>5.6.1</b> Tables</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="Summary.html"><a href="Summary.html"><i class="fa fa-check"></i><b>6</b> Summarizing Result Implications</a><ul>
+<li class="chapter" data-level="6.1" data-path="Summary.html"><a href="Summary.html#psm-moderators"><i class="fa fa-check"></i><b>6.1</b> PSM Moderators</a></li>
+<li class="chapter" data-level="6.2" data-path="Summary.html"><a href="Summary.html#sca-key-variables"><i class="fa fa-check"></i><b>6.2</b> SCA Key Variables</a></li>
+<li class="chapter" data-level="6.3" data-path="Summary.html"><a href="Summary.html#table-of-key-variables"><i class="fa fa-check"></i><b>6.3</b> Table of Key Variables</a></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">A Mega-Analysis of Personality Predictions: Robustness and Boundary Conditions</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="SCA" class="section level1">
+<h1><span class="header-section-number">Chapter 5</span> Specification Curve Analysis</h1>
+<div id="load-data-11" class="section level2">
+<h2><span class="header-section-number">5.1</span> Load Data</h2>
+<div id="covariates-10" class="section level3">
+<h3><span class="header-section-number">5.1.1</span> Covariates</h3>
+<div class="sourceCode" id="cb236"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb236-1" data-line-number="1">loadRData &lt;-<span class="st"> </span><span class="cf">function</span>(fileName, type){</a>
+<a class="sourceLine" id="cb236-2" data-line-number="2"><span class="co">#loads an RData file, and returns it</span></a>
+<a class="sourceLine" id="cb236-3" data-line-number="3">    path &lt;-<span class="st"> </span><span class="kw">sprintf</span>(<span class="st">&quot;%s/data/imputed/%s_imputed_small.RData&quot;</span>, wd, fileName)</a>
+<a class="sourceLine" id="cb236-4" data-line-number="4">    <span class="kw">load</span>(path)</a>
+<a class="sourceLine" id="cb236-5" data-line-number="5">    <span class="kw">get</span>(<span class="kw">ls</span>()[<span class="kw">grepl</span>(type, <span class="kw">ls</span>())])</a>
+<a class="sourceLine" id="cb236-6" data-line-number="6">}</a>
+<a class="sourceLine" id="cb236-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb236-8" data-line-number="8">studies &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;addhealth&quot;</span>, <span class="st">&quot;bhps&quot;</span>, <span class="st">&quot;gsoep&quot;</span>, <span class="st">&quot;hilda&quot;</span>, <span class="st">&quot;hrs&quot;</span>, <span class="st">&quot;liss&quot;</span>, <span class="st">&quot;midus&quot;</span>, <span class="st">&quot;nlsy&quot;</span>, <span class="st">&quot;shp&quot;</span>, <span class="st">&quot;wls&quot;</span>)</a>
+<a class="sourceLine" id="cb236-9" data-line-number="9">studies_long &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Add Health&quot;</span>, <span class="st">&quot;BHPS&quot;</span>, <span class="st">&quot;GSOEP&quot;</span>, <span class="st">&quot;HILDA&quot;</span>, <span class="st">&quot;HRS&quot;</span>, <span class="st">&quot;LISS&quot;</span>, <span class="st">&quot;MIDUS&quot;</span>, <span class="st">&quot;NLSY&quot;</span>, <span class="st">&quot;SHP&quot;</span>, <span class="st">&quot;WLS&quot;</span>)</a>
+<a class="sourceLine" id="cb236-10" data-line-number="10">studies_num &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">:</span><span class="dv">10</span></a>
+<a class="sourceLine" id="cb236-11" data-line-number="11"></a>
+<a class="sourceLine" id="cb236-12" data-line-number="12">sca_cov &lt;-<span class="st"> </span><span class="kw">tibble</span>(<span class="dt">study =</span> studies) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb236-13" data-line-number="13"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">data =</span> <span class="kw">map</span>(study, <span class="op">~</span><span class="kw">loadRData</span>(., <span class="st">&quot;SCA_imp&quot;</span>)),</a>
+<a class="sourceLine" id="cb236-14" data-line-number="14">         <span class="dt">data =</span> <span class="kw">map</span>(data, <span class="op">~</span>(.) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">mutate</span>(</a>
+<a class="sourceLine" id="cb236-15" data-line-number="15">           <span class="dt">p_year =</span> <span class="kw">as.numeric</span>(p_year), <span class="dt">SID =</span> <span class="kw">as.character</span>(SID))),</a>
+<a class="sourceLine" id="cb236-16" data-line-number="16">         <span class="dt">study =</span> <span class="kw">mapvalues</span>(study, studies, studies_long)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb236-17" data-line-number="17"><span class="st">  </span><span class="kw">unnest</span>(data) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb236-18" data-line-number="18"><span class="st">  </span><span class="kw">filter</span>(age <span class="op">&lt;</span><span class="st"> </span><span class="dv">100</span>)</a>
+<a class="sourceLine" id="cb236-19" data-line-number="19"></a>
+<a class="sourceLine" id="cb236-20" data-line-number="20">sca_cov_fun &lt;-<span class="st"> </span><span class="cf">function</span>(item){</a>
+<a class="sourceLine" id="cb236-21" data-line-number="21">  p_waves <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb236-22" data-line-number="22"><span class="st">    </span><span class="kw">filter</span>(p_item <span class="op">==</span><span class="st"> </span>item) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb236-23" data-line-number="23"><span class="st">    </span><span class="kw">select</span>(<span class="dt">study =</span> Study, Used) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb236-24" data-line-number="24"><span class="st">    </span><span class="kw">full_join</span>(sca_cov) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb236-25" data-line-number="25"><span class="st">    </span><span class="kw">filter</span>(p_year <span class="op">==</span><span class="st"> </span>Used) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb236-26" data-line-number="26"><span class="st">    </span><span class="kw">distinct</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb236-27" data-line-number="27"><span class="st">    </span><span class="kw">select</span>(<span class="op">-</span>Used) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb236-28" data-line-number="28"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">BMI =</span> <span class="kw">ifelse</span>(<span class="kw">is.nan</span>(BMI) <span class="op">|</span><span class="st"> </span><span class="kw">is.infinite</span>(BMI), <span class="ot">NA</span>, BMI))</a>
+<a class="sourceLine" id="cb236-29" data-line-number="29">}</a>
+<a class="sourceLine" id="cb236-30" data-line-number="30"></a>
+<a class="sourceLine" id="cb236-31" data-line-number="31">sca_cov &lt;-<span class="st"> </span><span class="kw">tibble</span>(<span class="dt">Trait =</span> <span class="kw">unique</span>(p_waves<span class="op">$</span>p_item)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb236-32" data-line-number="32"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">data =</span> <span class="kw">map</span>(Trait, sca_cov_fun))</a></code></pre></div>
+</div>
+<div id="outcomes-1" class="section level3">
+<h3><span class="header-section-number">5.1.2</span> Outcomes</h3>
+<div class="sourceCode" id="cb237"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb237-1" data-line-number="1">loadRData &lt;-<span class="st"> </span><span class="cf">function</span>(fileName, type){</a>
+<a class="sourceLine" id="cb237-2" data-line-number="2"><span class="co">#loads an RData file, and returns it</span></a>
+<a class="sourceLine" id="cb237-3" data-line-number="3">    path &lt;-<span class="st"> </span><span class="kw">sprintf</span>(<span class="st">&quot;%s/data/clean/%s_cleaned.RData&quot;</span>, wd, fileName)</a>
+<a class="sourceLine" id="cb237-4" data-line-number="4">    <span class="kw">load</span>(path)</a>
+<a class="sourceLine" id="cb237-5" data-line-number="5">    <span class="kw">get</span>(<span class="kw">ls</span>()[<span class="kw">grepl</span>(type, <span class="kw">ls</span>())])</a>
+<a class="sourceLine" id="cb237-6" data-line-number="6">}</a>
+<a class="sourceLine" id="cb237-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb237-8" data-line-number="8">sca_out &lt;-<span class="st"> </span><span class="kw">tibble</span>(<span class="dt">study =</span> studies) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb237-9" data-line-number="9"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">data =</span> <span class="kw">map</span>(study, <span class="op">~</span><span class="kw">loadRData</span>(., <span class="st">&quot;out&quot;</span>)),</a>
+<a class="sourceLine" id="cb237-10" data-line-number="10">         <span class="dt">data =</span> <span class="kw">map</span>(data, <span class="op">~</span>(.) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">mutate</span>(<span class="dt">p_year =</span> <span class="kw">as.numeric</span>(p_year), <span class="dt">SID =</span> <span class="kw">as.character</span>(SID))),</a>
+<a class="sourceLine" id="cb237-11" data-line-number="11">         <span class="dt">study =</span> <span class="kw">mapvalues</span>(study, studies, studies_long)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb237-12" data-line-number="12"><span class="st">  </span><span class="kw">unnest</span>(data) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb237-13" data-line-number="13"><span class="st">  </span><span class="kw">filter</span>(<span class="op">!</span><span class="kw">grepl</span>(<span class="st">&quot;sep&quot;</span>, name)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb237-14" data-line-number="14"><span class="st">  </span><span class="kw">select</span>(study, SID, name, p_year, value) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb237-15" data-line-number="15"><span class="st">  </span><span class="kw">filter</span>(<span class="kw">complete.cases</span>(.)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb237-16" data-line-number="16"><span class="st">  </span><span class="kw">distinct</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb237-17" data-line-number="17"><span class="st">  </span><span class="kw">group_by</span>(study, p_year, SID, name) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb237-18" data-line-number="18"><span class="st">  </span><span class="kw">summarize</span>(<span class="dt">value =</span> <span class="kw">max</span>(value, <span class="dt">na.rm =</span> T)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb237-19" data-line-number="19"><span class="st">  </span><span class="kw">ungroup</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb237-20" data-line-number="20"><span class="st">  </span><span class="kw">spread</span>(name, value) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb237-21" data-line-number="21"><span class="st">  </span><span class="kw">full_join</span>(p_waves <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(<span class="dt">study =</span> Study, p_item, Used)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb237-22" data-line-number="22"><span class="st">  </span><span class="kw">filter</span>(p_year <span class="op">==</span><span class="st"> </span>Used) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb237-23" data-line-number="23"><span class="st">  </span><span class="kw">select</span>(<span class="op">-</span>p_year, <span class="op">-</span>Used) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb237-24" data-line-number="24"><span class="st">  </span><span class="kw">group_by</span>(p_item) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb237-25" data-line-number="25"><span class="st">  </span><span class="kw">nest</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb237-26" data-line-number="26"><span class="st">  </span><span class="kw">ungroup</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb237-27" data-line-number="27"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">data =</span> <span class="kw">map</span>(data, <span class="op">~</span>(.) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">gather</span>(Outcome, value, <span class="op">-</span>study, <span class="op">-</span>SID, <span class="dt">na.rm =</span> T))) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb237-28" data-line-number="28"><span class="st">  </span><span class="kw">rename</span>(<span class="dt">Trait =</span> p_item)</a></code></pre></div>
+</div>
+<div id="personality-1" class="section level3">
+<h3><span class="header-section-number">5.1.3</span> Personality</h3>
+<div class="sourceCode" id="cb238"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb238-1" data-line-number="1">sca_pers &lt;-<span class="st"> </span><span class="kw">tibble</span>(<span class="dt">study =</span> studies) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb238-2" data-line-number="2"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">data =</span> <span class="kw">map</span>(study, <span class="op">~</span><span class="kw">loadRData</span>(., <span class="st">&quot;pers&quot;</span>)),</a>
+<a class="sourceLine" id="cb238-3" data-line-number="3">         <span class="dt">data =</span> <span class="kw">map</span>(data, <span class="op">~</span>(.) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">ungroup</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">mutate</span>(<span class="dt">year =</span> <span class="kw">as.numeric</span>(year), <span class="dt">SID =</span> <span class="kw">as.character</span>(SID))),</a>
+<a class="sourceLine" id="cb238-4" data-line-number="4">         <span class="dt">study =</span> <span class="kw">mapvalues</span>(study, studies, studies_long)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb238-5" data-line-number="5"><span class="st">  </span><span class="kw">unnest</span>(data) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb238-6" data-line-number="6"><span class="st">  </span><span class="kw">filter</span>(<span class="op">!</span><span class="kw">is.na</span>(name) <span class="op">&amp;</span><span class="st"> </span><span class="op">!</span><span class="kw">is.na</span>(value)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb238-7" data-line-number="7"><span class="st">  </span><span class="kw">full_join</span>(p_waves <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(<span class="dt">study =</span> Study, <span class="dt">name =</span> p_item, Used)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb238-8" data-line-number="8"><span class="st">  </span><span class="kw">filter</span>(year <span class="op">==</span><span class="st"> </span>Used) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb238-9" data-line-number="9"><span class="st">  </span><span class="kw">select</span>(study<span class="op">:</span>value) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb238-10" data-line-number="10"><span class="st">  </span><span class="kw">group_by</span>(name) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb238-11" data-line-number="11"><span class="st">  </span><span class="kw">nest</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb238-12" data-line-number="12"><span class="st">  </span><span class="kw">ungroup</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb238-13" data-line-number="13"><span class="st">  </span><span class="kw">rename</span>(<span class="dt">Trait =</span> name)</a></code></pre></div>
+</div>
+<div id="moderators-1" class="section level3">
+<h3><span class="header-section-number">5.1.4</span> Moderators</h3>
+<div class="sourceCode" id="cb239"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb239-1" data-line-number="1">mod_data &lt;-<span class="st"> </span><span class="kw">tibble</span>(<span class="dt">study =</span> studies) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb239-2" data-line-number="2"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">data =</span> <span class="kw">map</span>(study, <span class="op">~</span><span class="kw">loadRData</span>(., <span class="st">&quot;alpha&quot;</span>)),</a>
+<a class="sourceLine" id="cb239-3" data-line-number="3">         <span class="dt">data =</span> <span class="kw">map</span>(data, <span class="op">~</span>(.) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">ungroup</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">mutate</span>(<span class="dt">year =</span> <span class="kw">as.numeric</span>(year))),</a>
+<a class="sourceLine" id="cb239-4" data-line-number="4">         <span class="dt">study =</span> <span class="kw">mapvalues</span>(study, studies, studies_long)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb239-5" data-line-number="5"><span class="st">  </span><span class="kw">unnest</span>(data) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb239-6" data-line-number="6"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">alpha =</span> <span class="kw">map</span>(alpha, <span class="kw">possibly</span>(<span class="op">~</span>(.)<span class="op">$</span>total[[<span class="dv">1</span>]], <span class="ot">NA_real_</span>))) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb239-7" data-line-number="7"><span class="st">  </span><span class="kw">filter</span>(<span class="op">!</span><span class="kw">is.na</span>(name)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb239-8" data-line-number="8"><span class="st">  </span><span class="kw">select</span>(study, <span class="dt">p_item =</span> name, year, alpha) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb239-9" data-line-number="9"><span class="st">  </span><span class="kw">unnest</span>(alpha) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb239-10" data-line-number="10"><span class="st">  </span><span class="kw">full_join</span>(p_waves <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(p_item, <span class="dt">study =</span> Study, Used, predInt)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb239-11" data-line-number="11"><span class="st">  </span><span class="kw">filter</span>(year <span class="op">==</span><span class="st"> </span>Used) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb239-12" data-line-number="12"><span class="st">  </span><span class="kw">select</span>(<span class="op">-</span>Used) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb239-13" data-line-number="13"><span class="st">  </span><span class="kw">rename</span>(<span class="dt">Trait =</span> p_item, <span class="dt">reliability =</span> alpha)</a></code></pre></div>
+</div>
+</div>
+<div id="sca-data-setup" class="section level2">
+<h2><span class="header-section-number">5.2</span> SCA Data Setup</h2>
+<div class="sourceCode" id="cb240"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb240-1" data-line-number="1">factor_fun &lt;-<span class="st"> </span><span class="cf">function</span>(x){<span class="cf">if</span>(<span class="kw">is.numeric</span>(x)){<span class="kw">diff</span>(<span class="kw">range</span>(x, <span class="dt">na.rm =</span> T)) <span class="op">%in%</span><span class="st"> </span><span class="dv">1</span><span class="op">:</span><span class="dv">2</span>} <span class="cf">else</span>{F}}</a>
+<a class="sourceLine" id="cb240-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb240-3" data-line-number="3">sca_data_fun &lt;-<span class="st"> </span><span class="cf">function</span>(trait, outcome){</a>
+<a class="sourceLine" id="cb240-4" data-line-number="4">  df1 &lt;-<span class="st"> </span>(sca_pers <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(Trait <span class="op">==</span><span class="st"> </span>trait))<span class="op">$</span>data[[<span class="dv">1</span>]] <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(study, SID, <span class="dt">p_value =</span> value) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb240-5" data-line-number="5"><span class="st">    </span><span class="kw">full_join</span>((sca_out <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(Trait <span class="op">==</span><span class="st"> </span>trait))<span class="op">$</span>data[[<span class="dv">1</span>]] <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(Outcome <span class="op">==</span><span class="st"> </span>outcome) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(study, SID, <span class="dt">o_value =</span> value)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb240-6" data-line-number="6"><span class="st">    </span><span class="kw">filter</span>(<span class="kw">complete.cases</span>(.)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb240-7" data-line-number="7"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">o_value =</span> <span class="kw">factor</span>(<span class="kw">ifelse</span>(<span class="kw">as.numeric</span>(<span class="kw">as.character</span>(o_value)) <span class="op">&gt;</span><span class="st"> </span><span class="dv">1</span>, <span class="dv">1</span>, o_value))) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb240-8" data-line-number="8"><span class="st">    </span><span class="kw">full_join</span>((sca_cov <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(Trait <span class="op">==</span><span class="st"> </span>trait))<span class="op">$</span>data[[<span class="dv">1</span>]] <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(<span class="op">-</span>p_year)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb240-9" data-line-number="9"><span class="st">    </span><span class="kw">full_join</span>(mod_data <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(Trait <span class="op">==</span><span class="st"> </span>trait) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(<span class="op">-</span>Trait, <span class="op">-</span>year)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb240-10" data-line-number="10"><span class="st">    </span><span class="kw">mutate_if</span>(factor_fun, as.factor) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb240-11" data-line-number="11"><span class="st">    </span><span class="kw">filter</span>(<span class="op">!</span><span class="kw">is.na</span>(o_value) <span class="op">&amp;</span><span class="st"> </span><span class="op">!</span><span class="kw">is.na</span>(p_value)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb240-12" data-line-number="12"><span class="st">    </span><span class="kw">group_by</span>(study) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb240-13" data-line-number="13"><span class="st">    </span><span class="kw">mutate_at</span>(<span class="kw">vars</span>(p_value, grsWages, SRhealth, BMI, exercise, parOccPrstg,</a>
+<a class="sourceLine" id="cb240-14" data-line-number="14">                 parOccPrstg, numKids), </a>
+<a class="sourceLine" id="cb240-15" data-line-number="15">            <span class="op">~</span>((. <span class="op">-</span><span class="st"> </span><span class="kw">min</span>(., <span class="dt">na.rm =</span> T))<span class="op">/</span>(<span class="kw">max</span>(., <span class="dt">na.rm =</span> T) <span class="op">-</span><span class="st"> </span><span class="kw">min</span>(., <span class="dt">na.rm =</span> T))<span class="op">*</span><span class="dv">10</span>)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb240-16" data-line-number="16"><span class="st">    </span><span class="kw">mutate_if</span>(is.numeric, <span class="op">~</span><span class="kw">ifelse</span>(<span class="kw">is.nan</span>(.) <span class="op">|</span><span class="st"> </span><span class="kw">is.infinite</span>(.), <span class="ot">NA</span>, .)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb240-17" data-line-number="17"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">age =</span> <span class="kw">scale</span>(age, <span class="dt">center =</span> T, <span class="dt">scale =</span> F)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb240-18" data-line-number="18"><span class="st">    </span><span class="kw">ungroup</span>() <span class="co">#%&gt;%</span></a>
+<a class="sourceLine" id="cb240-19" data-line-number="19">  <span class="cf">if</span>(trait <span class="op">==</span><span class="st"> &quot;IQ&quot;</span>){df1&lt;-df1 <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">mutate_at</span>(<span class="kw">vars</span>(physhlthevnt,numKids), <span class="op">~</span><span class="kw">ifelse</span>(study <span class="op">==</span><span class="st"> &quot;NLSY&quot;</span> <span class="op">&amp;</span><span class="st"> </span><span class="kw">is.na</span>(.), <span class="dv">0</span>, .))}</a>
+<a class="sourceLine" id="cb240-20" data-line-number="20">    <span class="co"># mutate_at(vars(education, parEdu), ~ifelse(!is.na(.), as.numeric(as.character(.)) - 1, 0))</span></a>
+<a class="sourceLine" id="cb240-21" data-line-number="21">  <span class="kw">save</span>(df1, <span class="dt">file =</span> <span class="kw">sprintf</span>(<span class="st">&quot;%s/data/sca/sca_%s_%s.RData&quot;</span>, wd, trait, outcome))</a>
+<a class="sourceLine" id="cb240-22" data-line-number="22">}</a></code></pre></div>
+<div class="sourceCode" id="cb241"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb241-1" data-line-number="1">sca_nested &lt;-<span class="st"> </span><span class="kw">crossing</span>(</a>
+<a class="sourceLine" id="cb241-2" data-line-number="2">  <span class="dt">Trait =</span> <span class="kw">unique</span>(sca_cov<span class="op">$</span>Trait),</a>
+<a class="sourceLine" id="cb241-3" data-line-number="3">  <span class="dt">Outcome =</span> <span class="kw">unique</span>(sca_out<span class="op">$</span>data[[<span class="dv">1</span>]]<span class="op">$</span>Outcome)</a>
+<a class="sourceLine" id="cb241-4" data-line-number="4">  ) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb241-5" data-line-number="5"><span class="st">  </span><span class="kw">filter</span>(Trait <span class="op">==</span><span class="st"> &quot;N&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb241-6" data-line-number="6"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">data =</span> <span class="kw">map2</span>(Trait, Outcome, sca_data_fun))</a>
+<a class="sourceLine" id="cb241-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb241-8" data-line-number="8"><span class="kw">rm</span>(<span class="dt">list =</span> <span class="kw">c</span>(<span class="st">&quot;sca_out&quot;</span>, <span class="st">&quot;sca_pers&quot;</span>, <span class="st">&quot;sca_cov&quot;</span>))</a></code></pre></div>
+</div>
+<div id="functions" class="section level2">
+<h2><span class="header-section-number">5.3</span> Functions</h2>
+<div id="permutation-samples" class="section level3">
+<h3><span class="header-section-number">5.3.1</span> Permutation Samples</h3>
+<div class="sourceCode" id="cb242"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb242-1" data-line-number="1">sample_fun &lt;-<span class="st"> </span><span class="cf">function</span>(i, dfx){</a>
+<a class="sourceLine" id="cb242-2" data-line-number="2">  (dfx <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(study, SID, p_value) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb242-3" data-line-number="3"><span class="st">     </span><span class="kw">group_by</span>(study) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb242-4" data-line-number="4"><span class="st">     </span><span class="kw">mutate</span>(<span class="dt">p_value =</span> <span class="kw">sample</span>(p_value, <span class="kw">n</span>(), <span class="dt">replace =</span> F)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb242-5" data-line-number="5"><span class="st">     </span><span class="kw">ungroup</span>())<span class="op">$</span>p_value </a>
+<a class="sourceLine" id="cb242-6" data-line-number="6">}</a></code></pre></div>
+</div>
+<div id="permutation-models" class="section level3">
+<h3><span class="header-section-number">5.3.2</span> Permutation Models</h3>
+<div class="sourceCode" id="cb243"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb243-1" data-line-number="1">perm_fun &lt;-<span class="st"> </span><span class="cf">function</span>(i, df3, f1, po){</a>
+<a class="sourceLine" id="cb243-2" data-line-number="2">  n &lt;-<span class="st"> </span>df3<span class="op">$</span>n</a>
+<a class="sourceLine" id="cb243-3" data-line-number="3">  po &lt;-<span class="st"> </span>po[n]</a>
+<a class="sourceLine" id="cb243-4" data-line-number="4">  <span class="kw">which</span>(n <span class="op">%in%</span><span class="st"> </span><span class="dv">1</span><span class="op">:</span><span class="kw">length</span>(po))</a>
+<a class="sourceLine" id="cb243-5" data-line-number="5">  x &lt;-<span class="st"> </span>df3 <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(<span class="op">-</span>p_value) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">mutate</span>(<span class="dt">p_value =</span> po)</a>
+<a class="sourceLine" id="cb243-6" data-line-number="6">  start &lt;-<span class="st"> </span><span class="kw">Sys.time</span>()</a>
+<a class="sourceLine" id="cb243-7" data-line-number="7">  fit2  &lt;-<span class="st"> </span><span class="kw">femlm</span>(<span class="kw">formula</span>(f1), <span class="dt">data =</span> x, <span class="dt">family =</span> <span class="st">&quot;logit&quot;</span>)</a>
+<a class="sourceLine" id="cb243-8" data-line-number="8">  <span class="kw">print</span>(<span class="kw">Sys.time</span>() <span class="op">-</span><span class="st"> </span>start)</a>
+<a class="sourceLine" id="cb243-9" data-line-number="9">  par2 &lt;-<span class="st"> </span><span class="kw">coef</span>(fit2)[<span class="st">&quot;p_value&quot;</span>]</a>
+<a class="sourceLine" id="cb243-10" data-line-number="10">  ci2 &lt;-<span class="st"> </span><span class="kw">as.matrix</span>(<span class="kw">confint</span>(fit2, <span class="dt">parm=</span><span class="st">&quot;p_value&quot;</span>)[<span class="dv">1</span>,])</a>
+<a class="sourceLine" id="cb243-11" data-line-number="11">  <span class="co"># tidy2 &lt;- tidy(fit2, effects = &quot;fixed&quot;, conf.int = T) %&gt;% </span></a>
+<a class="sourceLine" id="cb243-12" data-line-number="12">  <span class="co">#   filter(term == &quot;p_value&quot;) %&gt;%</span></a>
+<a class="sourceLine" id="cb243-13" data-line-number="13">  <span class="co">#   select(estimate, conf.low, conf.high) %&gt;%</span></a>
+<a class="sourceLine" id="cb243-14" data-line-number="14">  <span class="co">#   as.matrix()</span></a>
+<a class="sourceLine" id="cb243-15" data-line-number="15">  tidy2 &lt;-<span class="st"> </span><span class="kw">c</span>(par2, ci2)</a>
+<a class="sourceLine" id="cb243-16" data-line-number="16">  <span class="kw">names</span>(tidy2) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;p_value&quot;</span>, <span class="st">&quot;ci_lower&quot;</span>, <span class="st">&quot;ci_upper&quot;</span>)</a>
+<a class="sourceLine" id="cb243-17" data-line-number="17">  <span class="kw">rm</span>(<span class="dt">list =</span> <span class="kw">c</span>(<span class="st">&quot;x&quot;</span>, <span class="st">&quot;df3&quot;</span>, <span class="st">&quot;fit2&quot;</span>))</a>
+<a class="sourceLine" id="cb243-18" data-line-number="18">  <span class="kw">gc</span>()</a>
+<a class="sourceLine" id="cb243-19" data-line-number="19">  <span class="kw">return</span>(tidy2)</a>
+<a class="sourceLine" id="cb243-20" data-line-number="20">}</a></code></pre></div>
+</div>
+<div id="terms-and-formulas" class="section level3">
+<h3><span class="header-section-number">5.3.3</span> Terms and Formulas</h3>
+<div class="sourceCode" id="cb244"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb244-1" data-line-number="1">sca_term_fun &lt;-<span class="st"> </span><span class="cf">function</span>(trait, outcome){</a>
+<a class="sourceLine" id="cb244-2" data-line-number="2">  terms &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;p_value&quot;</span>, (specifications <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(name, Effect, <span class="kw">one_of</span>(outcome)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(<span class="kw">complete.cases</span>(.)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb244-3" data-line-number="3"><span class="st">                           </span><span class="kw">mutate</span>(<span class="dt">name =</span> <span class="kw">ifelse</span>(Effect <span class="op">==</span><span class="st"> &quot;moderator&quot;</span>, <span class="kw">paste</span>(name, <span class="st">&quot;: p_value&quot;</span>, <span class="dt">sep =</span> <span class="st">&quot; &quot;</span>), name)))<span class="op">$</span>name)</a>
+<a class="sourceLine" id="cb244-4" data-line-number="4">}</a>
+<a class="sourceLine" id="cb244-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb244-6" data-line-number="6">sca_formula_fun &lt;-<span class="st"> </span><span class="cf">function</span>(terms){</a>
+<a class="sourceLine" id="cb244-7" data-line-number="7">  f &lt;-<span class="st"> </span><span class="kw">paste</span>(<span class="st">&quot;o_value ~ &quot;</span>, <span class="co"># outcome </span></a>
+<a class="sourceLine" id="cb244-8" data-line-number="8">             <span class="kw">paste</span>(terms, <span class="dt">collapse =</span> <span class="st">&quot; + &quot;</span>), <span class="co"># fixed effects </span></a>
+<a class="sourceLine" id="cb244-9" data-line-number="9">             <span class="st">&quot;| study&quot;</span>, <span class="dt">collapse =</span> <span class="st">&quot;&quot;</span>) <span class="co"># random effects</span></a>
+<a class="sourceLine" id="cb244-10" data-line-number="10">}</a></code></pre></div>
+</div>
+<div id="full-models-and-workspace-setup" class="section level3">
+<h3><span class="header-section-number">5.3.4</span> Full Models and Workspace Setup</h3>
+<div class="sourceCode" id="cb245"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb245-1" data-line-number="1">sca_setup_fun &lt;-<span class="st"> </span><span class="cf">function</span>(trait, outcome, <span class="dt">fixed =</span> <span class="st">&quot;p_value&quot;</span>){</a>
+<a class="sourceLine" id="cb245-2" data-line-number="2">  terms &lt;-<span class="st"> </span><span class="kw">sca_term_fun</span>(trait, outcome)</a>
+<a class="sourceLine" id="cb245-3" data-line-number="3">  terms &lt;-<span class="st"> </span><span class="cf">if</span>(trait <span class="op">==</span><span class="st"> &quot;OP&quot;</span> <span class="op">&amp;</span><span class="st"> </span>outcome <span class="op">==</span><span class="st"> &quot;mvInPrtnr&quot;</span>){terms[terms <span class="op">!=</span><span class="st"> &quot;alcohol&quot;</span>]}</a>
+<a class="sourceLine" id="cb245-4" data-line-number="4">  f &lt;-<span class="st"> </span><span class="kw">sca_formula_fun</span>(terms)</a>
+<a class="sourceLine" id="cb245-5" data-line-number="5">  <span class="co"># wd &lt;- &quot;~/selection&quot;</span></a>
+<a class="sourceLine" id="cb245-6" data-line-number="6">  <span class="kw">load</span>(<span class="kw">sprintf</span>(<span class="st">&quot;%s/data/sca/sca_%s_%s.RData&quot;</span>, wd, trait, outcome))</a>
+<a class="sourceLine" id="cb245-7" data-line-number="7">  df1 &lt;-<span class="st"> </span>df1 </a>
+<a class="sourceLine" id="cb245-8" data-line-number="8">  std &lt;-<span class="st"> </span>df1 <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb245-9" data-line-number="9"><span class="st">    </span><span class="kw">group_by</span>(study, o_value) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb245-10" data-line-number="10"><span class="st">    </span><span class="kw">tally</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb245-11" data-line-number="11"><span class="st">    </span><span class="kw">full_join</span>(<span class="kw">crossing</span>(<span class="dt">study =</span> <span class="kw">unique</span>(.<span class="op">$</span>study), <span class="dt">o_value =</span> <span class="kw">factor</span>(<span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">1</span>))))</a>
+<a class="sourceLine" id="cb245-12" data-line-number="12">  std &lt;-<span class="st"> </span><span class="kw">unique</span>(std<span class="op">$</span>study[std<span class="op">$</span>n <span class="op">&lt;</span><span class="st"> </span><span class="dv">50</span> <span class="op">|</span><span class="st"> </span><span class="kw">is.na</span>(std<span class="op">$</span>n)])</a>
+<a class="sourceLine" id="cb245-13" data-line-number="13">  df1 &lt;-<span class="st"> </span>df1 <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb245-14" data-line-number="14"><span class="st">    </span><span class="kw">filter</span>(<span class="op">!</span>study <span class="op">%in%</span><span class="st"> </span>std) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb245-15" data-line-number="15"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">o_value =</span> <span class="kw">as.numeric</span>(<span class="kw">as.character</span>(o_value)),</a>
+<a class="sourceLine" id="cb245-16" data-line-number="16">           <span class="dt">n =</span> <span class="kw">row_number</span>()) </a>
+<a class="sourceLine" id="cb245-17" data-line-number="17">  df2 &lt;-<span class="st"> </span>df1 <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb245-18" data-line-number="18"><span class="st">    </span><span class="kw">select</span>(study, SID, p_value, o_value, n, <span class="kw">one_of</span>(terms)) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb245-19" data-line-number="19"><span class="st">    </span><span class="kw">filter</span>(<span class="kw">complete.cases</span>(.)) <span class="co">#%&gt;%</span></a>
+<a class="sourceLine" id="cb245-20" data-line-number="20">    <span class="co"># mutate_if(is.factor, factor)</span></a>
+<a class="sourceLine" id="cb245-21" data-line-number="21">  </a>
+<a class="sourceLine" id="cb245-22" data-line-number="22">  </a>
+<a class="sourceLine" id="cb245-23" data-line-number="23">  start &lt;-<span class="st"> </span><span class="kw">Sys.time</span>()</a>
+<a class="sourceLine" id="cb245-24" data-line-number="24">  <span class="co"># optCtrl=list(maxfun=2e5))</span></a>
+<a class="sourceLine" id="cb245-25" data-line-number="25">  full_mod &lt;-<span class="st"> </span><span class="kw">femlm</span>(<span class="kw">formula</span>(f), <span class="dt">data =</span> df2, <span class="dt">family =</span> <span class="st">&quot;logit&quot;</span>)</a>
+<a class="sourceLine" id="cb245-26" data-line-number="26">  <span class="co"># full_mod &lt;- glmer(formula(f), data = df1, family = &quot;binomial&quot;, na.action = &quot;na.omit&quot;, control = cntrl)</span></a>
+<a class="sourceLine" id="cb245-27" data-line-number="27">  <span class="kw">print</span>(<span class="kw">Sys.time</span>() <span class="op">-</span><span class="st"> </span>start)</a>
+<a class="sourceLine" id="cb245-28" data-line-number="28">  gmCall &lt;-<span class="st"> </span><span class="kw">get_call</span>(full_mod)</a>
+<a class="sourceLine" id="cb245-29" data-line-number="29">  gmEnv &lt;-<span class="st"> </span><span class="kw">parent.frame</span>()</a>
+<a class="sourceLine" id="cb245-30" data-line-number="30">  gmFormulaEnv &lt;-<span class="st"> </span><span class="kw">environment</span>(<span class="kw">as.formula</span>(<span class="kw">formula</span>(full_mod), <span class="dt">env =</span> gmEnv))</a>
+<a class="sourceLine" id="cb245-31" data-line-number="31">  </a>
+<a class="sourceLine" id="cb245-32" data-line-number="32">  <span class="co"># set up terms</span></a>
+<a class="sourceLine" id="cb245-33" data-line-number="33">  </a>
+<a class="sourceLine" id="cb245-34" data-line-number="34">  allTerms &lt;-<span class="st"> </span>allTerms0 &lt;-<span class="st"> </span><span class="kw">getAllTerms.fixest</span>(full_mod, terms)</a>
+<a class="sourceLine" id="cb245-35" data-line-number="35">  deps &lt;-<span class="st"> </span><span class="kw">attr</span>(allTerms0, <span class="st">&quot;deps&quot;</span>)</a>
+<a class="sourceLine" id="cb245-36" data-line-number="36">  fixed &lt;-<span class="st"> </span><span class="kw">union</span>(fixed, <span class="kw">rownames</span>(deps)[<span class="kw">rowSums</span>(deps, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>) <span class="op">==</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb245-37" data-line-number="37"><span class="st">                                         </span><span class="kw">ncol</span>(deps)])</a>
+<a class="sourceLine" id="cb245-38" data-line-number="38">  fixed &lt;-<span class="st"> </span><span class="kw">c</span>(fixed, allTerms[allTerms <span class="op">%in%</span><span class="st"> &quot;(Intercept)&quot;</span>])</a>
+<a class="sourceLine" id="cb245-39" data-line-number="39">  nFixed &lt;-<span class="st"> </span><span class="kw">length</span>(fixed)</a>
+<a class="sourceLine" id="cb245-40" data-line-number="40">  gmCoefNames &lt;-<span class="st"> </span>gmCoefNames0 &lt;-<span class="st"> </span><span class="kw">names</span>(<span class="kw">coef</span>(full_mod))</a>
+<a class="sourceLine" id="cb245-41" data-line-number="41">  </a>
+<a class="sourceLine" id="cb245-42" data-line-number="42">  <span class="co"># this chunk makes sure that interactions include main effects</span></a>
+<a class="sourceLine" id="cb245-43" data-line-number="43">  varsOrder &lt;-<span class="st"> </span><span class="kw">order</span>(allTerms <span class="op">%in%</span><span class="st"> </span>fixed)</a>
+<a class="sourceLine" id="cb245-44" data-line-number="44">  termsOrder &lt;-<span class="st"> </span><span class="kw">order</span>(gmCoefNames <span class="op">%in%</span><span class="st"> </span>fixed)</a>
+<a class="sourceLine" id="cb245-45" data-line-number="45">  allTerms &lt;-<span class="st"> </span>allTerms[varsOrder]</a>
+<a class="sourceLine" id="cb245-46" data-line-number="46">  gmCoefNames &lt;-<span class="st"> </span>gmCoefNames[termsOrder]</a>
+<a class="sourceLine" id="cb245-47" data-line-number="47">  di &lt;-<span class="st"> </span><span class="kw">match</span>(allTerms, <span class="kw">rownames</span>(deps))</a>
+<a class="sourceLine" id="cb245-48" data-line-number="48">  deps &lt;-<span class="st"> </span>deps[di, di, drop =<span class="st"> </span><span class="ot">FALSE</span>]</a>
+<a class="sourceLine" id="cb245-49" data-line-number="49">  </a>
+<a class="sourceLine" id="cb245-50" data-line-number="50">  <span class="co"># setup output</span></a>
+<a class="sourceLine" id="cb245-51" data-line-number="51">  nVars &lt;-<span class="st"> </span><span class="kw">length</span>(allTerms)</a>
+<a class="sourceLine" id="cb245-52" data-line-number="52">  nTerms &lt;-<span class="st"> </span><span class="kw">length</span>(gmCoefNames)</a>
+<a class="sourceLine" id="cb245-53" data-line-number="53">  <span class="co"># rvNcol &lt;- nVars + 3L + 2</span></a>
+<a class="sourceLine" id="cb245-54" data-line-number="54">  <span class="co"># rtNcol &lt;- nTerms + 3L + 2</span></a>
+<a class="sourceLine" id="cb245-55" data-line-number="55">  <span class="co"># resultChunkSize &lt;- 1000000L</span></a>
+<a class="sourceLine" id="cb245-56" data-line-number="56">  <span class="co"># rval &lt;- matrix(NA_real_, ncol = rtNcol, nrow = resultChunkSize)</span></a>
+<a class="sourceLine" id="cb245-57" data-line-number="57">  </a>
+<a class="sourceLine" id="cb245-58" data-line-number="58">  nFixed &lt;-<span class="st"> </span><span class="dv">2</span>  <span class="co"># p_value &amp; intercept</span></a>
+<a class="sourceLine" id="cb245-59" data-line-number="59">  nVariants &lt;-<span class="st"> </span>1L</a>
+<a class="sourceLine" id="cb245-60" data-line-number="60">  nov &lt;-<span class="st"> </span><span class="kw">as.integer</span>(nVars <span class="op">-</span><span class="st"> </span>nFixed)</a>
+<a class="sourceLine" id="cb245-61" data-line-number="61">  ncomb &lt;-<span class="st"> </span>(2L<span class="op">^</span>nov) </a>
+<a class="sourceLine" id="cb245-62" data-line-number="62">  comb.sfx &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="ot">TRUE</span>, nFixed)</a>
+<a class="sourceLine" id="cb245-63" data-line-number="63">  comb.seq &lt;-<span class="st"> </span><span class="cf">if</span> (nov <span class="op">!=</span><span class="st"> </span>0L) {<span class="kw">seq_len</span>(nov)}</a>
+<a class="sourceLine" id="cb245-64" data-line-number="64">  <span class="co"># ord &lt;- integer(resultChunkSize)</span></a>
+<a class="sourceLine" id="cb245-65" data-line-number="65">  </a>
+<a class="sourceLine" id="cb245-66" data-line-number="66">  pval_out &lt;-<span class="st"> </span><span class="kw">sapply</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">500</span>, <span class="cf">function</span>(x){<span class="kw">sample_fun</span>(x, df1)}) <span class="co"># change back to 500</span></a>
+<a class="sourceLine" id="cb245-67" data-line-number="67">  <span class="co"># perm_res &lt;- array(NA_real_, c(10, 3, resultChunkSize)) # change back to 500</span></a>
+<a class="sourceLine" id="cb245-68" data-line-number="68">  <span class="co"># no_cores &lt;- detectCores() - 1</span></a>
+<a class="sourceLine" id="cb245-69" data-line-number="69">  </a>
+<a class="sourceLine" id="cb245-70" data-line-number="70">  k &lt;-<span class="st"> </span>0L</a>
+<a class="sourceLine" id="cb245-71" data-line-number="71">  <span class="kw">save</span>(<span class="dt">list =</span> <span class="kw">ls</span>(<span class="dt">all.names =</span> <span class="ot">TRUE</span>), </a>
+<a class="sourceLine" id="cb245-72" data-line-number="72">       <span class="dt">file =</span> <span class="kw">sprintf</span>(<span class="st">&quot;%s/results/sca_workspace/sca_workspace_%s_%s.RData&quot;</span>, wd, outcome, trait))</a>
+<a class="sourceLine" id="cb245-73" data-line-number="73">  <span class="kw">return</span>(ncomb)</a>
+<a class="sourceLine" id="cb245-74" data-line-number="74">}</a></code></pre></div>
+</div>
+<div id="specifications-and-permutations-for-cluster" class="section level3">
+<h3><span class="header-section-number">5.3.5</span> Specifications and Permutations for Cluster</h3>
+<div class="sourceCode" id="cb246"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb246-1" data-line-number="1">sca_run_fun &lt;-<span class="st"> </span><span class="cf">function</span>(trait, outcome, min, max){</a>
+<a class="sourceLine" id="cb246-2" data-line-number="2">  <span class="kw">load</span>(<span class="kw">sprintf</span>(<span class="st">&quot;/scratch/edbeck/sca_workspace/sca_workspace_%s_%s.RData&quot;</span>, wd, outcome, trait))</a>
+<a class="sourceLine" id="cb246-3" data-line-number="3">  k &lt;-<span class="st"> </span>0L</a>
+<a class="sourceLine" id="cb246-4" data-line-number="4">  seq_comb &lt;-<span class="st"> </span><span class="kw">seq</span>(min, max, <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb246-5" data-line-number="5">  <span class="co"># seq_comb &lt;- seq_comb[1:2] # remove after testing</span></a>
+<a class="sourceLine" id="cb246-6" data-line-number="6">  </a>
+<a class="sourceLine" id="cb246-7" data-line-number="7">  res &lt;-<span class="st"> </span><span class="kw">lapply</span>(seq_comb, <span class="cf">function</span>(iComb){</a>
+<a class="sourceLine" id="cb246-8" data-line-number="8">    varComb &lt;-<span class="st"> </span>iComb<span class="op">%%</span>nVariants</a>
+<a class="sourceLine" id="cb246-9" data-line-number="9">    jComb &lt;-<span class="st"> </span>(iComb <span class="op">-</span><span class="st"> </span>varComb)<span class="op">%/%</span>nVariants</a>
+<a class="sourceLine" id="cb246-10" data-line-number="10">    <span class="cf">if</span> (varComb <span class="op">==</span><span class="st"> </span>0L) {</a>
+<a class="sourceLine" id="cb246-11" data-line-number="11">      isok &lt;-<span class="st"> </span><span class="ot">TRUE</span></a>
+<a class="sourceLine" id="cb246-12" data-line-number="12">      comb &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="kw">as.logical</span>(<span class="kw">intToBits</span>(jComb)[comb.seq]), </a>
+<a class="sourceLine" id="cb246-13" data-line-number="13">                comb.sfx)</a>
+<a class="sourceLine" id="cb246-14" data-line-number="14">      nvar &lt;-<span class="st"> </span><span class="kw">sum</span>(comb) <span class="op">-</span><span class="st"> </span><span class="dv">1</span></a>
+<a class="sourceLine" id="cb246-15" data-line-number="15">      <span class="cf">if</span> (<span class="op">!</span><span class="kw">formula_margin_check</span>(comb, deps)) {</a>
+<a class="sourceLine" id="cb246-16" data-line-number="16">        isok &lt;-<span class="st"> </span><span class="ot">FALSE</span></a>
+<a class="sourceLine" id="cb246-17" data-line-number="17">        res &lt;-<span class="st"> </span><span class="ot">NA</span></a>
+<a class="sourceLine" id="cb246-18" data-line-number="18">      }</a>
+<a class="sourceLine" id="cb246-19" data-line-number="19">      new_terms &lt;-<span class="st"> </span>allTerms[comb]</a>
+<a class="sourceLine" id="cb246-20" data-line-number="20">      <span class="cf">if</span>(<span class="kw">sum</span>(<span class="kw">grepl</span>(<span class="st">&quot;:&quot;</span>, new_terms)) <span class="op">&gt;</span><span class="st"> </span><span class="dv">1</span>){</a>
+<a class="sourceLine" id="cb246-21" data-line-number="21">        isok &lt;-<span class="st"> </span><span class="ot">FALSE</span></a>
+<a class="sourceLine" id="cb246-22" data-line-number="22">        res &lt;-<span class="st"> </span><span class="ot">NA</span></a>
+<a class="sourceLine" id="cb246-23" data-line-number="23">      }</a>
+<a class="sourceLine" id="cb246-24" data-line-number="24">    }</a>
+<a class="sourceLine" id="cb246-25" data-line-number="25">    <span class="cf">if</span> (<span class="op">!</span>isok) {</a>
+<a class="sourceLine" id="cb246-26" data-line-number="26">      res &lt;-<span class="st"> </span><span class="ot">NA</span></a>
+<a class="sourceLine" id="cb246-27" data-line-number="27">    } <span class="cf">else</span>{</a>
+<a class="sourceLine" id="cb246-28" data-line-number="28">      f1 &lt;-<span class="st"> </span><span class="kw">paste</span>(<span class="st">&quot;o_value ~ &quot;</span>, <span class="co"># outcome</span></a>
+<a class="sourceLine" id="cb246-29" data-line-number="29">                  <span class="kw">paste</span>(new_terms[new_terms <span class="op">!=</span><span class="st"> &quot;(Intercept)&quot;</span>], <span class="dt">collapse =</span> <span class="st">&quot; + &quot;</span>), <span class="co"># fixed effects</span></a>
+<a class="sourceLine" id="cb246-30" data-line-number="30">                  <span class="st">&quot; | study&quot;</span>, <span class="dt">collapse =</span> <span class="st">&quot;&quot;</span>)</a>
+<a class="sourceLine" id="cb246-31" data-line-number="31">      std &lt;-<span class="st"> </span>df1 <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb246-32" data-line-number="32"><span class="st">        </span><span class="kw">group_by</span>(study, o_value) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb246-33" data-line-number="33"><span class="st">        </span><span class="kw">tally</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb246-34" data-line-number="34"><span class="st">        </span><span class="kw">full_join</span>(<span class="kw">crossing</span>(<span class="dt">study =</span> <span class="kw">unique</span>(.<span class="op">$</span>study), <span class="dt">o_value =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">1</span>)))</a>
+<a class="sourceLine" id="cb246-35" data-line-number="35">      std &lt;-<span class="st"> </span><span class="kw">unique</span>(std<span class="op">$</span>study[std<span class="op">$</span>n <span class="op">&lt;</span><span class="st"> </span><span class="dv">50</span> <span class="op">|</span><span class="st"> </span><span class="kw">is.na</span>(std<span class="op">$</span>n)])</a>
+<a class="sourceLine" id="cb246-36" data-line-number="36">      df3 &lt;-<span class="st"> </span>df1 <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb246-37" data-line-number="37"><span class="st">        </span><span class="kw">filter</span>(<span class="op">!</span>study <span class="op">%in%</span><span class="st"> </span>std) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb246-38" data-line-number="38"><span class="st">        </span><span class="kw">select</span>(study<span class="op">:</span>o_value, n, <span class="kw">one_of</span>(new_terms)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb246-39" data-line-number="39"><span class="st">        </span><span class="kw">mutate</span>(<span class="dt">o_value =</span> <span class="kw">as.numeric</span>(<span class="kw">as.character</span>(o_value))) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb246-40" data-line-number="40"><span class="st">        </span><span class="kw">filter</span>(<span class="kw">complete.cases</span>(.)) </a>
+<a class="sourceLine" id="cb246-41" data-line-number="41">      <span class="co">#   filter(study %in% std) </span></a>
+<a class="sourceLine" id="cb246-42" data-line-number="42">      fit &lt;-<span class="st"> </span><span class="kw">femlm</span>(<span class="kw">formula</span>(f1), <span class="dt">data =</span> df3, <span class="dt">family =</span> <span class="st">&quot;logit&quot;</span>)</a>
+<a class="sourceLine" id="cb246-43" data-line-number="43">      <span class="kw">print</span>(<span class="st">&quot;made it to creating fit&quot;</span>)</a>
+<a class="sourceLine" id="cb246-44" data-line-number="44">      mci1 &lt;-<span class="st"> </span><span class="kw">confint</span>(fit, <span class="dt">parm =</span> <span class="st">&quot;p_value&quot;</span>)</a>
+<a class="sourceLine" id="cb246-45" data-line-number="45">      mcoef1 &lt;-<span class="st"> </span><span class="kw">matchCoef</span>(fit, <span class="dt">all.terms =</span> gmCoefNames)</a>
+<a class="sourceLine" id="cb246-46" data-line-number="46">      ll1    &lt;-<span class="st"> </span><span class="kw">logLik</span>(fit)</a>
+<a class="sourceLine" id="cb246-47" data-line-number="47">      bic1 &lt;-<span class="st"> </span><span class="kw">BIC</span>(fit)</a>
+<a class="sourceLine" id="cb246-48" data-line-number="48">      nobs1  &lt;-<span class="st"> </span><span class="kw">nobs</span>(fit)</a>
+<a class="sourceLine" id="cb246-49" data-line-number="49">      psr1 &lt;-<span class="st"> </span>fit<span class="op">$</span>pseudo_r2</a>
+<a class="sourceLine" id="cb246-50" data-line-number="50">      row1   &lt;-<span class="st"> </span><span class="kw">c</span>(mcoef1[gmCoefNames], <span class="dt">ci.lower =</span> mci1[<span class="dv">1</span>,<span class="dv">1</span>], <span class="dt">ci.upper =</span> mci1[<span class="dv">1</span>,<span class="dv">2</span>],</a>
+<a class="sourceLine" id="cb246-51" data-line-number="51">                  <span class="dt">bic =</span> bic1, <span class="dt">psr2 =</span> psr1, <span class="dt">ll =</span> ll1)</a>
+<a class="sourceLine" id="cb246-52" data-line-number="52">      perm1 &lt;-<span class="st"> </span><span class="kw">t</span>(<span class="kw">sapply</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">500</span>, <span class="cf">function</span>(ii) <span class="kw">perm_fun</span>(ii, df3, f1, <span class="kw">as.numeric</span>(pval_out[,ii]))))</a>
+<a class="sourceLine" id="cb246-53" data-line-number="53">      <span class="kw">print</span>(<span class="kw">Sys.time</span>() <span class="op">-</span><span class="st"> </span>start)</a>
+<a class="sourceLine" id="cb246-54" data-line-number="54">      </a>
+<a class="sourceLine" id="cb246-55" data-line-number="55">      k &lt;-<span class="st"> </span>k <span class="op">+</span><span class="st"> </span>1L</a>
+<a class="sourceLine" id="cb246-56" data-line-number="56">      <span class="kw">print</span>(<span class="kw">sprintf</span>(<span class="st">&quot;%s %s %s&quot;</span>, iComb, f1, k))</a>
+<a class="sourceLine" id="cb246-57" data-line-number="57">      res &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">rval =</span> row1, <span class="dt">perm_res =</span> perm1, <span class="dt">ord =</span> iComb)</a>
+<a class="sourceLine" id="cb246-58" data-line-number="58">      <span class="kw">rm</span>(<span class="dt">list =</span> <span class="kw">c</span>(<span class="st">&quot;row1&quot;</span>, <span class="st">&quot;perm1&quot;</span>, <span class="st">&quot;fit&quot;</span>, <span class="st">&quot;mci1&quot;</span>, <span class="st">&quot;mcoef1&quot;</span>, <span class="st">&quot;ll1&quot;</span>, <span class="st">&quot;nobs1&quot;</span>))</a>
+<a class="sourceLine" id="cb246-59" data-line-number="59">      <span class="kw">gc</span>()</a>
+<a class="sourceLine" id="cb246-60" data-line-number="60">    }</a>
+<a class="sourceLine" id="cb246-61" data-line-number="61">    <span class="kw">return</span>(res)</a>
+<a class="sourceLine" id="cb246-62" data-line-number="62">  })</a>
+<a class="sourceLine" id="cb246-63" data-line-number="63">  </a>
+<a class="sourceLine" id="cb246-64" data-line-number="64">  res &lt;-<span class="st"> </span>res[<span class="op">!</span><span class="kw">is.na</span>(res)]</a>
+<a class="sourceLine" id="cb246-65" data-line-number="65">  </a>
+<a class="sourceLine" id="cb246-66" data-line-number="66">  rval &lt;-<span class="st"> </span><span class="kw">ldply</span>(res, <span class="st">`</span><span class="dt">[[</span><span class="st">`</span>, <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb246-67" data-line-number="67">  perm_res &lt;-<span class="st"> </span><span class="kw">llply</span>(res, <span class="st">`</span><span class="dt">[[</span><span class="st">`</span>, <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb246-68" data-line-number="68">  ord &lt;-<span class="st"> </span><span class="kw">laply</span>(res, <span class="st">`</span><span class="dt">[[</span><span class="st">`</span>, <span class="dv">3</span>)</a>
+<a class="sourceLine" id="cb246-69" data-line-number="69">  perm_res &lt;-<span class="st"> </span>abind<span class="op">::</span><span class="kw">abind</span>(perm_res, <span class="dt">along =</span> <span class="dv">3</span>)</a>
+<a class="sourceLine" id="cb246-70" data-line-number="70">  </a>
+<a class="sourceLine" id="cb246-71" data-line-number="71">  <span class="co"># colnames(rval) &lt;- c(gmCoefNames, &quot;ci.lower&quot;, &quot;ci.upper&quot;, &quot;df&quot;, &quot;ll&quot;)</span></a>
+<a class="sourceLine" id="cb246-72" data-line-number="72">  <span class="kw">row.names</span>(rval) &lt;-<span class="st"> </span>ord</a>
+<a class="sourceLine" id="cb246-73" data-line-number="73">  <span class="co"># rval[, seq_along(gmCoefNames)] &lt;- rval[, v &lt;- order(termsOrder)]</span></a>
+<a class="sourceLine" id="cb246-74" data-line-number="74">  <span class="kw">save</span>(rval, <span class="dt">file =</span> <span class="kw">sprintf</span>(<span class="st">&quot;/scratch/edbeck/raw/raw_%s_%s_%s_%s.RData&quot;</span>, trait, outcome, min, max))</a>
+<a class="sourceLine" id="cb246-75" data-line-number="75">  <span class="kw">save</span>(perm_res, <span class="dt">file =</span> <span class="kw">sprintf</span>(<span class="st">&quot;/scratch/edbeck/perm/perm_%s_%s_%s_%s.RData&quot;</span>, trait, outcome, min, max))</a>
+<a class="sourceLine" id="cb246-76" data-line-number="76">}</a></code></pre></div>
+</div>
+</div>
+<div id="setup" class="section level2">
+<h2><span class="header-section-number">5.4</span> Setup</h2>
+<div id="workspace-1" class="section level3">
+<h3><span class="header-section-number">5.4.1</span> Workspace</h3>
+<div class="sourceCode" id="cb247"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb247-1" data-line-number="1"><span class="kw">source</span>(<span class="kw">sprintf</span>(<span class="st">&quot;%s/scripts/mumin_fun.R&quot;</span>, wd))</a></code></pre></div>
+<div class="sourceCode" id="cb248"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb248-1" data-line-number="1">sca_nested &lt;-<span class="st"> </span><span class="kw">crossing</span>(</a>
+<a class="sourceLine" id="cb248-2" data-line-number="2">  <span class="dt">Trait =</span> <span class="kw">unique</span>(p_waves<span class="op">$</span>p_item),</a>
+<a class="sourceLine" id="cb248-3" data-line-number="3">  <span class="dt">Outcome =</span> (codebook<span class="op">$</span>codebook[[<span class="dv">2</span>]] <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(category <span class="op">==</span><span class="st"> &quot;out&quot;</span>))<span class="op">$</span>name</a>
+<a class="sourceLine" id="cb248-4" data-line-number="4">) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb248-5" data-line-number="5"><span class="st">  </span><span class="co"># filter(Trait == &quot;OP&quot; &amp; Outcome == &quot;mvInPrtnr&quot;) %&gt;%</span></a>
+<a class="sourceLine" id="cb248-6" data-line-number="6"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">sca =</span> <span class="kw">pmap</span>(<span class="kw">list</span>(Trait, Outcome, <span class="st">&quot;p_value&quot;</span>), sca_setup_fun))</a></code></pre></div>
+</div>
+<div id="job-arrays-for-the-cluster" class="section level3">
+<h3><span class="header-section-number">5.4.2</span> Job Arrays for the Cluster</h3>
+<div class="sourceCode" id="cb249"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb249-1" data-line-number="1">spl_fun &lt;-<span class="st"> </span><span class="cf">function</span>(trait, outcome){</a>
+<a class="sourceLine" id="cb249-2" data-line-number="2">  <span class="kw">print</span>(<span class="kw">paste</span>(trait, outcome))</a>
+<a class="sourceLine" id="cb249-3" data-line-number="3">  <span class="kw">load</span>(<span class="kw">sprintf</span>(<span class="st">&quot;%s/results/sca_workspace/sca_workspace_%s_%s.RData&quot;</span>, wd, outcome, trait))</a>
+<a class="sourceLine" id="cb249-4" data-line-number="4">  x &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>,ncomb,<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb249-5" data-line-number="5">  seq_comb =<span class="st"> </span><span class="kw">split</span>(x, <span class="kw">sort</span>(x<span class="op">%%</span><span class="dv">150</span>))</a>
+<a class="sourceLine" id="cb249-6" data-line-number="6">}</a>
+<a class="sourceLine" id="cb249-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb249-8" data-line-number="8">done &lt;-<span class="st"> </span><span class="kw">tibble</span>(<span class="dt">file =</span> <span class="kw">list.files</span>(<span class="kw">sprintf</span>(<span class="st">&quot;%s/results/sca/perm&quot;</span>, wd))) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb249-9" data-line-number="9"><span class="st">  </span><span class="kw">separate</span>(file, <span class="kw">c</span>(<span class="st">&quot;scrap&quot;</span>, <span class="st">&quot;Trait&quot;</span>, <span class="st">&quot;Outcome&quot;</span>, <span class="st">&quot;min&quot;</span>, <span class="st">&quot;max&quot;</span>), <span class="dt">sep =</span> <span class="st">&quot;_&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb249-10" data-line-number="10"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">perm =</span> <span class="st">&quot;done&quot;</span>, <span class="dt">max =</span> <span class="kw">str_remove_all</span>(max, <span class="st">&quot;.RData&quot;</span>)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb249-11" data-line-number="11"><span class="st">  </span><span class="kw">select</span>(<span class="op">-</span>scrap)  <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb249-12" data-line-number="12"><span class="st">  </span><span class="kw">mutate_at</span>(<span class="kw">vars</span>(min, max), as.numeric) </a>
+<a class="sourceLine" id="cb249-13" data-line-number="13"></a>
+<a class="sourceLine" id="cb249-14" data-line-number="14">sca_jobs &lt;-<span class="st"> </span><span class="kw">crossing</span>(</a>
+<a class="sourceLine" id="cb249-15" data-line-number="15">  <span class="dt">Trait =</span> <span class="kw">unique</span>(p_waves<span class="op">$</span>p_item), </a>
+<a class="sourceLine" id="cb249-16" data-line-number="16">  <span class="dt">Outcome =</span> (codebook<span class="op">$</span>codebook[[<span class="dv">2</span>]] <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(category <span class="op">==</span><span class="st"> &quot;out&quot;</span>))<span class="op">$</span>name</a>
+<a class="sourceLine" id="cb249-17" data-line-number="17">) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb249-18" data-line-number="18"><span class="st">  </span><span class="co"># filter(Outcome %in% c(&quot;mvInPrtnr&quot;, &quot;frstjob&quot;) | </span></a>
+<a class="sourceLine" id="cb249-19" data-line-number="19"><span class="st">  </span><span class="co">#       (Trait %in% c(&quot;E&quot;, &quot;SS&quot;, &quot;SWL&quot;) &amp; Outcome %in% c(&quot;physhlthevnt&quot;, &quot;mntlhlthevnt&quot;))) %&gt;%</span></a>
+<a class="sourceLine" id="cb249-20" data-line-number="20"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">data =</span> <span class="kw">map2</span>(Trait, Outcome, <span class="kw">possibly</span>(spl_fun, <span class="ot">NA_real_</span>))) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb249-21" data-line-number="21"><span class="st">  </span><span class="kw">unnest</span>(data) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb249-22" data-line-number="22"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">min =</span> <span class="kw">map_dbl</span>(data, min),</a>
+<a class="sourceLine" id="cb249-23" data-line-number="23">         <span class="dt">max =</span> <span class="kw">map_dbl</span>(data, max)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb249-24" data-line-number="24"><span class="st">  </span><span class="kw">select</span>(<span class="dt">trait =</span> Trait, <span class="dt">outcome =</span> Outcome, min, max) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb249-25" data-line-number="25"><span class="st">  </span><span class="kw">write.table</span>(., <span class="dt">file =</span> <span class="kw">sprintf</span>(<span class="st">&quot;%s/scripts/sca_cluster/sca_args.txt&quot;</span>, wd), <span class="dt">row.names =</span> F, <span class="dt">col.names =</span> F)</a></code></pre></div>
+</div>
+</div>
+<div id="re-compiling" class="section level2">
+<h2><span class="header-section-number">5.5</span> Re-Compiling</h2>
+<div id="raw-data-functions" class="section level3">
+<h3><span class="header-section-number">5.5.1</span> Raw Data Functions</h3>
+<div class="sourceCode" id="cb250"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb250-1" data-line-number="1"><span class="co"># read raw data </span></a>
+<a class="sourceLine" id="cb250-2" data-line-number="2">raw_read_fun &lt;-<span class="st"> </span><span class="cf">function</span>(file){</a>
+<a class="sourceLine" id="cb250-3" data-line-number="3">  <span class="kw">load</span>(<span class="kw">sprintf</span>(<span class="st">&quot;%s/results/sca/raw/%s&quot;</span>, wd, file))</a>
+<a class="sourceLine" id="cb250-4" data-line-number="4">  rval &lt;-<span class="st"> </span>rval <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb250-5" data-line-number="5"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">ci.lower =</span> <span class="kw">ifelse</span>(<span class="kw">is.na</span>(ci.lower), <span class="fl">-.01</span>, ci.lower),</a>
+<a class="sourceLine" id="cb250-6" data-line-number="6">           <span class="dt">ci.upper =</span> <span class="kw">ifelse</span>(<span class="kw">is.na</span>(ci.upper), <span class="fl">-.01</span>, ci.upper))</a>
+<a class="sourceLine" id="cb250-7" data-line-number="7">  <span class="kw">return</span>(rval)</a>
+<a class="sourceLine" id="cb250-8" data-line-number="8">}</a>
+<a class="sourceLine" id="cb250-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb250-10" data-line-number="10"><span class="co"># determine dominant sign for personality-outcome association</span></a>
+<a class="sourceLine" id="cb250-11" data-line-number="11">dom_sign_fun &lt;-<span class="st"> </span><span class="cf">function</span>(p){</a>
+<a class="sourceLine" id="cb250-12" data-line-number="12">  signs &lt;-<span class="st"> </span><span class="kw">sign</span>(p)</a>
+<a class="sourceLine" id="cb250-13" data-line-number="13">  dom&lt;-<span class="cf">if</span>(<span class="kw">sum</span>(signs <span class="op">==</span><span class="st"> </span><span class="dv">1</span>, <span class="dt">na.rm =</span> T) <span class="op">&gt;</span><span class="st"> </span><span class="kw">sum</span>(signs <span class="op">==</span><span class="st"> </span><span class="dv">-1</span>, <span class="dt">na.rm =</span> T)){<span class="dv">1</span>} <span class="cf">else</span> {<span class="op">-</span><span class="dv">1</span>}</a>
+<a class="sourceLine" id="cb250-14" data-line-number="14">  num_dom &lt;-<span class="st"> </span><span class="kw">sum</span>(signs <span class="op">==</span><span class="st"> </span>dom, <span class="dt">na.rm =</span> T)</a>
+<a class="sourceLine" id="cb250-15" data-line-number="15">  <span class="kw">return</span>(<span class="kw">c</span>(<span class="st">&quot;dom_sign&quot;</span> =<span class="st"> </span>dom, <span class="st">&quot;num_dom&quot;</span> =<span class="st"> </span>num_dom))</a>
+<a class="sourceLine" id="cb250-16" data-line-number="16">}</a>
+<a class="sourceLine" id="cb250-17" data-line-number="17"></a>
+<a class="sourceLine" id="cb250-18" data-line-number="18"><span class="co"># determine number of significant dominant signs</span></a>
+<a class="sourceLine" id="cb250-19" data-line-number="19">num_sig_fun &lt;-<span class="st"> </span><span class="cf">function</span>(l, u, p, dom){</a>
+<a class="sourceLine" id="cb250-20" data-line-number="20">  <span class="kw">sum</span>(<span class="kw">sign</span>(l) <span class="op">==</span><span class="st"> </span><span class="kw">sign</span>(u) <span class="op">&amp;</span><span class="st"> </span><span class="kw">sign</span>(p) <span class="op">==</span><span class="st"> </span>dom, <span class="dt">na.rm =</span> T)</a>
+<a class="sourceLine" id="cb250-21" data-line-number="21">}</a></code></pre></div>
+</div>
+<div id="perm-data-functions" class="section level3">
+<h3><span class="header-section-number">5.5.2</span> Perm Data Functions</h3>
+<div class="sourceCode" id="cb251"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb251-1" data-line-number="1"><span class="co"># read in permuted data  </span></a>
+<a class="sourceLine" id="cb251-2" data-line-number="2">perm_read_fun &lt;-<span class="st"> </span><span class="cf">function</span>(file){</a>
+<a class="sourceLine" id="cb251-3" data-line-number="3">  file &lt;-<span class="st"> </span><span class="kw">str_replace</span>(file, <span class="st">&quot;raw&quot;</span>, <span class="st">&quot;perm&quot;</span>)</a>
+<a class="sourceLine" id="cb251-4" data-line-number="4">  <span class="kw">load</span>(<span class="kw">sprintf</span>(<span class="st">&quot;%s/results/sca/perm/%s&quot;</span>, wd, file))</a>
+<a class="sourceLine" id="cb251-5" data-line-number="5">  <span class="cf">if</span>(<span class="kw">any</span>(<span class="kw">is.na</span>(perm_res))){</a>
+<a class="sourceLine" id="cb251-6" data-line-number="6">    perm_res[,<span class="dv">2</span>,] &lt;-<span class="st"> </span><span class="kw">apply</span>(perm_res[,<span class="dv">2</span>,], <span class="dv">1</span>, <span class="cf">function</span>(x) {x[<span class="kw">is.na</span>(x)] &lt;-<span class="st"> </span><span class="fl">-.01</span>; x}) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">t</span>()</a>
+<a class="sourceLine" id="cb251-7" data-line-number="7">    perm_res[,<span class="dv">3</span>,] &lt;-<span class="st"> </span><span class="kw">apply</span>(perm_res[,<span class="dv">3</span>,], <span class="dv">1</span>, <span class="cf">function</span>(x) {x[<span class="kw">is.na</span>(x)] &lt;-<span class="st"> </span><span class="fl">-.01</span>; x}) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">t</span>()</a>
+<a class="sourceLine" id="cb251-8" data-line-number="8">  }</a>
+<a class="sourceLine" id="cb251-9" data-line-number="9">  <span class="kw">return</span>(perm_res)</a>
+<a class="sourceLine" id="cb251-10" data-line-number="10">}</a>
+<a class="sourceLine" id="cb251-11" data-line-number="11"></a>
+<a class="sourceLine" id="cb251-12" data-line-number="12"><span class="co"># calculate median and quantiles of permuted personality-outcome associations  </span></a>
+<a class="sourceLine" id="cb251-13" data-line-number="13">sum_fun &lt;-<span class="st"> </span><span class="cf">function</span>(x){</a>
+<a class="sourceLine" id="cb251-14" data-line-number="14">  <span class="kw">t</span>(<span class="kw">apply</span>(x[,<span class="dv">1</span>,], <span class="dv">2</span>, <span class="cf">function</span>(y) <span class="kw">c</span>(<span class="kw">median</span>(y, <span class="dt">na.rm =</span> T), <span class="kw">quantile</span>(y, <span class="dt">prob =</span> <span class="kw">c</span>(.<span class="dv">15</span>, <span class="fl">.85</span>), <span class="dt">na.rm =</span> T)))) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb251-15" data-line-number="15"><span class="st">    </span><span class="kw">data.frame</span>() <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb251-16" data-line-number="16"><span class="st">    </span><span class="kw">setNames</span>(<span class="kw">c</span>(<span class="st">&quot;perm_median&quot;</span>, <span class="st">&quot;perm_lower&quot;</span>, <span class="st">&quot;perm_upper&quot;</span>))</a>
+<a class="sourceLine" id="cb251-17" data-line-number="17">}</a></code></pre></div>
+</div>
+<div id="inferential-based-tests" class="section level3">
+<h3><span class="header-section-number">5.5.3</span> Inferential-Based Tests</h3>
+<p>Simonsohn et al. define 3 inferential-based tests:
+1. the median overall point estimate within each specification curve.<br />
+2. the percentage of specifications that are of the dominant sign.<br />
+3. the percentage of specifications with the dominant sign that are also significant.</p>
+<div class="sourceCode" id="cb252"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb252-1" data-line-number="1"><span class="co"># median permuted personality-outcome association for each model</span></a>
+<a class="sourceLine" id="cb252-2" data-line-number="2">perm_med_fun &lt;-<span class="st"> </span><span class="cf">function</span>(m){</a>
+<a class="sourceLine" id="cb252-3" data-line-number="3">  <span class="kw">apply</span>(m[, <span class="dv">1</span>, ], <span class="dv">1</span>, <span class="cf">function</span>(x){ <span class="co"># m[, 1, ] = p_value column for each specification with length = 500 perm</span></a>
+<a class="sourceLine" id="cb252-4" data-line-number="4">    <span class="kw">median</span>(x, <span class="dt">na.rm =</span> T)</a>
+<a class="sourceLine" id="cb252-5" data-line-number="5">  })</a>
+<a class="sourceLine" id="cb252-6" data-line-number="6">}</a>
+<a class="sourceLine" id="cb252-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb252-8" data-line-number="8"><span class="co"># number of (out of 500) dominant permuted sign of personality-outcome associations for each  model  </span></a>
+<a class="sourceLine" id="cb252-9" data-line-number="9">perm_dom_sign_fun &lt;-<span class="st"> </span><span class="cf">function</span>(m){</a>
+<a class="sourceLine" id="cb252-10" data-line-number="10">  <span class="kw">sapply</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">500</span>, <span class="cf">function</span>(i){</a>
+<a class="sourceLine" id="cb252-11" data-line-number="11">    x &lt;-<span class="st"> </span>m[i, <span class="dv">1</span>, ]</a>
+<a class="sourceLine" id="cb252-12" data-line-number="12">    signs &lt;-<span class="st"> </span><span class="kw">sign</span>(x)</a>
+<a class="sourceLine" id="cb252-13" data-line-number="13">    dom &lt;-<span class="st"> </span><span class="cf">if</span>(<span class="kw">sum</span>(signs <span class="op">==</span><span class="st"> </span><span class="dv">1</span>, <span class="dt">na.rm =</span> T) <span class="op">&gt;</span><span class="st"> </span><span class="kw">sum</span>(signs <span class="op">==</span><span class="st"> </span><span class="dv">-1</span>, <span class="dt">na.rm =</span> T)){<span class="dv">1</span>} <span class="cf">else</span> {<span class="op">-</span><span class="dv">1</span>}</a>
+<a class="sourceLine" id="cb252-14" data-line-number="14">    num_dom &lt;-<span class="st"> </span><span class="kw">sum</span>(signs <span class="op">==</span><span class="st"> </span>dom, <span class="dt">na.rm =</span> T)</a>
+<a class="sourceLine" id="cb252-15" data-line-number="15">    <span class="kw">return</span>(<span class="kw">c</span>(<span class="st">&quot;dom_sign&quot;</span> =<span class="st"> </span>dom, <span class="st">&quot;num_dom&quot;</span> =<span class="st"> </span>num_dom))</a>
+<a class="sourceLine" id="cb252-16" data-line-number="16">    <span class="co"># return(dom)</span></a>
+<a class="sourceLine" id="cb252-17" data-line-number="17">  }, <span class="dt">simplify =</span> T) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">t</span>()</a>
+<a class="sourceLine" id="cb252-18" data-line-number="18">}</a>
+<a class="sourceLine" id="cb252-19" data-line-number="19"></a>
+<a class="sourceLine" id="cb252-20" data-line-number="20"><span class="co"># number of (out of 500) dominant and significant permuted sign of personality-outcome associations for each  model  </span></a>
+<a class="sourceLine" id="cb252-21" data-line-number="21">perm_sig_fun &lt;-<span class="st"> </span><span class="cf">function</span>(m, dom){</a>
+<a class="sourceLine" id="cb252-22" data-line-number="22">  <span class="kw">apply</span>(m, <span class="dv">1</span>, <span class="cf">function</span>(x){</a>
+<a class="sourceLine" id="cb252-23" data-line-number="23">    <span class="kw">sum</span>(<span class="kw">sign</span>(x[<span class="dv">2</span>,]) <span class="op">==</span><span class="st"> </span><span class="kw">sign</span>(x[<span class="dv">3</span>,]) <span class="op">&amp;</span><span class="st"> </span><span class="kw">sign</span>(x[<span class="dv">1</span>,]) <span class="op">==</span><span class="st"> </span>dom, <span class="dt">na.rm =</span> T)</a>
+<a class="sourceLine" id="cb252-24" data-line-number="24">  })</a>
+<a class="sourceLine" id="cb252-25" data-line-number="25">}</a>
+<a class="sourceLine" id="cb252-26" data-line-number="26"></a>
+<a class="sourceLine" id="cb252-27" data-line-number="27"><span class="co"># combine permuted results across different models </span></a>
+<a class="sourceLine" id="cb252-28" data-line-number="28"><span class="co"># previously split up to run smaller batches of models</span></a>
+<a class="sourceLine" id="cb252-29" data-line-number="29">combine_fun &lt;-<span class="st"> </span><span class="cf">function</span>(d1){</a>
+<a class="sourceLine" id="cb252-30" data-line-number="30">  m&lt;-abind<span class="op">::</span><span class="kw">abind</span>(d1, <span class="dt">along =</span> <span class="dv">3</span>)</a>
+<a class="sourceLine" id="cb252-31" data-line-number="31">  perm_med &lt;-<span class="st"> </span><span class="kw">perm_med_fun</span>(m)</a>
+<a class="sourceLine" id="cb252-32" data-line-number="32">  perm_sign &lt;-<span class="st"> </span><span class="kw">perm_dom_sign_fun</span>(m)</a>
+<a class="sourceLine" id="cb252-33" data-line-number="33">  perm_num_sign &lt;-<span class="st"> </span>perm_sign[,<span class="st">&quot;num_dom&quot;</span>]; perm_sign &lt;-<span class="st"> </span>perm_sign[,<span class="st">&quot;dom_sign&quot;</span>]</a>
+<a class="sourceLine" id="cb252-34" data-line-number="34">  perm_sig &lt;-<span class="st"> </span><span class="kw">perm_sig_fun</span>(m, perm_sign[<span class="st">&quot;dom_sign&quot;</span>])</a>
+<a class="sourceLine" id="cb252-35" data-line-number="35">  <span class="kw">tibble</span>(perm_med, perm_sign, perm_num_sign, perm_sig)</a>
+<a class="sourceLine" id="cb252-36" data-line-number="36">}</a>
+<a class="sourceLine" id="cb252-37" data-line-number="37"></a>
+<a class="sourceLine" id="cb252-38" data-line-number="38"><span class="co"># compute inferential permutation tests by comparing raw results to each of the permutations  </span></a>
+<a class="sourceLine" id="cb252-39" data-line-number="39">perm_inf_test_fun &lt;-<span class="st"> </span><span class="cf">function</span>(perm,med, sign, sig){</a>
+<a class="sourceLine" id="cb252-40" data-line-number="40">  <span class="kw">tibble</span>(<span class="dt">med_test =</span> <span class="kw">sum</span>(<span class="kw">abs</span>(perm<span class="op">$</span>perm_med) <span class="op">&gt;</span><span class="st"> </span><span class="kw">abs</span>(med))<span class="op">/</span><span class="dv">500</span>,</a>
+<a class="sourceLine" id="cb252-41" data-line-number="41">         <span class="dt">sign_test =</span> <span class="kw">sum</span>(perm<span class="op">$</span>perm_num_sign <span class="op">&gt;</span><span class="st"> </span>sign)<span class="op">/</span><span class="dv">500</span>,</a>
+<a class="sourceLine" id="cb252-42" data-line-number="42">         <span class="dt">sig =</span> <span class="kw">sum</span>(perm<span class="op">$</span>perm_sig <span class="op">&gt;</span><span class="st"> </span>sig)<span class="op">/</span><span class="dv">500</span>)</a>
+<a class="sourceLine" id="cb252-43" data-line-number="43">}</a></code></pre></div>
+</div>
+<div id="plotting-function" class="section level3">
+<h3><span class="header-section-number">5.5.4</span> Plotting Function</h3>
+<div class="sourceCode" id="cb253"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb253-1" data-line-number="1"><span class="co"># plot the results</span></a>
+<a class="sourceLine" id="cb253-2" data-line-number="2">sca_plot_fun &lt;-<span class="st"> </span><span class="cf">function</span>(d1, type, trait, outcome){</a>
+<a class="sourceLine" id="cb253-3" data-line-number="3">  d &lt;-<span class="st"> </span><span class="kw">round</span>(<span class="kw">max</span>(<span class="kw">abs</span>(<span class="dv">1</span><span class="op">-</span><span class="kw">min</span>(<span class="kw">exp</span>(d1<span class="op">$</span>p_value))), <span class="kw">abs</span>(<span class="dv">1</span><span class="op">-</span><span class="kw">exp</span>(<span class="kw">max</span>(d1<span class="op">$</span>p_value)))), <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb253-4" data-line-number="4">  lim &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span><span class="op">-</span>d<span class="op">-</span>(d<span class="op">/</span><span class="fl">2.5</span>), <span class="dv">1</span><span class="op">+</span>d<span class="op">+</span>(d<span class="op">/</span><span class="fl">2.5</span>))</a>
+<a class="sourceLine" id="cb253-5" data-line-number="5">  brk &lt;-<span class="st"> </span><span class="kw">round</span>(<span class="kw">c</span>(<span class="dv">1</span><span class="op">-</span>d<span class="op">-</span>(d<span class="op">/</span><span class="dv">5</span>), <span class="dv">1</span>, <span class="dv">1</span><span class="op">+</span>d<span class="op">+</span>(d<span class="op">/</span><span class="dv">5</span>)),<span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb253-6" data-line-number="6">  lab &lt;-<span class="st"> </span><span class="kw">str_remove</span>(<span class="kw">round</span>(<span class="kw">c</span>(<span class="dv">1</span><span class="op">-</span>d<span class="op">-</span>(d<span class="op">/</span><span class="dv">5</span>), <span class="dv">1</span>, <span class="dv">1</span><span class="op">+</span>d<span class="op">+</span>(d<span class="op">/</span><span class="dv">5</span>)),<span class="dv">2</span>), <span class="st">&quot;^0&quot;</span>)</a>
+<a class="sourceLine" id="cb253-7" data-line-number="7">  ns &lt;-<span class="st"> </span><span class="kw">diff</span>(lim) <span class="op">/</span><span class="st"> </span><span class="dv">100</span>;  sg &lt;-<span class="st"> </span><span class="kw">diff</span>(lim) <span class="op">/</span><span class="st"> </span><span class="dv">50</span></a>
+<a class="sourceLine" id="cb253-8" data-line-number="8">  top &lt;-<span class="st"> </span>d1 <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb253-9" data-line-number="9"><span class="st">    </span><span class="kw">arrange</span>(p_value) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb253-10" data-line-number="10"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">sig =</span> <span class="kw">ifelse</span>(<span class="kw">sign</span>(ci.lower) <span class="op">==</span><span class="st"> </span><span class="kw">sign</span>(ci.upper), <span class="st">&quot;sig&quot;</span>, <span class="st">&quot;ns&quot;</span>),</a>
+<a class="sourceLine" id="cb253-11" data-line-number="11">           <span class="dt">specification =</span> <span class="dv">1</span><span class="op">:</span><span class="kw">n</span>()) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb253-12" data-line-number="12"><span class="st">    </span><span class="kw">mutate_at</span>(<span class="kw">vars</span>(<span class="op">-</span>(Min<span class="op">:</span>Max), <span class="op">-</span>n, <span class="op">-</span>(bic<span class="op">:</span>specification)), exp) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb253-13" data-line-number="13"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">p_min =</span> <span class="kw">ifelse</span>(sig <span class="op">==</span><span class="st"> &quot;sig&quot;</span>, p_value <span class="op">-</span><span class="st"> </span>sg, p_value <span class="op">-</span><span class="st"> </span>ns),</a>
+<a class="sourceLine" id="cb253-14" data-line-number="14">           <span class="dt">p_max =</span> <span class="kw">ifelse</span>(sig <span class="op">==</span><span class="st"> &quot;sig&quot;</span>, p_value <span class="op">+</span><span class="st"> </span>sg, p_value <span class="op">+</span><span class="st"> </span>ns)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb253-15" data-line-number="15"><span class="st">    </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> specification, <span class="dt">y =</span> p_value)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb253-16" data-line-number="16"><span class="st">      </span><span class="kw">scale_y_continuous</span>(<span class="dt">limits =</span> lim, <span class="dt">breaks =</span> brk, <span class="dt">labels =</span> lab) <span class="op">+</span></a>
+<a class="sourceLine" id="cb253-17" data-line-number="17"><span class="st">      </span><span class="kw">scale_color_manual</span>(<span class="dt">values =</span> <span class="kw">c</span>(<span class="st">&quot;black&quot;</span>, <span class="st">&quot;red&quot;</span>)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb253-18" data-line-number="18"><span class="st">      </span><span class="kw">geom_hline</span>(<span class="kw">aes</span>(<span class="dt">yintercept =</span> <span class="dv">1</span>), <span class="dt">linetype =</span> <span class="st">&quot;dashed&quot;</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb253-19" data-line-number="19"><span class="st">      </span><span class="kw">geom_linerange</span>(<span class="kw">aes</span>(<span class="dt">ymin =</span> p_min, <span class="dt">ymax =</span> p_max, <span class="dt">color =</span> sig), <span class="dt">size =</span> <span class="fl">.05</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb253-20" data-line-number="20"><span class="st">      </span><span class="co"># geom_errorbar(aes(color = sig, ymin = ci.lower, ymax = ci.upper), </span></a>
+<a class="sourceLine" id="cb253-21" data-line-number="21"><span class="st">              </span><span class="co"># width = 0, size = .01, alpha = .4) +</span></a>
+<a class="sourceLine" id="cb253-22" data-line-number="22"><span class="st">      </span><span class="co"># geom_point(shape = &quot;|&quot;, aes(color = sig), size = .25) +</span></a>
+<a class="sourceLine" id="cb253-23" data-line-number="23"><span class="st">      </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">&quot;</span><span class="ch">\n</span><span class="st">Specification Number&quot;</span>, </a>
+<a class="sourceLine" id="cb253-24" data-line-number="24">             <span class="dt">y =</span> <span class="kw">str_wrap</span>(<span class="kw">sprintf</span>(<span class="st">&quot;Effect of %s on %s (OR)</span><span class="ch">\n</span><span class="st">&quot;</span>, trait, outcome), <span class="dv">30</span>), </a>
+<a class="sourceLine" id="cb253-25" data-line-number="25">             <span class="dt">title =</span> <span class="kw">bquote</span>(.(trait) <span class="op">%-&gt;%</span><span class="st"> </span>.(outcome))) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb253-26" data-line-number="26"><span class="st">      </span><span class="kw">theme_minimal</span>(<span class="dt">base_size =</span> <span class="dv">11</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb253-27" data-line-number="27"><span class="st">      </span><span class="kw">theme</span>(<span class="dt">legend.title =</span> <span class="kw">element_text</span>(<span class="dt">size =</span> <span class="dv">10</span>),</a>
+<a class="sourceLine" id="cb253-28" data-line-number="28">            <span class="dt">legend.text =</span> <span class="kw">element_text</span>(<span class="dt">size =</span> <span class="dv">9</span>),</a>
+<a class="sourceLine" id="cb253-29" data-line-number="29">            <span class="dt">axis.text =</span> <span class="kw">element_text</span>(<span class="dt">color =</span> <span class="st">&quot;black&quot;</span>),</a>
+<a class="sourceLine" id="cb253-30" data-line-number="30">            <span class="dt">axis.line =</span> <span class="kw">element_line</span>(<span class="dt">colour =</span> <span class="st">&quot;black&quot;</span>),</a>
+<a class="sourceLine" id="cb253-31" data-line-number="31">            <span class="dt">legend.position =</span> <span class="st">&quot;none&quot;</span>,</a>
+<a class="sourceLine" id="cb253-32" data-line-number="32">            <span class="dt">panel.grid.major =</span> <span class="kw">element_blank</span>(),</a>
+<a class="sourceLine" id="cb253-33" data-line-number="33">            <span class="dt">panel.grid.minor =</span> <span class="kw">element_blank</span>(),</a>
+<a class="sourceLine" id="cb253-34" data-line-number="34">            <span class="dt">panel.border =</span> <span class="kw">element_blank</span>(),</a>
+<a class="sourceLine" id="cb253-35" data-line-number="35">            <span class="dt">panel.background =</span> <span class="kw">element_blank</span>(),</a>
+<a class="sourceLine" id="cb253-36" data-line-number="36">            <span class="dt">plot.title =</span> <span class="kw">element_text</span>(<span class="dt">hjust =</span> <span class="fl">.5</span>, <span class="dt">face =</span> <span class="st">&quot;bold&quot;</span>))</a>
+<a class="sourceLine" id="cb253-37" data-line-number="37">  </a>
+<a class="sourceLine" id="cb253-38" data-line-number="38">  <span class="cf">if</span>(type <span class="op">==</span><span class="st"> &quot;perm&quot;</span>){</a>
+<a class="sourceLine" id="cb253-39" data-line-number="39">    top &lt;-<span class="st"> </span>top <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb253-40" data-line-number="40"><span class="st">      </span><span class="kw">geom_smooth</span>(<span class="kw">aes</span>(<span class="dt">y =</span> perm_lower), <span class="dt">color =</span> <span class="st">&quot;gray&quot;</span>, <span class="dt">linetype =</span> <span class="st">&quot;dotted&quot;</span>, <span class="dt">se =</span> F) <span class="op">+</span></a>
+<a class="sourceLine" id="cb253-41" data-line-number="41"><span class="st">      </span><span class="kw">geom_smooth</span>(<span class="kw">aes</span>(<span class="dt">y =</span> perm_upper), <span class="dt">color =</span> <span class="st">&quot;gray&quot;</span>, <span class="dt">linetype =</span> <span class="st">&quot;dotted&quot;</span>, <span class="dt">se =</span> F) <span class="op">+</span></a>
+<a class="sourceLine" id="cb253-42" data-line-number="42"><span class="st">      </span><span class="kw">geom_smooth</span>(<span class="kw">aes</span>(<span class="dt">y =</span> perm_median), <span class="dt">color =</span> <span class="st">&quot;lightblue&quot;</span>, <span class="dt">linetype =</span> <span class="st">&quot;dashed&quot;</span>, <span class="dt">se =</span> F) </a>
+<a class="sourceLine" id="cb253-43" data-line-number="43">  }</a>
+<a class="sourceLine" id="cb253-44" data-line-number="44">  </a>
+<a class="sourceLine" id="cb253-45" data-line-number="45">  bottom &lt;-<span class="st"> </span>d1 <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb253-46" data-line-number="46"><span class="st">    </span><span class="kw">arrange</span>(p_value) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb253-47" data-line-number="47"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">sig =</span> <span class="kw">ifelse</span>(<span class="kw">sign</span>(ci.lower) <span class="op">==</span><span class="st"> </span><span class="kw">sign</span>(ci.upper), <span class="st">&quot;sig&quot;</span>, <span class="st">&quot;ns&quot;</span>),</a>
+<a class="sourceLine" id="cb253-48" data-line-number="48">           <span class="dt">specification =</span> <span class="dv">1</span><span class="op">:</span><span class="kw">n</span>(),</a>
+<a class="sourceLine" id="cb253-49" data-line-number="49">           <span class="co"># model = fct_reorder(specification, .x = p_value, .fun = min)</span></a>
+<a class="sourceLine" id="cb253-50" data-line-number="50">           ) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb253-51" data-line-number="51"><span class="st">    </span><span class="kw">select</span>(<span class="op">-</span>(perm_median<span class="op">:</span>perm_upper), <span class="op">-</span>(bic<span class="op">:</span>ll)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb253-52" data-line-number="52"><span class="st">    </span><span class="kw">gather</span>(variable, value, <span class="op">-</span>(Min<span class="op">:</span>n), <span class="op">-</span>(ci.lower<span class="op">:</span>specification)) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb253-53" data-line-number="53"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">value =</span> <span class="kw">ifelse</span>(<span class="op">!</span><span class="kw">is.na</span>(value), <span class="st">&quot;|&quot;</span>, <span class="st">&quot;&quot;</span>)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb253-54" data-line-number="54"><span class="st">    </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(specification, variable, <span class="dt">color =</span> sig)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb253-55" data-line-number="55"><span class="st">      </span><span class="co"># geom_point(aes(size = sig), shape = &quot;|&quot;) +</span></a>
+<a class="sourceLine" id="cb253-56" data-line-number="56"><span class="st">      </span><span class="kw">geom_text</span>(<span class="kw">aes</span>(<span class="dt">label =</span> value), <span class="dt">size =</span> <span class="kw">rel</span>(<span class="dv">2</span>)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb253-57" data-line-number="57"><span class="st">      </span><span class="kw">scale_color_manual</span>(<span class="dt">values =</span> <span class="kw">c</span>(<span class="st">&quot;black&quot;</span>, <span class="st">&quot;red&quot;</span>)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb253-58" data-line-number="58"><span class="st">      </span><span class="co"># scale_size_manual(values = c(2,3))+</span></a>
+<a class="sourceLine" id="cb253-59" data-line-number="59"><span class="st">      </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">&quot;</span><span class="ch">\n</span><span class="st">Specification Number&quot;</span>, <span class="dt">y =</span> <span class="st">&quot;Variables</span><span class="ch">\n</span><span class="st">&quot;</span>) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb253-60" data-line-number="60"><span class="st">      </span><span class="kw">theme_minimal</span>(<span class="dt">base_size =</span> <span class="dv">11</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb253-61" data-line-number="61"><span class="st">      </span><span class="kw">theme</span>(<span class="dt">legend.title =</span> <span class="kw">element_text</span>(<span class="dt">size =</span> <span class="dv">10</span>),</a>
+<a class="sourceLine" id="cb253-62" data-line-number="62">            <span class="dt">legend.text =</span> <span class="kw">element_text</span>(<span class="dt">size =</span> <span class="dv">9</span>),</a>
+<a class="sourceLine" id="cb253-63" data-line-number="63">            <span class="dt">axis.text =</span> <span class="kw">element_text</span>(<span class="dt">color =</span> <span class="st">&quot;black&quot;</span>),</a>
+<a class="sourceLine" id="cb253-64" data-line-number="64">            <span class="dt">axis.line =</span> <span class="kw">element_line</span>(<span class="dt">colour =</span> <span class="st">&quot;black&quot;</span>),</a>
+<a class="sourceLine" id="cb253-65" data-line-number="65">            <span class="dt">legend.position =</span> <span class="st">&quot;none&quot;</span>,</a>
+<a class="sourceLine" id="cb253-66" data-line-number="66">            <span class="dt">panel.grid.major =</span> <span class="kw">element_blank</span>(),</a>
+<a class="sourceLine" id="cb253-67" data-line-number="67">            <span class="dt">panel.grid.minor =</span> <span class="kw">element_blank</span>(),</a>
+<a class="sourceLine" id="cb253-68" data-line-number="68">            <span class="dt">panel.border =</span> <span class="kw">element_blank</span>(),</a>
+<a class="sourceLine" id="cb253-69" data-line-number="69">            <span class="dt">panel.background =</span> <span class="kw">element_blank</span>())</a>
+<a class="sourceLine" id="cb253-70" data-line-number="70">  </a>
+<a class="sourceLine" id="cb253-71" data-line-number="71">  p_val =<span class="st"> </span>cowplot<span class="op">::</span><span class="kw">plot_grid</span>(top, bottom, <span class="dt">ncol =</span> <span class="dv">1</span>, <span class="dt">align =</span> <span class="st">&quot;v&quot;</span>, <span class="dt">labels =</span> <span class="kw">c</span>(<span class="st">&#39;A&#39;</span>, <span class="st">&#39;B&#39;</span>))</a>
+<a class="sourceLine" id="cb253-72" data-line-number="72">  <span class="co"># file &lt;- sprintf(&quot;%s/results/sca/plots/%s/sca_%s_%s.pdf&quot;, res_path, type, outcome, trait)</span></a>
+<a class="sourceLine" id="cb253-73" data-line-number="73">  <span class="co"># ggsave(p_val, width = 12, height = 8, file = file)</span></a>
+<a class="sourceLine" id="cb253-74" data-line-number="74">  outcome &lt;-<span class="st"> </span><span class="kw">mapvalues</span>(outcome, outcomes<span class="op">$</span>long_name, outcomes<span class="op">$</span>short_name, <span class="dt">warn_missing =</span> F)</a>
+<a class="sourceLine" id="cb253-75" data-line-number="75">  trait &lt;-<span class="st"> </span><span class="kw">mapvalues</span>(trait, traits<span class="op">$</span>long_name, traits<span class="op">$</span>short_name, <span class="dt">warn_missing =</span> F)</a>
+<a class="sourceLine" id="cb253-76" data-line-number="76">  file &lt;-<span class="st"> </span><span class="kw">sprintf</span>(<span class="st">&quot;%s/results/sca/plots/png/%s_%s_%s.png&quot;</span>, res_path, type, outcome, trait)</a>
+<a class="sourceLine" id="cb253-77" data-line-number="77">  <span class="kw">ggsave</span>(p_val, <span class="dt">width =</span> <span class="dv">12</span>, <span class="dt">height =</span> <span class="dv">8</span>, <span class="dt">file =</span> file)</a>
+<a class="sourceLine" id="cb253-78" data-line-number="78">}</a></code></pre></div>
+</div>
+<div id="compiling-function" class="section level3">
+<h3><span class="header-section-number">5.5.5</span> Compiling Function</h3>
+<div class="sourceCode" id="cb254"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb254-1" data-line-number="1"><span class="co"># Compile the results </span></a>
+<a class="sourceLine" id="cb254-2" data-line-number="2"><span class="co"># written as below because of RAM issues. Everything done at once.</span></a>
+<a class="sourceLine" id="cb254-3" data-line-number="3">sca_compile_fun &lt;-<span class="st"> </span><span class="cf">function</span>(trait, outcome, d){</a>
+<a class="sourceLine" id="cb254-4" data-line-number="4">  <span class="co"># bring in raw data </span></a>
+<a class="sourceLine" id="cb254-5" data-line-number="5">  raw &lt;-<span class="st"> </span>d <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb254-6" data-line-number="6"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">raw =</span> <span class="kw">map</span>(files, raw_read_fun),</a>
+<a class="sourceLine" id="cb254-7" data-line-number="7">           <span class="dt">Min =</span> <span class="kw">as.numeric</span>(Min)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb254-8" data-line-number="8"><span class="st">    </span><span class="kw">select</span>(<span class="op">-</span>files, <span class="op">-</span>type, <span class="op">-</span>scrap) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb254-9" data-line-number="9"><span class="st">    </span><span class="kw">arrange</span>(Min) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb254-10" data-line-number="10"><span class="st">    </span><span class="kw">unnest</span>(raw) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb254-11" data-line-number="11"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">n =</span> <span class="dv">1</span><span class="op">:</span><span class="kw">n</span>())</a>
+<a class="sourceLine" id="cb254-12" data-line-number="12">  <span class="co"># get values for inferential tests</span></a>
+<a class="sourceLine" id="cb254-13" data-line-number="13">  med_size &lt;-<span class="st"> </span><span class="kw">median</span>(raw<span class="op">$</span>p_value)</a>
+<a class="sourceLine" id="cb254-14" data-line-number="14">  dom_sign &lt;-<span class="st"> </span><span class="kw">dom_sign_fun</span>(raw<span class="op">$</span>p_value)</a>
+<a class="sourceLine" id="cb254-15" data-line-number="15">  sig_sign &lt;-<span class="st"> </span><span class="kw">with</span>(raw, <span class="kw">num_sig_fun</span>(ci.lower, ci.upper, p_value, dom_sign[<span class="st">&quot;dom_sign&quot;</span>]))</a>
+<a class="sourceLine" id="cb254-16" data-line-number="16">  raw_test &lt;-<span class="st"> </span><span class="kw">c</span>(med_size, dom_sign, sig_sign)</a>
+<a class="sourceLine" id="cb254-17" data-line-number="17">  <span class="kw">names</span>(raw_test) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;med_size&quot;</span>, <span class="st">&quot;dom_sign&quot;</span>, <span class="st">&quot;num_dom&quot;</span>, <span class="st">&quot;sig_sign&quot;</span>)</a>
+<a class="sourceLine" id="cb254-18" data-line-number="18">  </a>
+<a class="sourceLine" id="cb254-19" data-line-number="19">  <span class="co"># bring in permutations</span></a>
+<a class="sourceLine" id="cb254-20" data-line-number="20">  perm &lt;-<span class="st"> </span>d  <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb254-21" data-line-number="21"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">data =</span> <span class="kw">map</span>(files, perm_read_fun),</a>
+<a class="sourceLine" id="cb254-22" data-line-number="22">           <span class="dt">quant =</span> <span class="kw">map</span>(data, sum_fun),</a>
+<a class="sourceLine" id="cb254-23" data-line-number="23">           <span class="dt">Min =</span> <span class="kw">as.numeric</span>(Min)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb254-24" data-line-number="24"><span class="st">  </span><span class="kw">select</span>(<span class="op">-</span>files, <span class="op">-</span>type, <span class="op">-</span>scrap) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb254-25" data-line-number="25"><span class="st">  </span><span class="kw">arrange</span>(Min) </a>
+<a class="sourceLine" id="cb254-26" data-line-number="26">  <span class="co"># get values for inferential test</span></a>
+<a class="sourceLine" id="cb254-27" data-line-number="27">  perm_test &lt;-<span class="st"> </span><span class="kw">combine_fun</span>(perm<span class="op">$</span>data)</a>
+<a class="sourceLine" id="cb254-28" data-line-number="28">  </a>
+<a class="sourceLine" id="cb254-29" data-line-number="29">  <span class="co"># perform inferential permutation test</span></a>
+<a class="sourceLine" id="cb254-30" data-line-number="30">  test &lt;-<span class="st"> </span><span class="kw">perm_inf_test_fun</span>(perm_test, med_size, dom_sign[<span class="st">&quot;num_dom&quot;</span>], sig_sign)</a>
+<a class="sourceLine" id="cb254-31" data-line-number="31">  </a>
+<a class="sourceLine" id="cb254-32" data-line-number="32">  <span class="co"># plotting </span></a>
+<a class="sourceLine" id="cb254-33" data-line-number="33">  d &lt;-<span class="st"> </span>perm <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(<span class="op">-</span>data) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">unnest</span>(quant) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">mutate</span>(<span class="dt">n =</span> <span class="dv">1</span><span class="op">:</span><span class="kw">n</span>()) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb254-34" data-line-number="34"><span class="st">    </span><span class="kw">full_join</span>(raw)</a>
+<a class="sourceLine" id="cb254-35" data-line-number="35">  </a>
+<a class="sourceLine" id="cb254-36" data-line-number="36">  <span class="kw">sca_plot_fun</span>(d, <span class="st">&quot;raw&quot;</span>, trait, outcome)</a>
+<a class="sourceLine" id="cb254-37" data-line-number="37">  <span class="kw">sca_plot_fun</span>(d, <span class="st">&quot;perm&quot;</span>, trait, outcome)</a>
+<a class="sourceLine" id="cb254-38" data-line-number="38">  </a>
+<a class="sourceLine" id="cb254-39" data-line-number="39">  results &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">inf_test =</span> test, <span class="dt">raw_test =</span> raw_test, <span class="dt">perm_test =</span> perm_test)</a>
+<a class="sourceLine" id="cb254-40" data-line-number="40">  <span class="kw">save</span>(results,  <span class="dt">file =</span> <span class="kw">sprintf</span>(<span class="st">&quot;%s/results/sca/inf_test/%s_%s.RData&quot;</span>, res_path, outcome, trait))</a>
+<a class="sourceLine" id="cb254-41" data-line-number="41">  <span class="kw">rm</span>(<span class="dt">list =</span> <span class="kw">c</span>(<span class="st">&quot;d&quot;</span>, <span class="st">&quot;test&quot;</span>, <span class="st">&quot;raw_test&quot;</span>, <span class="st">&quot;perm_test&quot;</span>, <span class="st">&quot;perm&quot;</span>, <span class="st">&quot;raw&quot;</span>))</a>
+<a class="sourceLine" id="cb254-42" data-line-number="42">  <span class="kw">gc</span>()</a>
+<a class="sourceLine" id="cb254-43" data-line-number="43">  <span class="kw">return</span>(results)</a>
+<a class="sourceLine" id="cb254-44" data-line-number="44">}</a>
+<a class="sourceLine" id="cb254-45" data-line-number="45"></a>
+<a class="sourceLine" id="cb254-46" data-line-number="46">done &lt;-<span class="st"> </span><span class="kw">tibble</span>(</a>
+<a class="sourceLine" id="cb254-47" data-line-number="47">  <span class="dt">files =</span> <span class="kw">sprintf</span>(<span class="st">&quot;%s/results/sca/plots/png&quot;</span>, res_path) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">list.files</span>()</a>
+<a class="sourceLine" id="cb254-48" data-line-number="48">) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb254-49" data-line-number="49"><span class="st">  </span><span class="kw">separate</span>(files, <span class="kw">c</span>(<span class="st">&quot;scrap&quot;</span>, <span class="st">&quot;Outcome&quot;</span>, <span class="st">&quot;Trait&quot;</span>), <span class="dt">sep =</span> <span class="st">&quot;_&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb254-50" data-line-number="50"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">Trait =</span> <span class="kw">str_remove</span>(Trait, <span class="st">&quot;.png&quot;</span>),</a>
+<a class="sourceLine" id="cb254-51" data-line-number="51">         <span class="dt">done =</span> <span class="st">&quot;done&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb254-52" data-line-number="52"><span class="st">  </span><span class="kw">group_by</span>(Outcome,Trait) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb254-53" data-line-number="53"><span class="st">  </span><span class="kw">filter</span>(<span class="kw">n</span>()<span class="op">==</span><span class="dv">2</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb254-54" data-line-number="54"><span class="st">  </span><span class="kw">ungroup</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb254-55" data-line-number="55"><span class="st">  </span><span class="kw">select</span>(<span class="op">-</span>scrap) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb254-56" data-line-number="56"><span class="st">  </span><span class="kw">distinct</span>()</a>
+<a class="sourceLine" id="cb254-57" data-line-number="57"></a>
+<a class="sourceLine" id="cb254-58" data-line-number="58"><span class="kw">plan</span>(<span class="kw">multiprocess</span>(<span class="dt">workers =</span> 3L))</a>
+<a class="sourceLine" id="cb254-59" data-line-number="59">sca_res_nested &lt;-<span class="st"> </span><span class="kw">tibble</span>(</a>
+<a class="sourceLine" id="cb254-60" data-line-number="60">  <span class="dt">files =</span> <span class="kw">sprintf</span>(<span class="st">&quot;%s/results/sca/raw&quot;</span>, wd) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">list.files</span>()</a>
+<a class="sourceLine" id="cb254-61" data-line-number="61">) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb254-62" data-line-number="62"><span class="st">  </span><span class="kw">separate</span>(files, <span class="kw">c</span>(<span class="st">&quot;type&quot;</span>, <span class="st">&quot;Trait&quot;</span>, <span class="st">&quot;Outcome&quot;</span>, <span class="st">&quot;Min&quot;</span>, <span class="st">&quot;Max&quot;</span>, <span class="st">&quot;scrap&quot;</span>), <span class="dt">remove =</span> F) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb254-63" data-line-number="63"><span class="st">  </span><span class="kw">arrange</span>(Min) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb254-64" data-line-number="64"><span class="st">  </span><span class="kw">group_by</span>(Trait, Outcome) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb254-65" data-line-number="65"><span class="st">  </span><span class="kw">nest</span>() <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb254-66" data-line-number="66"><span class="st">  </span><span class="kw">filter</span>(<span class="kw">map</span>(data, nrow) <span class="op">==</span><span class="st"> </span><span class="dv">150</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb254-67" data-line-number="67"><span class="st">  </span><span class="kw">ungroup</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb254-68" data-line-number="68"><span class="st">  </span><span class="kw">filter</span>(Trait <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;E&quot;</span>, <span class="st">&quot;A&quot;</span>, <span class="st">&quot;C&quot;</span>, <span class="st">&quot;N&quot;</span>, <span class="st">&quot;O&quot;</span>)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb254-69" data-line-number="69"><span class="st">  </span><span class="co"># full_join(done) %&gt;%</span></a>
+<a class="sourceLine" id="cb254-70" data-line-number="70"><span class="st">  </span><span class="co"># filter(is.na(done)) %&gt;%</span></a>
+<a class="sourceLine" id="cb254-71" data-line-number="71"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">Trait =</span> <span class="kw">mapvalues</span>(Trait, traits<span class="op">$</span>short_name, traits<span class="op">$</span>long_name),</a>
+<a class="sourceLine" id="cb254-72" data-line-number="72">         <span class="dt">Outcome =</span> <span class="kw">mapvalues</span>(Outcome, outcomes<span class="op">$</span>short_name, outcomes<span class="op">$</span>long_name)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb254-73" data-line-number="73"><span class="st">  </span><span class="kw">mutate</span>(<span class="co">#results = pmap(list(Trait, Outcome, data), sca_compile_fun))</span></a>
+<a class="sourceLine" id="cb254-74" data-line-number="74">         <span class="dt">results =</span> <span class="kw">future_pmap</span>(<span class="kw">list</span>(Trait, Outcome, data)</a>
+<a class="sourceLine" id="cb254-75" data-line-number="75">         , sca_compile_fun</a>
+<a class="sourceLine" id="cb254-76" data-line-number="76">         , <span class="dt">.progress =</span> T</a>
+<a class="sourceLine" id="cb254-77" data-line-number="77">         , <span class="dt">.options =</span> <span class="kw">future_options</span>(</a>
+<a class="sourceLine" id="cb254-78" data-line-number="78">           <span class="dt">globals =</span> <span class="kw">c</span>(<span class="st">&quot;combine_fun&quot;</span>, <span class="st">&quot;dom_sign_fun&quot;</span>, <span class="st">&quot;num_sig_fun&quot;</span>,</a>
+<a class="sourceLine" id="cb254-79" data-line-number="79">                       <span class="st">&quot;perm_dom_sign_fun&quot;</span>, <span class="st">&quot;perm_inf_test_fun&quot;</span>,</a>
+<a class="sourceLine" id="cb254-80" data-line-number="80">                       <span class="st">&quot;perm_med_fun&quot;</span>, <span class="st">&quot;perm_read_fun&quot;</span>, <span class="st">&quot;wd&quot;</span>, <span class="st">&quot;res_path&quot;</span>,</a>
+<a class="sourceLine" id="cb254-81" data-line-number="81">                       <span class="st">&quot;perm_sig_fun&quot;</span>, <span class="st">&quot;raw_read_fun&quot;</span>, <span class="st">&quot;read_fun&quot;</span>,</a>
+<a class="sourceLine" id="cb254-82" data-line-number="82">                       <span class="st">&quot;sca_plot_fun&quot;</span>, <span class="st">&quot;sum_fun&quot;</span>, <span class="st">&quot;traits&quot;</span>, <span class="st">&quot;outcomes&quot;</span>)</a>
+<a class="sourceLine" id="cb254-83" data-line-number="83">           , <span class="dt">packages =</span> <span class="kw">c</span>(<span class="st">&quot;plyr&quot;</span>, <span class="st">&quot;tidyverse&quot;</span>, <span class="st">&quot;cowplot&quot;</span>, <span class="st">&quot;abind&quot;</span>))))</a>
+<a class="sourceLine" id="cb254-84" data-line-number="84"><span class="kw">closeAllConnections</span>()</a></code></pre></div>
+</div>
+</div>
+<div id="results" class="section level2">
+<h2><span class="header-section-number">5.6</span> Results</h2>
+<div id="tables-2" class="section level3">
+<h3><span class="header-section-number">5.6.1</span> Tables</h3>
+<div class="sourceCode" id="cb255"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb255-1" data-line-number="1">read_fun &lt;-<span class="st"> </span><span class="cf">function</span>(file){</a>
+<a class="sourceLine" id="cb255-2" data-line-number="2">  <span class="kw">load</span>(<span class="kw">sprintf</span>(<span class="st">&quot;%s/results/sca/inf_test/%s&quot;</span>, res_path, file))</a>
+<a class="sourceLine" id="cb255-3" data-line-number="3">  <span class="kw">return</span>(results)</a>
+<a class="sourceLine" id="cb255-4" data-line-number="4">}</a>
+<a class="sourceLine" id="cb255-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb255-6" data-line-number="6">sca_res &lt;-<span class="st"> </span><span class="kw">tibble</span>(</a>
+<a class="sourceLine" id="cb255-7" data-line-number="7">  <span class="dt">files =</span> <span class="kw">sprintf</span>(<span class="st">&quot;%s/results/sca/inf_test&quot;</span>, res_path) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">list.files</span>()</a>
+<a class="sourceLine" id="cb255-8" data-line-number="8">) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb255-9" data-line-number="9"><span class="st">  </span><span class="kw">separate</span>(files, <span class="kw">c</span>(<span class="st">&quot;Outcome&quot;</span>, <span class="st">&quot;Trait&quot;</span>), <span class="dt">sep =</span> <span class="st">&quot;_&quot;</span>, <span class="dt">remove =</span> F) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb255-10" data-line-number="10"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">Trait =</span> <span class="kw">str_remove</span>(Trait, <span class="st">&quot;.RData&quot;</span>),</a>
+<a class="sourceLine" id="cb255-11" data-line-number="11">         <span class="dt">data =</span> <span class="kw">map</span>(files, read_fun),</a>
+<a class="sourceLine" id="cb255-12" data-line-number="12">         <span class="dt">inf_test =</span> <span class="kw">map</span>(data, <span class="op">~</span>(.)<span class="op">$</span>inf_test),</a>
+<a class="sourceLine" id="cb255-13" data-line-number="13">         <span class="dt">raw_test =</span> <span class="kw">map</span>(data, <span class="op">~</span>(.)<span class="op">$</span>raw_test),</a>
+<a class="sourceLine" id="cb255-14" data-line-number="14">         <span class="dt">perm_test =</span> <span class="kw">map</span>(data, <span class="op">~</span>(.)<span class="op">$</span>perm_test))</a>
+<a class="sourceLine" id="cb255-15" data-line-number="15"></a>
+<a class="sourceLine" id="cb255-16" data-line-number="16">sca_res <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb255-17" data-line-number="17"><span class="st">  </span><span class="kw">select</span>(Outcome, Trait, inf_test) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb255-18" data-line-number="18"><span class="st">  </span><span class="kw">unnest</span>(inf_test) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb255-19" data-line-number="19"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">num_sig =</span> <span class="kw">rowSums</span>(<span class="kw">cbind</span>(med_test, sign_test, sig) <span class="op">&lt;</span><span class="st"> </span>(.<span class="dv">05</span><span class="op">/</span><span class="dv">3</span>))) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb255-20" data-line-number="20"><span class="st">  </span><span class="kw">group_by</span>(Outcome, num_sig) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb255-21" data-line-number="21"><span class="st">  </span><span class="kw">tally</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb255-22" data-line-number="22"><span class="st">  </span><span class="kw">spread</span>(num_sig, n)</a></code></pre></div>
+<pre><code>## # A tibble: 14 x 4
+## # Groups:   Outcome [14]
+##    Outcome                  `1`   `2`   `3`
+##    &lt;chr&gt;                  &lt;int&gt; &lt;int&gt; &lt;int&gt;
+##  1 Child Birth                3    NA     2
+##  2 Child Moves Out            5    NA    NA
+##  3 Criminality                1    NA     4
+##  4 Divorce                   NA    NA     5
+##  5 First Job                  2     2     1
+##  6 Higher Ed                  3     1     1
+##  7 Major Health Event         4     1    NA
+##  8 Marriage                   1     1     3
+##  9 Mental Health Event       NA     1     4
+## 10 Mortality                  1     3     1
+## 11 Move in with a partner     2    NA     3
+## 12 Retirement                 1     1     3
+## 13 Unemployment              NA    NA     5
+## 14 Volunteering              NA    NA     5</code></pre>
+<div class="sourceCode" id="cb257"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb257-1" data-line-number="1">t_names &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>, <span class="kw">rep</span>(<span class="dv">3</span>, <span class="dv">5</span>)); <span class="kw">names</span>(t_names) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot; &quot;</span>, traits<span class="op">$</span>long_name)</a>
+<a class="sourceLine" id="cb257-2" data-line-number="2">cols_names &lt;-<span class="st"> </span><span class="kw">paste</span>(<span class="kw">rep</span>(<span class="kw">c</span>(<span class="st">&quot;med_test&quot;</span>, <span class="st">&quot;sign_test&quot;</span>, <span class="st">&quot;sig&quot;</span>), <span class="dt">times =</span> <span class="dv">5</span>), </a>
+<a class="sourceLine" id="cb257-3" data-line-number="3">      <span class="kw">rep</span>(traits<span class="op">$</span>short_name, <span class="dt">each =</span> <span class="dv">3</span>), <span class="dt">sep =</span> <span class="st">&quot;_&quot;</span>)</a>
+<a class="sourceLine" id="cb257-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb257-5" data-line-number="5">sca_res <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb257-6" data-line-number="6"><span class="st">  </span><span class="kw">select</span>(Outcome, Trait, inf_test) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb257-7" data-line-number="7"><span class="st">  </span><span class="kw">unnest</span>(inf_test) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb257-8" data-line-number="8"><span class="st">  </span><span class="co"># pivot_longer(cols = c(&quot;med_test&quot;, &quot;sign_test&quot;, &quot;sig&quot;)</span></a>
+<a class="sourceLine" id="cb257-9" data-line-number="9"><span class="st">  </span><span class="co">#              , names_to = &quot;Test&quot;</span></a>
+<a class="sourceLine" id="cb257-10" data-line-number="10"><span class="st">  </span><span class="co">#              , values_to = &quot;val&quot;) %&gt;%</span></a>
+<a class="sourceLine" id="cb257-11" data-line-number="11"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">Trait =</span> <span class="kw">mapvalues</span>(Trait, traits<span class="op">$</span>long_name, traits<span class="op">$</span>short_name)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb257-12" data-line-number="12"><span class="st">  </span><span class="kw">pivot_wider</span>(<span class="dt">names_from =</span> <span class="st">&quot;Trait&quot;</span></a>
+<a class="sourceLine" id="cb257-13" data-line-number="13">              , <span class="dt">values_from =</span> <span class="kw">c</span>(<span class="st">&quot;med_test&quot;</span>, <span class="st">&quot;sign_test&quot;</span>, <span class="st">&quot;sig&quot;</span>)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb257-14" data-line-number="14"><span class="st">  </span><span class="kw">select</span>(Outcome, <span class="kw">all_of</span>(cols_names)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb257-15" data-line-number="15"><span class="st">  </span><span class="co"># mutate(Test = mapvalues(Test, c(&quot;med_test&quot;, &quot;sign_test&quot;, &quot;sig&quot;), c(&quot;Median&quot;, &quot;Sign&quot;, &quot;Significance&quot;))) %&gt;%</span></a>
+<a class="sourceLine" id="cb257-16" data-line-number="16"><span class="st">  </span><span class="kw">mutate_at</span>(<span class="kw">vars</span>(<span class="op">-</span>Outcome), <span class="op">~</span><span class="kw">ifelse</span>(. <span class="op">&lt;</span><span class="st"> </span><span class="fl">.05</span>, <span class="kw">sprintf</span>(<span class="st">&quot;&lt;strong&gt;%.2f&lt;/strong&quot;</span>,.), <span class="kw">sprintf</span>(<span class="st">&quot;%.2f&quot;</span>,.))) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb257-17" data-line-number="17"><span class="st">  </span><span class="kw">kable</span>(.</a>
+<a class="sourceLine" id="cb257-18" data-line-number="18">        , <span class="st">&quot;html&quot;</span></a>
+<a class="sourceLine" id="cb257-19" data-line-number="19">        , <span class="dt">escape =</span> F</a>
+<a class="sourceLine" id="cb257-20" data-line-number="20">        , <span class="dt">col.names =</span> <span class="kw">c</span>(<span class="st">&quot;Outcome&quot;</span>, <span class="kw">rep</span>(<span class="kw">c</span>(<span class="st">&quot;Median&quot;</span>, <span class="st">&quot;Sign&quot;</span>, <span class="st">&quot;Signif&quot;</span>), <span class="dt">times =</span> <span class="dv">5</span>))</a>
+<a class="sourceLine" id="cb257-21" data-line-number="21">        , <span class="dt">align =</span> <span class="kw">c</span>(<span class="st">&quot;r&quot;</span>, <span class="kw">rep</span>(<span class="st">&quot;c&quot;</span>, <span class="dv">15</span>))</a>
+<a class="sourceLine" id="cb257-22" data-line-number="22">        , <span class="dt">caption =</span> <span class="st">&quot;Results of the Permuation Based Inference Tests from Specification Curve Analyses&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb257-23" data-line-number="23"><span class="st">  </span><span class="kw">kable_styling</span>(<span class="dt">full_width =</span> F) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb257-24" data-line-number="24"><span class="st">  </span><span class="kw">collapse_rows</span>(<span class="dv">1</span></a>
+<a class="sourceLine" id="cb257-25" data-line-number="25">                , <span class="dt">valign =</span> <span class="st">&quot;top&quot;</span></a>
+<a class="sourceLine" id="cb257-26" data-line-number="26">                , <span class="dt">row_group_label_position =</span> <span class="st">&quot;stack&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb257-27" data-line-number="27"><span class="st">  </span><span class="kw">add_header_above</span>(t_names) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb257-28" data-line-number="28"><span class="st">  </span><span class="kw">footnote</span>(<span class="st">&quot;Median = Percentage of permutations in which the raw median effect size of the dominant sign was larger than the permuted median effect size; Sign = Percentage of permutations in which the total number of raw specifications of the dominant sign was greater than permuted. Signifiance = Percentage of permutations in which the total number of raw, significant specifications of the dominant sign was greater than the permuted.&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb257-29" data-line-number="29"><span class="st">  </span><span class="kw">save_kable</span>(., <span class="dt">file =</span> <span class="kw">sprintf</span>(<span class="st">&quot;%s/results/sca/inferential_tests.html&quot;</span>, res_path))</a></code></pre></div>
+
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="psm-models-psm-mods.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="Summary.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/rstudio/bookdown-demo/edit/master/04-SCA.Rmd",
+"text": "Edit"
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["bookdown-demo.pdf", "bookdown-demo.epub"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>

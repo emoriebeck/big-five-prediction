@@ -1,0 +1,12 @@
+name: book
+title: book
+username: emorie_beck
+account: emorie_beck
+server: bookdown.org
+hostUrl: https://bookdown.org/__api__
+appId: 4928
+bundleId: 24144
+url: https://bookdown.org/emorie_beck/book/
+when: 1593570826.76882
+asMultiple: FALSE
+asStatic: FALSE

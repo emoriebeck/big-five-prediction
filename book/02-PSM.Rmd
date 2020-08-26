@@ -1,0 +1,623 @@
+# Propensity Score Matching {#PSM}  
+Study 1 tests whether personality still predicts outcomes following propensity score matching to control for selection bias. The analyses will proceed in several parts: 
+1. Data cleaning and combining  
+2. Running the matching procedure  
+3. Creating Balance Plots and Tables  
+4. Getting descriptive statistics of the matched and unmatched samples  
+5. Combining matched and unmatched data across studies into 14 personality characteristics x 14 outcomes x 9 models (one unmoderator + 8 moderated) x 5 imputations  
+6. Running matched and unmatched models in brms using the High Performance Computing Cluster  
+7. Recompiling and combining imputations and pulling model terms, random effects, predictions  
+8. Creating a series of tables and figures describing the results of all the models   
+
+## Part 1: Data  
+First, the data for the matching procedure need to be set up, so we'll load in the matching, outcome, and personality data, and combine data from the same study in the year into one for each personality-outcome-moderator combination.  
+### Matching  
+First, let's load in the matching data.  
+```{r psm matching data, eval = F}
+#loads an RData file, and returns it
+loadRData <- function(fileName, type){
+    path <- sprintf("%s/data/imputed/%s_imputed_small.RData", wd, fileName)
+    load(path)
+    get(ls()[grepl(type, ls())])
+}
+
+# load in matching data from each study and combine 
+psm_match <- tibble(study = studies) %>%
+  mutate(data = map(study, ~loadRData(., "match_imp_long")),
+         data = map(data, ~(.) %>% mutate(
+           p_year = as.numeric(p_year), SID = as.character(SID))%>%
+           mutate_if(is.factor, ~as.numeric(as.character(.))) %>%
+           filter(age < 100)),
+         study = mapvalues(study, studies, studies_long),
+         data = map(data, ~(.) %>% group_by(.imp, p_year) %>% nest())) %>%
+  unnest(data) %>%
+  rename(match_dat = data)
+```
+
+### Outcomes and Personality  
+Next, let's load in th personality and outcome data. Both are needed even though we won't be matching on personality because we want to constrain the sample we match on to those individuals who have personality data that we can actually use to run personality-outcome associations.
+```{r psm outcome and personality data, eval = F}
+loadRData <- function(fileName, type){
+#loads an RData file, and returns it
+    path <- sprintf("%s/data/clean/%s_cleaned.RData", wd, fileName)
+    load(path)
+    get(ls()[grepl(type, ls())])
+}
+
+# short function to join together personality and outcome data
+join_fun <- function(pdat, odat){
+  odat %>% select(p_year, SID, Outcome = name, o_value = value) %>%
+    full_join(pdat %>% select(p_year, SID, Trait = name, p_value = value)) %>%
+    filter(complete.cases(.)) %>%
+    filter(!grepl("sep", Outcome)) %>%
+    group_by(Trait, Outcome, p_year) %>%
+    nest() %>%
+    ungroup()
+}
+
+# load and combine personality and outcome data
+psm_dat <- tibble(study = studies) %>%
+  # filter(study == "wls") %>%
+  mutate(p_data = map(study,  ~loadRData(., "pers")),
+         o_data = map(study, ~loadRData(., "out")),
+         o_data = map(o_data, ~(.) %>% mutate(p_year = as.numeric(p_year), SID = as.character(SID))),
+         p_data = map(p_data, ~(.) %>% ungroup() %>% rename(p_year = year) %>% mutate(p_year = as.numeric(p_year), SID = as.character(SID))),
+         study = mapvalues(study, studies, studies_long),
+         data = map2(p_data, o_data, join_fun)) %>%
+  select(-p_data, -o_data) %>%
+  unnest(data) %>%
+  rename(op_dat = data)
+```
+
+### Combine Matching and Outcome Variables  
+Once we have the matching and outcome data, we need to combine these for each study-year-outcome-personality-imputation combination for the matching procedure.  
+```{r combine matching and outcome psm, eval = F}
+# short function to find columnns with all missing data
+not_all_na <- function(x) any(!is.na(x))
+# short function to find factor variables
+factor_fun <- function(x){if(is.numeric(x)){diff(range(x, na.rm = T)) %in% 1:2} else{F}}
+# function to join together matching, personality, and outcome data
+join_fun <- function(opdat, mdat, study, p_year, outcome, trait, .imp){
+  x <- opdat %>% full_join(mdat) %>%
+    select_if(not_all_na) %>%
+    select(-p_value) %>%
+    filter(complete.cases(.)) %>%
+    mutate_if(factor_fun, as.factor) 
+  save(x, file = sprintf("%s/data/psm_raw/%s_%s_%s_%s_%s.RData", wd, study, p_year, outcome, trait, .imp))
+}
+
+psm_nested <- psm_dat %>% full_join(psm_match) %>%
+  mutate(data = pmap(list(op_dat, match_dat, study, p_year, Outcome, Trait, .imp), join_fun))
+```
+
+## Part 2: Run Matching  
+Now that we have data, we can run the matching. But first, we need a series of functions to do so.  
+### Functions  
+```{r psm funs, eval = F}
+# takes the data and generates combinationsn for the moderators
+mod_fun <- function(outcome, imp, Study, year, trait){
+  tibble(moderator = c("none", "age", "gender", "race", "parEdu", "grsWages", "parOccPrstg")) %>% #, list(c("parEdu", "grsWages", "parOccPrstg"))
+    mutate(psm = pmap(list(outcome, imp, Study, year, moderator, trait),  psm_fun))
+}
+
+# function to run the propensity score matching procedure
+psm_fun <- function(outcome, imp, Study, year, mod, trait){
+  m <- ifelse(length(mod) > 1, "SES", mod)  # indexing the moderator
+  # file path
+  file <- sprintf("%s_%s_%s_%s_%s_%s.RData", Study, trait, outcome, year, imp, m)
+  # check the year to make sure personality was measured in this year
+  pw <- (p_waves %>% filter(p_item == trait & study == Study))$Used
+  if(!file %in% done & pw == year){
+  Ratio <- 4 # set the ratio
+  # load the data
+  load(sprintf("%s/data/psm_raw/%s_%s_%s_%s_%s.RData", wd, Study, year, outcome, trait, imp))
+  # short function to find all missing columns 
+  not_all_na <- function(x) any(!is.na(x))
+  # remove columns with all missing data
+  x <- x %>% filter(!is.na(o_value)) %>% select_if(not_all_na) %>% select(-one_of(c("study", "p_year", ".id")), -one_of(c(unique(p_waves$p_item), "NegAff")))
+  # find columns with too high percentage missing data 
+  # typically happens due to reshaping
+  sum_na <- function(x) sum(is.na(x))/length(x)*100
+  min <- ifelse(Study %in% c("GSOEP", "HILDA", "BHPS"), 97, ifelse(Study == "HRS", 100, 55))
+  pos <- which(apply(x, 2, sum_na) < min)
+  x <- x %>% select(one_of(names(pos)))
+  # keep only complete cases for psm
+  x <- x[complete.cases(x),]
+  # make sure all data has variance 
+  has_var <- function(x) if(class(x) %in% c("factor", "character")) !all(duplicated(x)[-1L]) else sd(x, na.rm = T) != 0 
+  x <- x %>% select_if(has_var) 
+  x <- data.frame(unclass(x)) # unclass because tibbles 
+  # vector of variables not to match on
+  no.match <- c("yearBrth", "o_value", "weight", "height", "SID", unique(p_waves$p_item), mod)
+  # vector of variables to match on
+  to.match <- colnames(x)[-which(colnames(x) %in% no.match)]
+  # matching formula
+  match.formula <- as.formula(paste("o_value ~ ", paste(to.match, collapse=" + "), sep = " "))
+  # call the matching procedure
+  y <- matchit(match.formula, data = x, method = "nearest", ratio = Ratio, caliper = .25)
+  # get the psm df
+  d <- psm_df(y)
+  # get the balance plots 
+  u <- unbalanced_fun(y)
+  # save the matching data
+  save(d, file = sprintf("%s/data/psm_matched/%s_%s_%s_%s_%s_%s.RData", wd, Study, trait, outcome, year, imp, m))
+  # save the balance plots
+  save(u, file = sprintf("%s/results/psm/bal_tabs/%s_%s_%s_%s_%s_%s.RData", wd, Study, trait, outcome, year, imp, m))
+  # clean up the environment
+  rm(list = c("y", "d", "u", "x"))
+  gc()}
+  return(NULL)
+}
+
+# creates the matched data frames
+psm_df <- function(psm){
+  data.frame(match.data(psm)) %>% tbl_df %>% select(SID, o_value, distance)
+}
+
+# this function creates the balance table of the psm weights and filters 
+# the results into variables the matching procedure did not fix and 
+# those that it did
+unbalanced_fun <- function(x){
+  #x <- bal.table(psm)
+  y <- summary(x, standardize = T)
+  raw <- y$sum.all %>%
+    mutate(var = rownames(.)) %>%
+    select(var, `Means Treated`, `Means Control`, `Std. Mean Diff.`)
+  smalldiff.var <- raw %>% filter(abs(`Std. Mean Diff.`) <= .05)
+  matched <- y$sum.matched %>%
+    mutate(var = rownames(.)) %>%
+    select(var, `Means Treated`, `Means Control`, `Std. Mean Diff.`)
+  unbalanced.var <- matched %>% filter(abs(`Std. Mean Diff.`) >= .2)
+  return(list(raw = raw, matched = matched, 
+              unbalanced = unbalanced.var,smalldiff = smalldiff.var))
+}
+```
+
+### Run Models  
+The code below will activate and the matching procedure described in the functions above.  
+```{r psm run, eval = F}
+p_waves <- p_waves %>% rename(study = Study)
+
+plan(multiprocess(workers = 5L))
+psm_nested <- tibble(file = list.files(sprintf("%s/data/psm_raw", wd))) %>%
+  separate(file, c("study", "p_year", "Outcome", "Trait", "imp"), sep = "_") %>%
+  full_join(p_waves %>% select(Trait = p_item, study, Used)) %>%
+  filter(Used == p_year) %>%
+  mutate(imp = str_remove_all(imp, "[A-Z a-z .]"),
+         # psm = pmap(list(Outcome, imp, study, p_year, Trait)
+         #                   ,  mod_fun))
+         psm = future_pmap(list(Outcome, imp, study, p_year, Trait)
+                           ,  possibly(mod_fun, NA_real_)
+                           , .options = future_options(globals = c(
+                  "psm_fun", "psm_df", "mod_fun", "unbalanced_fun",
+                  "done", "p_waves", "wd"), packages = c("MatchIt",
+                  "tidyverse", "plyr", "forcats"))
+                           , .progress = T))
+closeAllConnections()
+p_waves <- p_waves %>% rename(Study = study)
+```
+
+The number of, a sample list of, and a sample file of the data and balance files the above functions create is below:   
+```{r psm res dir}
+# propensity score matched data sets
+cat(length(list.files(sprintf("%s/data/psm_matched", wd))), " total propensity score matched data sets.", sep = "")
+# number of files
+list.files(sprintf("%s/data/psm_matched", wd))[1:15]
+# sample file
+load(sprintf("%s/data/psm_matched/GSOEP_C_physhlthevnt_2005_5_none.RData", wd))
+d
+rm(d)
+
+# propensity score matched balance tables 
+cat(length(list.files(sprintf("%s/results/psm/bal_tabs", wd))), " total propensity score matched balance tables.", sep = "")
+# number of files
+list.files(sprintf("%s/results/psm/bal_tabs", wd))[1:15]
+# sample file
+load(sprintf("%s/results/psm/bal_tabs/GSOEP_C_physhlthevnt_2005_5_none.RData", wd))
+map(u, head)
+rm(u)
+```
+
+
+## Part 3: Balance  
+Once we've run the propensity score matching procedure, we're ready to check the balance of the procedure using balance plots and tables.  
+### Functions  
+The functions below will load create balance plots and tables for each study-personality-outcome-moderator-imputation combination in the matched and unmatched data sets.  
+#### Data  
+These functions will load in the matched and unmatched data.  
+```{r psm read funs}
+# unmatched data
+um_read_fun <- function(file){
+  load(sprintf("%s/data/psm_raw/%s", wd, file))
+  x %>% tbl_df %>% 
+    mutate(o_value = as.numeric(as.character(o_value))) %>%
+    select(-.id, -one_of(traits$short_name)) %>%
+    select_if(not_factor) %>%
+    filter(complete.cases(.))
+} 
+
+# matched data 
+m_read_fun <- function(file){
+  load(sprintf("%s/data/psm_matched/%s", wd, file))
+  d %>% tbl_df 
+}
+```
+
+#### Balance Tables  
+```{r bal tab fun}
+bal_tab_fun <- function(file, trait, outcome, study, mod, imp, year){
+  load(sprintf("%s/results/psm/bal_tabs/%s", wd, file))
+  cap = sprintf("Balance Table from Propensity Score Matching for %s in %s, %s and %s Set, Imputation %s", outcome, study, trait, mod, imp)
+  u$raw %>% select(var, raw_d = `Std. Mean Diff.`) %>%
+    full_join(u$matched %>% select(var, matched_d = `Std. Mean Diff.`)) %>%
+    filter(var != "distance") %>%
+    kable(.
+          , "html"
+          , col.names = c("Variable", "Raw", "Matched")
+          , digits = 2
+          , caption = cap
+          , escape = F) %>%
+    kable_styling(full_width = F) %>%
+    add_header_above(c(" " = 1, "Cohen's d" = 2)) %>%
+    save_kable(., file = sprintf("%s/results/psm/bal_tabs_html/%s_%s_%s_%s_%s_%s.html", wd, study, year, outcome, trait, mod, imp))
+  rm(list = c("u", "d", "study", "trait", "outcome", "mod", "imp", "year"))
+  gc()
+}
+```
+
+
+#### Balance Plots  
+These functions will calculate Cohen's d across groups in the matched and unmatched data and run the balance plots. 
+```{r psm bal plot funs}
+# identify variables that aren't factors
+not_factor <- function(x) !is.factor(x)
+
+# calculate cohen's d
+cohens_d <- function(x, y) {
+    x <- x$value; y <- y$value
+    lx <- length(x)- 1; ly <- length(y)- 1
+    md  <- mean(x, na.rm = T) - mean(y, na.rm = T)        ## mean difference (numerator)
+    csd <- lx * var(x, na.rm = T) + ly * var(y, na.rm = T)
+    csd <- csd/(lx + ly); csd <- sqrt(csd)                     ## common sd computation
+    cd  <- md/csd                        ## cohen's d
+    return(cd)
+}
+
+# create the plots
+plot_fun <- function(d, outcome, trait, mod){
+  ## setup variables for titles, prettified ##
+  # setup nicer names for plotting
+  o <- mapvalues(outcome, outcomes$short_name, outcomes$long_name, warn_missing = F)
+  md <- mapvalues(mod, c("none", moderators$short_name), c("No", moderators$long_name), warn_missing = F)
+  trt <- mapvalues(trait, traits$short_name, traits$long_name, warn_missing = F)
+  ttl <- sprintf("Outcome = %s, %s Set, %s Moderation", o, trt, md) 
+  
+  ## load matched and unmatched data ##
+  d1 <- d %>%
+    mutate(m = map(m_file, m_read_fun),
+           um = map(um_file, um_read_fun)) %>%
+    select(-m_file, -year, -um_file) 
+  
+  ## clean matched data ##
+  m <- d1 %>% 
+    mutate(m = map2(m, um, ~(.x) %>% left_join(.y %>% select(-o_value)))) %>%
+    select(-um) %>%
+    mutate(type = "Matched",
+           m = map(m, ~(.) %>% 
+                   gather(variable, value, -SID, -o_value, -distance) %>%
+                   select(-SID, -distance) %>% 
+                   group_by(o_value, variable) %>% 
+                   nest() %>% ungroup() %>% 
+                   spread(o_value, data))) %>%
+    unnest(m) %>%
+    
+    ## calculate cohen's d ##
+    
+    mutate(d = map2_dbl(`0`, `1`, cohens_d)) %>%
+    select(-`0`, -`1`)
+  
+  ## clean unmatched data ##
+  um <- d1 %>% 
+    select(study, imp, um) %>% 
+    mutate(type = "Unmatched",
+           um = map(um, ~(.) %>% 
+                   gather(variable, value, -SID, -o_value) %>%
+                   select(-SID) %>% 
+                   group_by(o_value, variable) %>% 
+                   nest() %>% ungroup() %>% 
+                   spread(o_value, data))) %>%
+    unnest(um) %>%
+    
+    ## calculate cohen's d ##
+    
+    mutate(d = map2_dbl(`0`, `1`, cohens_d)) %>%
+    select(-`0`, -`1`)
+  
+  ## join together d's and plot them for all studies ##
+  std <- ceiling(length(unique(um$study))/2)
+  p <- um %>% full_join(m) %>%
+    group_by(study, variable, type) %>%
+    summarize(d = mean(d, na.rm = T)) %>%
+    ungroup() %>%
+    mutate(study = mapvalues(study, studies, studies_long, warn_missing = F)) %>%
+    filter(!variable %in% c(mod, "yearBrth")) %>%
+    ggplot(aes(x = variable, y = d)) +
+      scale_shape_manual(values = c(19,1)) +
+      scale_y_continuous(limits = c(-1.5, 1.5), breaks = seq(-1, 1, 1)) +
+      geom_hline(aes(yintercept = 0), linetype = "dashed", size = .25) +
+      geom_point(aes(shape = type), size = 1.5) +
+      labs(y = "Cohen's d", x = NULL, shape = NULL, title = ttl) +
+      facet_wrap(study~., ncol = 2, scales = "free") +
+      theme_classic() +
+      theme(legend.position = "bottom"
+            , axis.text.x = element_text(face = "bold", size = rel(.7), angle = 45, hjust = 1)
+            , axis.text.y = element_text(face = "bold", size = rel(1.2))
+            , axis.title = element_text(face = "bold", size = rel(1.2)),
+          strip.text = element_text(face = "bold")
+          , plot.title = element_text(face = "bold", size = rel(1.2), hjust = .5)
+          , legend.text = element_text(face = "bold")
+          , legend.title = element_text(face = "bold", size = rel(1.2)))
+  ggsave(p, filename = sprintf("%s/results/psm/bal_plots/%s/%s_%s.pdf", wd, mod, outcome, trait), width = 10, height = 2.5*std)
+  # ggsave(p, filename = sprintf("%s/results/psm/bal_plots/png/%s_%s_%s.png", wd, mod, outcome, trait), width = 10, height = 2.5*std)
+  return(T)
+} 
+```
+
+### Run  
+Run the above functions to create the balance tables and plots.  
+```{r psm raw and matched}
+# unmatched data
+psm_unmatched <- tibble(um_file = list.files(sprintf("%s/data/psm_raw", wd))) %>%
+  separate(um_file
+           , c("study", "year", "Outcome", "Trait", "imp")
+           , sep = "_"
+           , remove = F) %>%
+  mutate(imp = str_remove_all(imp, "[A-Z a-z .]"))
+psm_unmatched
+
+# matched data
+psm_matched <- tibble(m_file = list.files(sprintf("%s/data/psm_matched", wd))) %>%
+  separate(m_file
+           , c("study","Trait", "Outcome", "year", "imp", "Moderator")
+           , sep = "_"
+           , remove = F) %>%
+  mutate(Moderator = str_remove_all(Moderator, ".RData"))
+psm_matched
+```
+
+#### Balance Tables  
+```{r balance tables, eval = F}
+# load the balance plots and render them as html
+tibble(file = list.files(sprintf("%s/results/psm/bal_tabs/", wd))) %>%
+  separate(file
+           , c("study", "Trait", "Outcome", "Year", "imp", "Moderator")
+           , remove = F
+           , sep = "_") %>%
+  filter(complete.cases(.)) %>%
+  mutate(Moderator = str_remove(Moderator, ".RData"),
+         pmap(list(file, Trait, Outcome, study, Moderator, imp, Year)
+         , bal_tab_fun))
+```
+
+```{r sample balance table}
+xfun::embed_file(sprintf("%s/results/psm/bal_tabs_html/GSOEP_2005_physhlthevnt_C_none_1.html", wd))
+```
+
+#### Balance Plots  
+Run the code to create the balance plots.  
+```{r psm comb}
+psm_comb <- psm_matched %>% 
+  left_join(psm_unmatched) %>%
+  group_by(Trait, Outcome, Moderator) %>%
+  nest() %>%
+  ungroup()
+```
+
+
+```{r bal plots, eval = F}
+plan(multisession(workers = 4L))
+res <- psm_comb %>%
+  full_join(done) %>% 
+  filter(is.na(done)) %>%
+  mutate(res = future_pmap(list(data, Outcome, Trait, Moderator)
+                     , possibly(plot_fun, NA_real_)
+                     , .progress = T
+                     , .options = future_options(
+                       globals = c("cohens_d", "m_read_fun", "um_read_fun",
+                                   "traits", "outcomes", "moderators",
+                                   "studies", "studies_long", "wd", "not_factor")
+                       , packages = c("plyr", "tidyverse"))
+                     ))
+closeAllConnections()
+```
+
+## Part 4: Descriptives  
+Next, let's get the descriptives of the matched and unmatched samples, including sample sizes, average age and gender breakdown.  
+
+Because there are so many different sets, I'll create separate tables for each outcome that includes info for each study and trait. But for the manuscript, I'll also create a table that has ranges for each outcome across traits for simplicity.  
+```{r psm desc funs}
+# slightly different function for unnmatched data reading
+# in order to incorporate age and gender.
+um_read_fun <- function(file){
+  load(sprintf("%s/data/psm_raw/%s", wd, file))
+  x %>% tbl_df %>% 
+    mutate(o_value = as.numeric(as.character(o_value)),
+           age = as.numeric(as.character(age))) %>%
+    select(SID, o_value, age, gender) 
+} 
+
+desc_fun <- function(d, outcome){
+  o <- mapvalues(outcome, outcomes$short_name, outcomes$long_name, warn_missing = F)
+  # read in the matched and unmatched data
+  d1 <- d %>%
+    mutate(m = map(m_file, m_read_fun),
+           um = map(um_file, um_read_fun)) %>%
+    select(-m_file, -year, -um_file) 
+  
+  ## clean matched data ##
+  m <- d1 %>% 
+    mutate(m = map2(m, um, ~(.x) %>% left_join(.y %>% select(-o_value)))) %>%
+    select(-um) %>%
+    unnest(m) %>%
+    mutate(type = "Matched")
+  
+  ## clean unmatched data ##
+  um <- d1 %>%  
+    select(-m) %>% 
+    unnest(um) %>%
+    mutate(type = "Unmatched")
+  
+  rm(d1)
+  
+  d1 <- m %>% 
+    full_join(um %>% mutate(o_value = factor(o_value))) 
+  # sample sizes of matched and unmatched samples
+  d1 %>%
+    group_by(study, Trait, o_value, type) %>%
+    tally() %>%
+    ungroup() %>%
+    spread(o_value, n) %>%
+    mutate(freq = sprintf("%i (%i)", `0`, `1`)) %>%
+    select(study, Trait, type, freq) %>%
+  # percentages of gender
+    full_join(
+      d1 %>% filter(!is.na(gender)) %>%
+        group_by(study, Trait, type, gender) %>%
+        summarize(Gender = n()) %>% 
+        group_by(study, Trait, type) %>%
+        summarize(Gender = (Gender[gender == 1]/(sum(Gender))*100))
+  # mean and sd of age
+      ) %>% full_join(
+      d1 %>% group_by(study, Trait, type) %>%
+        summarize_at(vars(age), lst(m = mean, sd = sd), na.rm = T) %>%
+        ungroup() 
+      ) %>%
+    # spread out for the table
+    pivot_wider(values_from = c("freq", "Gender", "m", "sd")
+                , names_from = "type"
+                , names_sep = "_") %>%
+    # reorder the columns
+    select(study, Trait, contains("freq"), contains("m_"), contains("sd"), contains("gender")) %>%
+    # reformat the Trait names
+    mutate(Trait = factor(Trait, levels = traits$short_name, labels = traits$long_name)) %>%
+    arrange(study, Trait) %>% # reorder the rows
+    # create this wild table
+    kable(.
+          , "html"
+          , digits = 1
+          , col.names = c("Study", "Trait", rep(c("Matched", "Raw"), times = 4))
+          , align = c("r", "r", rep("c", 8))
+          , caption = sprintf("Descriptive Statistics of Matched and Raw Samples for Those Who Experienced %s", o)) %>% 
+    kable_styling(full_width = F) %>%
+    collapse_rows(1, valign = "top") %>%
+    add_header_above(c(" " = 2, "Frequency" = 2, "M" = 2, "SD" = 2, "% Women" = 2)) %>%
+    add_header_above(c(" " = 4, "Age at Baseline" = 4, " " = 2)) %>%
+    footnote("Frequency = Experienced (Did not Experience); M = Mean age at baseline; SD = Standard deviation of age at baseline"
+             , escape = F) %>%
+    save_kable(., file = sprintf("%s/results/psm/descriptives/%s.html", wd, outcome))
+  
+  # return the range of sample sizes for each study and outcome.
+  d2 <- d1 %>%
+    group_by(study, Trait, o_value, type) %>%
+    tally() %>%
+    ungroup() %>%
+    group_by(study, o_value, type) %>%
+    summarize_at(vars(n), lst(min, max), na.rm = T) %>%
+    mutate(range = sprintf("%i-%i", min, max)) %>%
+    ungroup() %>%
+    select(-min, -max) %>%
+    spread(o_value, range) %>%
+    mutate(freq = sprintf("%s (%s)", `0`, `1`)) %>%
+    select(study, type, freq) %>%
+    full_join(
+      d1 %>% filter(!is.na(gender)) %>%
+        group_by(study, Trait, type, gender) %>%
+        summarize(Gender = n()) %>% 
+        group_by(study, Trait, type) %>%
+        summarize(Gender = (Gender[gender == 1]/(sum(Gender))*100)) %>%
+        group_by(study, type) %>%
+        summarize_at(vars(Gender), lst(min, max), na.rm = T) %>%
+        mutate(Gender = sprintf("%.1f-%.1f", min, max)) %>%
+        ungroup() %>%
+        select(-min, -max)
+      ) %>% full_join(
+      d1 %>% group_by(study, Trait, type) %>%
+        summarize_at(vars(age), lst(m = mean, sd = sd), na.rm = T) %>%
+        ungroup() %>%
+        group_by(study, type) %>%
+        summarize_at(vars(m, sd), lst(min, max), na.rm = T) %>%
+        mutate(m = sprintf("%.1f-%.1f", m_min, m_max),
+               sd = sprintf("%.1f-%.1f", sd_min, sd_max)) %>%
+        ungroup() %>%
+        select(-m_min, -m_max, -sd_max, -sd_min)
+      ) %>%
+    pivot_wider(values_from = c("freq", "Gender", "m", "sd")
+                , names_from = "type"
+                , names_sep = "_") %>%
+    select(study, contains("freq"), contains("m_"), contains("sd"), contains("Gender")) 
+    rm(d1)
+    gc()
+    return(d2)
+}
+```
+
+
+```{r psm desc tables, eval = F}
+# run the descriptives table functions
+plan(multisession(workers = 5L))
+psm_comb <- psm_matched %>% 
+  filter(Moderator == "none"  & imp == 1) %>%
+  left_join(psm_unmatched) %>%
+  group_by(Outcome, Moderator) %>%
+  nest() %>%
+  ungroup() %>%
+  mutate(data = future_map2(data, Outcome
+                     , possibly(desc_fun, NA_real_)
+                     , .options = future_options(
+                       globals = c("m_read_fun", "um_read_fun", "traits",
+                                   "outcomes", "studies", "studies_long",
+                                   "wd", "not_factor")
+                       , packages = c("plyr", "tidyverse", "kableExtra", "knitr"))
+                     ))
+closeAllConnections()
+save(psm_comb, file = sprintf("%s/results/psm/descriptives/psm_comb.RData", wd))
+```
+
+```{r range table}
+load(sprintf("%s/results/psm/descriptives/psm_comb.RData", wd))
+psm_comb %>%
+  select(-Moderator) %>%
+  mutate(Outcome = factor(Outcome, levels = outcomes$short_name, labels = outcomes$long_name)) %>%
+  # arrange(Outcome)
+  unnest(data) %>%
+  arrange(Outcome, study) %>%
+  select(-Outcome) %>%
+  kable(.
+          , "html"
+          , digits = 1
+          , col.names = c("Study", rep(c("Matched", "Raw"), times = 4))
+          , align = c("r", rep("c", 8))
+          , caption = sprintf("Descriptive Statistics of Matched and Raw Samples for Those Who Experienced Outcomes")) %>% 
+    kable_styling(full_width = F) %>%
+    add_header_above(c(" " = 1, "Frequency" = 2, "M" = 2, "SD" = 2, "% Women" = 2)) %>%
+    add_header_above(c(" " = 3, "Age at Baseline" = 4, " " = 2)) %>%
+    kableExtra::group_rows("Mortality", 1, 8, label_row_css = NULL) %>%
+    kableExtra::group_rows("Major Health Event", 9, 18, label_row_css = NULL) %>%
+    kableExtra::group_rows("Mental Health Event", 19, 28, label_row_css = NULL) %>%
+    kableExtra::group_rows("Child Birth", 29, 36, label_row_css = NULL) %>%
+    kableExtra::group_rows("Move in with a partner", 37, 44, label_row_css = NULL) %>%
+    kableExtra::group_rows("Marriage", 45, 53, label_row_css = NULL) %>%
+    kableExtra::group_rows("Divorce", 54, 63, label_row_css = NULL) %>%
+    kableExtra::group_rows("Child Moves Out", 64, 67, label_row_css = NULL) %>%
+    kableExtra::group_rows("Higher Education", 68, 76, label_row_css = NULL) %>%
+    kableExtra::group_rows("First Job", 77, 81, label_row_css = NULL) %>%
+    kableExtra::group_rows("Unemployment", 82, 91, label_row_css = NULL) %>%
+    kableExtra::group_rows("Retirement", 92, 99, label_row_css = NULL) %>%
+    kableExtra::group_rows("Volunteering", 100, 107, label_row_css = NULL) %>%
+    kableExtra::group_rows("Criminality", 108, 110, label_row_css = NULL) %>%
+    
+    footnote("All results presented as a range. Frequency = Experienced (Did not Experience); M = Mean age at baseline; SD = Standard deviation of age at baseline"
+             , escape = F) %>%
+    save_kable(., file = sprintf("%s/results/psm/descriptives/ranges.html", wd))
+```
+

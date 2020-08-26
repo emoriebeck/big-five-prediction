@@ -1,0 +1,146 @@
+--- 
+title: "A Mega-Analysis of Personality Predictions: Robustness and Boundary Conditions"
+author: 
+  - name: "Emorie D. Beck"
+    affiliation: "Feinberg School of Medicine"
+  - name: "Joshua J. Jackson"
+    affiliation: "Washington University in St. Louis"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+documentclass: book
+bibliography: [book.bib, packages.bib]
+biblio-style: apalike
+delete_merged_file: false
+description: "Decades of studies identify personality traits as an important predictor of life outcomes. However, previous investigations of personality-outcome associations have not taken a principled approach to covariate use or other sampling strategies to ensure the robustness of personality-outcome associations. The result is that it is unclear (1) whether personality predicts important outcomes after accounting for a range of background variables, (2) for whom and when personality predictions hold, and 3) for which background variables are most important to account. The present study examines the robustness and boundary conditions of personality prediction using the Big Five to predict 14 health, social, education/work, and societal life outcomes across eight different person- and study-level moderators in 10 longitudinal panel studies in a mega-analytic framework. Robustness and boundary conditions were systematically tested using two approaches: propensity score matching and specification curve analysis. Across 26/70 propensity score matched models and 37/70 specification curve models, personality traits were a robust predictor of outcomes. Main effects of personality traits were predominant, with few moderators of personality-outcome associations. However, such robustness was differential across covariates in nearly half of the tested models, with the inclusion or not inclusion of some of these flipping the direction of association. In sum, personality is a powerful predictor of life outcomes with few moderated associations. However, researchers need to be careful in their choices of covariates. We discuss how these findings can inform the pathways by which personality has effects, as well as recommendations for covariate inclusion."
+editor_options: 
+  chunk_output_type: console
+---
+
+# Workspace  
+## Packages  
+
+```{r, echo = F}
+knitr::opts_chunk$set(echo = TRUE, warning = F, message = F, error = F)
+options(knitr.kable.NA = '')
+```
+
+
+```{r, echo = F}
+load_url <- function (url, ..., sha1 = NULL) {
+  # based very closely on code for devtools::source_url
+  stopifnot(is.character(url), length(url) == 1)
+  temp_file <- tempfile()
+  on.exit(unlink(temp_file))
+  request <- httr::GET(url)
+  httr::stop_for_status(request)
+  writeBin(httr::content(request, type = "raw"), temp_file)
+  file_sha1 <- digest::digest(file = temp_file, algo = "sha1")
+  if (is.null(sha1)) {
+    message("SHA-1 hash of file is ", file_sha1)
+  }
+  else {
+    if (nchar(sha1) < 6) {
+      stop("Supplied SHA-1 hash is too short (must be at least 6 characters)")
+    }
+    file_sha1 <- substr(file_sha1, 1, nchar(sha1))
+    if (!identical(file_sha1, sha1)) {
+      stop("SHA-1 hash of downloaded file (", file_sha1, 
+           ")\n  does not match expected value (", sha1, 
+           ")", call. = FALSE)
+    }
+  }
+  load(temp_file, envir = .GlobalEnv)
+}
+
+```
+
+
+```{r packages}
+library(knitr)
+library(kableExtra)
+library(readxl)
+library(psych)
+library(brms)
+library(mice)
+library(fixest)
+library(parallel)
+library(MuMIn)
+library(MatchIt)
+library(haven)
+library(broom.mixed)
+library(rstan)
+library(tidybayes)
+library(shiny)
+library(plyr)
+library(tidyverse)
+library(furrr)
+```
+
+
+## Directory Path  
+```{r path}
+# res_path <- "https://github.com/emoriebeck/big-five-prediction/blob/master"
+res_path <- "~/Box/network/other projects/big 5 prediction"
+wd <- "/Volumes/Emorie Beck/projects/selection"
+```
+
+## Codebook  
+Each study has a separate codebook indexing matching, covariate, personality, and outcome variables. Moreover, these codebooks contain information about the original scale of the variable, any recoding of the variable (including binarizing outcomes, changing the scale, and removing missing data), reverse coding of scale variables, categories, etc.  
+```{r codebook}
+# list of all codebook sheets
+sheets <- sprintf("%s/codebooks/master_codebook_01.24.20.xlsx", res_path) %>% excel_sheets()
+
+# function for reading in sheets
+read_fun <- function(x){
+  sprintf("%s/codebooks/master_codebook_01.24.20.xlsx", res_path) %>% read_xlsx(., sheet = x)
+}
+
+# read in sheets and index source
+codebook <- tibble(
+  study = sheets,
+  codebook = map(study, read_fun)
+)
+
+## short and long versions of names of all categories for later use
+studies <- c("addhealth", "bhps", "gsoep", "hilda", "hrs", "liss", "midus", "nlsy", "shp", "wls")
+studies_long <- c("Add Health", "BHPS", "GSOEP", "HILDA", "HRS", "LISS", "MIDUS", "NLSY", "SHP", "WLS")
+
+traits <- codebook$codebook[[2]] %>% filter(category == "pers") %>% 
+  select(long_name = Construct, short_name = name)
+
+outcomes <- codebook$codebook[[2]] %>% filter(category == "out") %>%
+  select(long_name = Construct, short_name = name)
+
+moderators <- codebook$codebook[[2]] %>% filter(category == "mod") %>%
+  select(long_name = Construct, short_name = name, breaks, mod, mod_name)
+```
+
+
+## Other Supporting Documents  
+```{r other docs}
+# used personality waves 
+p_waves <- sprintf("%s/codebooks/personality_waves.xlsx", res_path) %>% read_xlsx()
+# used covariates for specifications 
+specifications <- sprintf("%s/codebooks/specifications.xlsx", res_path) %>% read_xlsx()
+# coded specificatoin curve results
+spec_summ <- sprintf("%s/results/sca/SCA_summary.xlsx", res_path) %>% read_xlsx()
+
+# occupation code converters 
+occ90to00 <- sprintf("%s/codebooks/occ_90-00.xls", res_path) %>% read_xls() %>% mutate_at(vars(OCC90, OCC00), as.numeric)
+occ70to90 <- sprintf("%s/codebooks/occ1970_occ1990dd.dta", res_path) %>% read_dta() %>%
+  setNames(c("OCC70", "OCC90"))
+occ80to90 <- sprintf("%s/codebooks/occ1980_occ1990dd.dta", res_path) %>% read_dta() %>%
+  setNames(c("OCC80", "OCC90"))
+
+# npb codes for ses
+npb <- sprintf("%s/codebooks/npb.xlsx", res_path) %>% read_xlsx() %>% 
+  setNames(c("OCC00", "NPB", "desc"))
+```
+
+
+```{r include=FALSE}
+# automatically create a bib database for R packages
+knitr::write_bib(c(
+  .packages(), 'bookdown', 'knitr', 'rmarkdown'
+), 'packages.bib')
+```

@@ -1,0 +1,1114 @@
+# PSM Models {#PSM Mods}  
+Now that the propensity score matching procedure and balance has run, we can set up the final data sets, run the models, recompile across imputations, and create the tables and figures. 
+
+## Part 5: Data Setup  
+### Personality
+```{r psm mod pers data, eval = F}
+loadRData <- function(fileName, type){
+#loads an RData file, and returns it
+    path <- sprintf("%s/data/clean/%s_cleaned.RData", wd, fileName)
+    load(path)
+    get(ls()[grepl(type, ls())])
+}
+
+psm_pers <- tibble(study = studies) %>%
+  mutate(data = map(study, ~loadRData(., "pers")),
+         data = map(data, ~(.) %>% ungroup() %>% mutate(year = as.numeric(year), SID = as.character(SID))),
+         study = mapvalues(study, studies, studies_long)) %>%
+  unnest(data) %>%
+  filter(!is.na(name) & !is.na(value)) %>%
+  full_join(p_waves %>% select(study = Study, name = p_item, Used)) %>%
+  filter(year == Used) %>%
+  select(study:value) %>%
+  rename(Trait = name, p_value = value)
+psm_pers
+```
+
+### Moderators  
+```{r psm moderators, eval = F}
+mod_data <- tibble(study = studies) %>%
+  mutate(data = map(study, ~loadRData(., "alpha")),
+         data = map(data, ~(.) %>% ungroup() %>% mutate(year = as.numeric(year))),
+         study = mapvalues(study, studies, studies_long)) %>%
+  unnest(data) %>%
+  mutate(alpha = map(alpha, possibly(~(.)$total[[1]], NA_real_))) %>% 
+  filter(!is.na(name)) %>%
+  select(study, p_item = name, year, alpha) %>%
+  unnest(alpha) %>% 
+  full_join(p_waves %>% select(p_item, study = Study, Used, predInt)) %>%
+  filter(year == Used) %>% 
+  select(-Used) %>%
+  rename(Trait = p_item, reliability = alpha)
+
+mod_data <- tibble(study = studies) %>%
+  mutate(data = map(study, ~loadRData(., "SCA")),
+         data = map(data, ~(.) %>% ungroup() %>% mutate(p_year = as.numeric(p_year), SID=as.character(SID)) %>% select(SID, year = p_year, age, gender, one_of(c("parEdu", "grsWages", "parOccPrstg", "race")))),
+         study = mapvalues(study, studies, studies_long)) %>%
+  unnest(data) %>%
+  full_join(mod_data)
+mod_data
+```
+
+### Outcomes  
+#### Matched  
+```{r psm matched data, eval = F}
+factor_fun <- function(x){if(is.numeric(x)){diff(range(x, na.rm = T)) %in% 1:2} else{F}}
+
+read_fun <- function(file){
+  load(sprintf("%s/data/psm_matched/%s", wd, file))
+  d %>% select(SID, o_value) %>% as_tibble() %>%
+    mutate(o_value = as.numeric(as.character(o_value)),
+           o_value = ifelse(o_value > 1, 1, o_value))
+}  
+
+merge_fun <- function(df3, Study, df){
+  df %>% filter(study == Study) %>% select(-year) %>%
+    full_join(df3) %>% select(-study) %>%
+    filter(!is.na(o_value) & !is.na(p_value)) 
+}
+
+combine_fun <- function(df2, outcome, mod, trait, df){
+  # plan(multisession)
+  df_l <- df2 %>% 
+    mutate(data = map(file, read_fun),
+           data = pmap(list(df3 = data, Study = study, df = list(df)), merge_fun)) %>%
+    select(-file, -year) %>%
+    group_by(imp) %>%
+    nest() %>%
+    ungroup() %>%
+    mutate(data = map(data, ~(.) %>% unnest(data)),
+           data = map(data, clean_fun))
+  df_l <- df_l$data
+  save(df_l, file = sprintf("%s/data/psm_combined/%s_%s_%s.RData", wd, outcome, trait, mod))
+  rm(list = c("df2", "df_l"))
+  gc()
+}
+
+clean_fun <- function(df4){
+  df4 <- df4 %>% 
+    mutate_if(factor_fun, as.factor) %>%
+    mutate(o_value = as.numeric(as.character(o_value))) %>%
+    group_by(study) %>%
+    mutate_at(vars(p_value, parOccPrstg, grsWages), 
+            ~((. - min(., na.rm = T))/(max(., na.rm = T) - min(., na.rm = T))*10)) %>%
+    mutate(age = scale(age, center = T, scale = F)) %>%
+    ungroup() %>%
+    mutate_if(is.numeric, ~ifelse(is.infinite(.), NA, .)) 
+  
+  std <- df4 %>%
+        group_by(study, o_value) %>%
+        tally() %>%
+        full_join(crossing(study = unique(.$study), o_value = c(0,1)))
+  std <- unique(std$study[std$n < 8 | is.na(std$n)])
+  df4 <- df4 %>%
+    filter(!study %in% std) 
+}
+
+
+out_data_fun <- function(trait, df){
+  print(trait)
+  plan(multisession(workers = 6L))
+  df1 <- df %>% select(study, p_year = year) %>% distinct() %>%
+    mutate(file = map(study, ~list.files(sprintf("%s/data/psm_matched", wd), pattern = .))) %>%
+    select(-study) %>%
+    unnest(file) %>%
+    separate(file, c("study","Trait", "Outcome", "year", "imp", "Moderator"), sep = "_", remove = F) %>%
+    group_by(study, Trait, Outcome, year, Moderator) %>%
+    filter(n() == 5) %>%
+    ungroup() %>%
+    filter(!is.na(Moderator)) %>%
+    filter(Outcome == "retired") %>%
+    filter(p_year == year & Trait == trait) %>% select(-p_year) %>%
+    mutate(Moderator = str_remove_all(Moderator, ".RData")) %>%
+    group_by(Moderator, Outcome, Trait) %>%
+    nest() %>%
+    ungroup() %>%
+    mutate(data = future_pmap(
+      list(df2 = data, outcome = Outcome, mod = Moderator, trait = Trait, df = list(df))
+      , combine_fun
+      , .options = future_options(
+        globals = c("clean_fun", "combine_fun", "factor_fun",
+                    "loadRData", "merge_fun", "read_fun","wd")
+        , packages = c("plyr", "tidyverse"))))
+  closeAllConnections()
+  return(T)
+}
+# plan(multisession(workers = 5L))
+psm_data <- psm_pers %>%
+  full_join(mod_data) %>%
+  filter(!is.na(p_value) & !is.na(Trait)) %>%
+  group_by(Trait) %>%
+  nest() %>%
+  ungroup() %>%
+  filter(Trait == "LOC") %>%
+  mutate(data = map2(Trait, data, out_data_fun))
+closeAllConnections()
+```
+
+
+## Part 6: Models  
+### Matched Model Function  
+```{r mod matched}
+brms_matched_fun <- function(outcome, trait, mod){
+  # load data 
+  m <- if(mod == "SES") c("parEdu", "grsWages", "parOccPrstg")  else mod
+  d <- if(mod %in% c("reliability", "predInt")){"none"} else mod
+  load(sprintf("%s/data/psm_combined/%s_%s_%s.RData", wd, outcome, trait, d))
+  
+  df_l <- map(df_l, ~(.) %>% select(study, SID, p_value, o_value, one_of(d)) %>%
+                filter(complete.cases(.)))
+  
+  # set priors
+  Prior <-  c(set_prior("cauchy(0,1)", class = "sd"))
+  
+  # formula 
+  if(mod == "none"){f <- formula(o_value ~ p_value + (p_value | study))}
+  else if(mod %in% c("reliability", "predInt")){f <- formula(paste("o_value ~ p_value + ", paste("p_value*", m, collapse = " + "), " + (p_value | study)", sep = ""))}
+  else {f <- formula(paste("o_value ~ p_value + ", paste("p_value*", m, collapse = " + "), "+ (", paste("p_value*", m, collapse = " + "), " | study)", sep = ""))}
+  # run the model 
+  Iter <- 2000; Warmup <- 1000; treedepth <- 20
+  
+  start.tmp <- Sys.time()
+  fit2 <- brm_multiple(formula = f
+             , data = df_l
+             , prior = Prior
+             , iter = Iter
+             , warmup = Warmup
+             , family = binomial(link = "logit")
+             , control = list(adapt_delta = 0.99, max_treedepth = treedepth)
+             , cores = 4)
+  print(end.tmp <- Sys.time() - start.tmp)
+  
+  # extract key parameters
+  # fixed effects
+  fx <- fixef(fit, probs = c(0.055, 0.945)) %>% data.frame %>% 
+    rownames_to_column("names") %>%
+    mutate_at(vars(-names), lst(OR = inv_logit_scaled)) %>%
+    as_tibble 
+  # random effects
+  rx <- ranef(fit, probs = c(0.055, 0.945))[[1]] %>% array_tree(3) %>% 
+    tibble(names = names(.), data = .) %>% 
+    mutate(data = map(data, ~(.) %>% data.frame %>% 
+      rownames_to_column("study"))) %>% 
+    unnest(data) %>%
+    mutate_at(vars(-names, -study), lst(OR = inv_logit_scaled)) %>%
+    as_tibble
+  
+  
+  
+  # samples
+  fx.draws <- fit %>% tidy_draws() %>% 
+    select(.chain:.draw, matches("^b_"), matches("p_value]$")) %>%
+    mutate_at(vars(matches("p_value]$")), ~(.) + b_p_value) %>%
+    gather(key = item, value = s_value, -(.chain:.draw))
+  
+  tau.draws <- fit %>% tidy_draws() %>% 
+    select(.chain:.draw, matches("^sd"), matches("^cor"))
+  
+  if(mod != "none"){
+    pred.fx <- fx_pred_fun(fit, m)
+    pred.rx <- rx_pred_fun(fit, m)
+    save(pred.fx, pred.rx, file = sprintf("/scratch/edbeck/psm/predicted/pred_%s_%s_%s", trait, outcome, mod))
+  }
+  
+  save(fit, file = sprintf("/scratch/edbeck/psm/models/matched_%s_%s_%s", trait, outcome, mod))
+  save(fx, rx, file = sprintf("/scratch/edbeck/psm/summary/matched_%s_%s_%s", trait, outcome, mod))
+  save(fx.draws, tau.draws, file = sprintf("/scratch/edbeck/psm/draws/matched_%s_%s_%s", trait, outcome, mod))
+  rm(list("fit", "fx", "rx", "fx.draws", "rx.draws", "df"))
+  gc()
+}
+```
+
+### Setup Cluster Jobs  
+```{r setup cluster, eval = F}
+jobs_nested <- crossing(
+  Trait = unique(p_waves$p_item), 
+  Outcome = (codebook$codebook[[2]] %>% filter(category == "out"))$name,
+  Moderator = c("none", "gender","race", "age", "reliability", "predInt", "parEdu", "grsWages", "parOccPrstg"), 
+  chain = c(1:5)
+)
+
+done <- tibble(file = list.files(sprintf("%s/results/psm/matched/models", wd))) %>% 
+  separate(file, c("scrap", "Trait", "Outcome", "Moderator", "chain"), sep = "_") %>%
+  select(-scrap) %>%
+  mutate(done = "done",
+         chain = as.numeric(str_remove(chain, ".RData"))) 
+
+jobs_nested <- jobs_nested %>%
+  full_join(done) %>%
+  filter(is.na(done)) %>%
+  select(-done)
+```
+
+#### The Cluster  
+```{r, eval = F, echo = F}
+# none goes to old_pe8
+# replace later
+# http://64.227.68.208:8787
+# http://157.245.139.181:8787
+# http://161.35.82.145:8787
+jobs_nested %>% 
+  filter(Moderator %in% c("predInt")) %>%
+  mutate(cores = 8) %>%
+  arrange(Moderator) %>%
+  # filter(row_number() %in% 1:75) %>%
+  write.table(., file = sprintf("%s/scripts/psm_cluster/args/psm_matched_args_old_pe8.txt", wd),  row.names = F, col.names = F)
+
+#pe_8
+jobs_nested %>% 
+  filter(Moderator %in% c("reliability")) %>%
+  mutate(cores = 8) %>%
+  arrange(Moderator) %>%
+  # filter(row_number() %in% 76:136) %>%
+  write.table(., file = sprintf("%s/scripts/psm_cluster/args/psm_matched_args_pe8.txt", wd),  row.names = F, col.names = F)
+
+# http://161.35.82.112:8787
+# http://159.89.87.77:8787
+# http://165.227.193.101:8787
+jobs_nested %>% 
+  mutate(cores = 4) %>%
+  arrange(Outcome) %>%
+  # filter(!row_number() %in% 1:100) %>% 
+  write.table(., file = sprintf("%s/scripts/psm_cluster/args/psm_matched_args_pe4.txt", wd),  row.names = F, col.names = F)
+```
+
+## Part 7: Compile Cluster Jobs  
+### Moderator Predicted Values  
+Below are functions to get predicted values of moderated personality-outcome associations for both fixed effects and random effects.  
+```{r mod pred values}
+# fixed effect prediction function
+fx_pred_fun <- function(fits, m){
+  x <- lapply(m, function(x) {
+  cl <- class(fits$data[, x])
+
+  if(cl %in% c("numeric", "integer", "matrix")){
+  msd <- fits$data %>% 
+    select(one_of(x)) %>% 
+    as_tibble() %>%
+    summarize_all(lst(mean, sd))
+  
+  pred.fx <- crossing(
+    p_value = seq(0,10,.25)
+    , mod_value = with(msd, c(mean-sd, mean,mean+sd))
+    ) %>%
+    setNames(c("p_value", x))
+  } else {
+    pred.fx <- crossing(
+      p_value = seq(0,10,.25)
+      , mod_value = factor(levels(fits$data[, x]))
+    ) %>%
+    setNames(c("p_value", x))
+  }
+  })
+  
+  pred.fx <- if(length(x) > 1){x %>% reduce(full_join)} else {x[[1]]}
+    
+  pred.fx <- bind_cols(
+    pred.fx, 
+    fitted(fits
+           , newdata = pred.fx
+           , probs = c(0.055, 0.945)
+           , re_formula = NA
+           , scale = "linear") %>% data.frame
+    ) %>%
+    mutate_at(vars(Estimate, Q5.5, Q94.5), lst(OR = exp))
+}
+
+# short function  to get crossings of continuous personality and moderator levels
+crossing_fun <- function(df, mod){
+  pred.rx <- crossing(
+    p_value = seq(0,10,.25),
+    mod_value = with(df, c(mean-sd, mean,mean+sd))
+    ) %>%
+    setNames(c("p_value", mod))
+  return(pred.rx)
+}
+
+# function to get predicted values across random effects (studies)
+rx_pred_fun <- function(fits, m){
+  studies <- unique(fits$data$study)
+  x <- lapply(m, function(x) {
+   cl <- class(fits$data[, x])
+  
+  if(cl %in% c("numeric", "integer", "matrix")){
+    pred.rx <- fits$data %>% select(study, one_of(x)) %>% 
+      as_tibble() %>%
+      group_by(study) %>%
+      summarize_all(lst(mean, sd)) %>%
+      group_by(study) %>%
+      nest() %>%
+      ungroup() %>%
+      mutate(pred = map2(data, x, crossing_fun)) %>%
+      unnest(pred) %>%
+      select(-data)
+  } else {
+    pred.rx <- crossing(
+      study = studies
+      , p_value = seq(0,10,.25)
+      , mod_value = factor(levels(fits$data[, x]))
+    ) %>%
+      setNames(c("study", "p_value", x))
+  }
+  })
+  
+  pred.rx <- if(length(x) > 1){x %>% reduce(full_join)} else {x[[1]]}
+  
+  pred.rx <- bind_cols(
+    pred.rx, 
+    fitted(fits
+           , newdata = pred.rx
+           , probs = c(0.055, 0.945)
+           , scale = "linear"
+           ) %>% data.frame
+    ) %>%
+    mutate_at(vars(Estimate, Q5.5, Q94.5), lst(OR = exp))
+  return(pred.rx)
+}
+```
+
+### Compilation and Summary Function  
+Now that we have functions to get predicted values, the function below will load in each of the 5 imputations for a given trait-outcome-moderator combination, get fixed and random effects, Level 2 variances, predicted values (moderator models only), and fixed and random posterior draws.  
+```{r combine psm models}
+combine_fun <- function(trait, outcome, mod){
+  # get short moderator names
+  m <- if(mod == "SES") c("parEdu", "grsWages", "parOccPrstg")  else mod
+  d <- if(mod %in% c("reliability", "predInt")){"none"} else mod
+  # load in each of the models and change their class to both brmsfit and brmsfit_multiple
+  fits <- map(1:5, function(x){
+    load(sprintf("%s/results/psm/matched/models/matched_%s_%s_%s_%s.RData", wd, trait, outcome, mod, x))
+    class(fit) <- c("brmsfit_multiple", class(fit))
+    return(fit)})
+  
+  # combine models #
+  # get the rhat values
+  rhats <- map_df(fits, function(x)data.frame(as.list(rhat(x))))
+  # combined the models
+  fits <- combine_models(mlist = fits, check_data = FALSE)
+  # change the data name
+  fits$data.name <- "df_l"
+  # add in pooled rhats
+  fits$rhats <- rhats
+  # change the class
+  class(fits) <- c("brmsfit_multiple", class(fits))
+  
+  # extract key parameters
+  # fixed effects
+  fx <- fixef(fits, probs = c(0.055, 0.945)) %>% data.frame %>%
+    rownames_to_column("names") %>%
+    mutate_at(vars(-names), lst(OR = exp)) %>%
+    as_tibble()
+  # random effects
+  rx <- coef(fits, probs = c(0.055, 0.945))[[1]] %>% array_tree(3) %>%
+    tibble(names = names(.), data = .) %>%
+    mutate(data = map(data, ~(.) %>% data.frame %>%
+                        rownames_to_column("study"))) %>%
+    unnest(data) %>%
+    mutate_at(vars(-names, -study), lst(OR = exp)) %>%
+    as_tibble()
+  
+  # variance covariance matrix
+  vc <- VarCorr(fits, probs = c(0.055, 0.945))$study
+
+  # samples
+  # fixed 
+  fx.draws <- fits %>% tidy_draws() %>%
+    select(.chain:.draw, matches("^b_"), matches("p_value]$")) %>%
+    mutate_at(vars(matches("p_value]$")), ~(.) + b_p_value) %>%
+    gather(key = item, value = s_value, -(.chain:.draw))
+  # random
+  tau.draws <- fits %>% tidy_draws() %>%
+    select(.chain:.draw, matches("^sd"), matches("^cor"))
+
+  # if it's a moderator model, get and save predicted values
+  if(mod != "none"){
+    pred.fx <- fx_pred_fun(fits, m)
+    pred.rx <- rx_pred_fun(fits, m)
+    save(pred.fx, pred.rx, file = sprintf("%s/results/psm/matched/predicted/matched_pred_%s_%s_%s.RData", wd, trait, outcome, mod))
+    rm(list = c("pred.fx", "pred.rx"))
+  }
+# save variance covariance matrix, fixed and random summaries, 
+# and posterior draws to folders
+  save(vc, file = sprintf("%s/results/psm/matched/vc/matched_%s_%s_%s.RData", wd, trait, outcome, mod))
+  save(fx, rx, file = sprintf("%s/results/psm/matched/summary/matched_%s_%s_%s.RData", wd, trait, outcome, mod))
+  save(fx.draws, tau.draws, file = sprintf("%s/results/psm/matched/draws/matched_%s_%s_%s.RData", wd, trait, outcome, mod))
+  # remove objects from local enviornment and clean up the garbage
+  rm(list = c("fits", "fx", "rx", "fx.draws", "tau.draws"))
+  gc()
+}
+```
+
+### Run Compilation  
+```{r run combine psm models, eval = F}
+# get a list of models
+files <- list.files(sprintf("%s/results/psm/matched/models", wd))
+
+done <- tibble(file = list.files(sprintf("%s/results/psm/matched/summary", wd))) %>%
+  separate(file, c("scrap", "Trait", "Outcome", "Moderator"), sep = "_") %>%
+  mutate(Moderator = str_remove(Moderator, ".RData"), 
+         Done = "done")
+
+plan(multiprocess(workers = 5L))
+res <- tibble(file = files) %>%
+  separate(file, c("scrap", "Trait", "Outcome", "Moderator", "chain"), sep = "_") %>%
+  group_by(Trait, Outcome, Moderator) %>%
+  filter(n() == 5) %>%
+  ungroup() %>%
+  select(-scrap, -chain) %>%
+  distinct() %>%
+  full_join(done) %>%
+  filter(is.na(Done)) %>%
+  mutate(c = future_pmap(list(Trait, Outcome, Moderator)
+                         , safely(combine_fun)
+                         , .progress = T))
+closeAllConnections()
+```
+
+## Part 8: Tables and Plots    
+### Summaries  
+```{r load psm mod summaries}
+# short function for reading in model results
+load_fun <- function(file, ob){
+  load(sprintf("%s/results/psm/matched/summary/%s", res_path, file))
+  get(ls()[ls() == ob])
+}
+
+# load in fixed and random summaries
+fx_res <- tibble(file = list.files(sprintf("%s/results/psm/matched/summary", res_path))) %>%
+  separate(file, c("scrap", "Trait", "Outcome", "Moderator"), sep = "_", remove = F) %>%
+  mutate(Moderator = str_remove(Moderator, ".RData"),
+         fx = map(file, ~load_fun(., "fx")),
+         rx = map(file, ~load_fun(., "rx")))  %>%
+  select(-scrap, -file)
+
+# random effects summaries
+rx_res <- fx_res %>% select(-fx) %>% unnest(rx) 
+# fixed effect summaries
+fx_res <- fx_res %>% select(-rx) %>% unnest(fx) 
+
+# %s significant 
+cat(round(nrow(fx_res %>% filter(names == "p_value" & Moderator == "none") %>% filter(sign(Q5.5) == sign(Q94.5)))/70*100,2), "% of the tested unmoderated, matched personality-outcome associations were significant.", sep ="")
+
+sig_mod <- fx_res %>% 
+  filter(Moderator != "none" & 
+         grepl("p_value:", names) &
+         (sign(Q5.5) == sign(Q94.5))) %>%
+  select(Trait, Outcome, Moderator) %>% 
+  distinct() 
+
+cat(round(nrow(sig_mod)/(5*14*8)*100,2), "% of personality-outcome associations had reliable moderators effects.", sep = "")
+
+cat(round(nrow(fx_res %>% filter(names == "p_value:age" & Moderator == "age") %>% filter(sign(Q5.5) == sign(Q94.5)))/70*100,2), "% of the matched personality-outcome associations were significantly moderated by age.", sep ="")
+
+cat(round(nrow(fx_res %>% filter(names == "p_value:gender1" & Moderator == "gender") %>% filter(sign(Q5.5) == sign(Q94.5)))/70*100,2), "% of the matched personality-outcome associations were significantly moderated by gender", sep ="")
+
+cat(round(nrow(fx_res %>% filter(names == "p_value:race1" & Moderator == "race") %>% filter(sign(Q5.5) == sign(Q94.5)))/70*100,2), "% of the matched personality-outcome associations were significantly moderated by race (black v white)", sep ="")
+
+cat(round(nrow(fx_res %>% filter(names == "p_value:race2" & Moderator == "race") %>% filter(sign(Q5.5) == sign(Q94.5)))/70*100,2), "% of the matched personality-outcome associations were significantly moderated by race (other v white)", sep ="")
+
+cat(round(nrow(fx_res %>% filter(names == "p_value:parEdu1" & Moderator == "parEdu") %>% filter(sign(Q5.5) == sign(Q94.5)))/70*100,2), "% of the matched personality-outcome associations were significantly moderated by parental education (SES; college v HS or lower)", sep ="")
+
+cat(round(nrow(fx_res %>% filter(names == "p_value:parEdu2" & Moderator == "parEdu") %>% filter(sign(Q5.5) == sign(Q94.5)))/70*100,2), "% of the matched personality-outcome associations were significantly moderated by parental education (SES; beyond college v HS or lower)", sep ="")
+
+cat(round(nrow(fx_res %>% filter(names == "p_value:parOccPrstg" & Moderator == "parOccPrstg") %>% filter(sign(Q5.5) == sign(Q94.5)))/70*100,2), "% of the matched personality-outcome associations were significantly moderated by parental occupational prestige (SES)", sep ="")
+
+cat(round(nrow(fx_res %>% filter(names == "p_value:grsWages" & Moderator == "grsWages") %>% filter(sign(Q5.5) == sign(Q94.5)))/70*100,2), "% of the matched personality-outcome associations were significantly moderated by gross wages (SES)", sep ="")
+
+cat(round(nrow(fx_res %>% filter(names == "p_value:reliability" & Moderator == "reliability") %>% filter(sign(Q5.5) == sign(Q94.5)))/70*100,2), "% of the matched personality-outcome associations were significantly moderated by personality scale reliability", sep ="")
+
+cat(round(nrow(fx_res %>% filter(names == "p_value:predInt" & Moderator == "predInt") %>% filter(sign(Q5.5) == sign(Q94.5)))/70*100,2), "% of the matched personality-outcome associations were significantly moderated by the interval between personality and outcome measures", sep ="")
+
+## traits 
+
+
+cat(mapvalues((sig_mod %>% group_by(Trait) %>% tally() %>% arrange(desc(n)))$Trait[1], traits$short_name, traits$long_name, warn_missing =F), " was the most frequently moderated personality characteristic (", round((sig_mod %>% group_by(Trait) %>% tally() %>% arrange(desc(n)))$n[1]/(5*8)*100,2) ,"%), while ",  mapvalues((sig_mod %>% group_by(Trait) %>% tally() %>% arrange(n))$Trait[1], traits$short_name, traits$long_name, warn_missing =F), " was the least frequently moderated trait (", round((sig_mod %>% group_by(Trait) %>% tally() %>% arrange(n))$n[1]/(5*8)*100,2) ,"%).", sep = "")
+
+cat(mapvalues((sig_mod %>% group_by(Outcome) %>% tally() %>% arrange(desc(n)))$Outcome[1], outcomes$short_name, outcomes$long_name, warn_missing =F), " was the most frequently moderated outcome (", round((sig_mod %>% group_by(Outcome) %>% tally() %>% arrange(desc(n)))$n[1]/(5*8)*100,2) ,"%), while ",  mapvalues((sig_mod %>% group_by(Outcome) %>% tally() %>% arrange(n))$Outcome[1], outcomes$short_name, outcomes$long_name, warn_missing =F), " was the least frequently moderated outcome (", round((sig_mod %>% group_by(Outcome) %>% tally() %>% arrange(n))$n[1]/(5*8)*100,2) ,"%).", sep = "")
+```
+
+#### Plots  
+##### Study-Specific Forest Plots  
+The function below creates a plot for each outcome-moderator combination of mega-analytic and study-specific associations across traits and saves them to a folder.  
+```{r study specific forest plots, eval = F}
+plot_fun <- function(df, outcome, mod){
+  print(paste(outcome, mod))
+  o <- mapvalues(outcome, outcomes$short_name, outcomes$long_name, warn_missing = F)
+  m <- mapvalues(mod, moderators$mod, moderators$mod_name, warn_missing = F)
+  d <- round(max(abs(1-min(df$Estimate_OR)), abs(1-max(df$Estimate_OR))), 2)
+  lim <- if(mod == "none"){c(.68, 1.32)} else{c(1-d-(d/2.5), 1+d+(d/2.5))}
+  brk <- if(mod == "none"){seq(.75, 1.25, .25)} else{round(c(1-d-(d/5), 1, 1+d+(d/5)),2)}
+  lab <- if(mod == "none"){c(".75", "1", "1.25")} else{str_remove(round(c(1-d-(d/5), 1, 1+d+(d/5)),2), "^0")}
+  shapes <- c(15, 16, 17, 18)[1:length(unique(df$names))]
+  lt <- rep("solid", length(unique(df$names)))
+  titl <- if(mod == "none"){o} else {sprintf("%s: Personality x %s", o, m)}
+  leg <- if(length(unique(df$names)) > 1){"bottom"} else {"none"}
+  p <- df %>%
+    mutate(Q5.5_OR = ifelse(Q5.5_OR < lim[1], lim[1], Q5.5_OR),
+           Q94.5_OR = ifelse(Q94.5_OR > lim[2], lim[2], Q94.5_OR),
+           study = factor(study, levels = c("Overall", studies_long)),
+           Trait = factor(Trait, levels = traits$short_name, labels = traits$long_name)) %>%
+    ggplot(aes(x = study, y = Estimate_OR)) +
+      scale_y_continuous(limits = lim, breaks = brk, labels = lab) +
+      scale_size_manual(values = c(2.5, 1.5)) +
+      scale_shape_manual(values = shapes) + 
+      scale_color_manual(values = c("blue", "black")) +
+      scale_linetype_manual(values = lt) +
+      geom_hline(aes(yintercept = 1), linetype = "dashed") +
+      geom_errorbar(aes(ymin = Q5.5_OR, ymax = Q94.5_OR, linetype = names)
+                    , width = 0
+                    , position = position_dodge(width = .9)) + 
+      geom_point(aes(color = type, size = type, shape = names)
+                    , position = position_dodge(width = .9)) +
+      labs(x = NULL, y = "Odds Ratio", title = titl) +
+      facet_wrap(~Trait, scales = "free_y", nrow = 3) +
+      coord_flip() +
+      theme_classic() +
+      theme(legend.position = leg,
+            plot.title = element_text(face = "bold", size = rel(1.2), hjust = .5),
+            strip.background = element_rect(fill = "black"),
+            strip.text = element_text(face = "bold", color = "white"),
+            axis.text = element_text(color = "black"))
+  ggsave(p, file = sprintf("%s/results/psm/matched/plots/study specific forest/%s/matched_%s.pdf", res_path, mod, outcome), width = 6, height = 6)
+  save(p, file = sprintf("%s/results/psm/matched/plots/study specific forest/rdata/matched_%s_%s.RData", res_path, outcome, mod))
+  rm(p)
+  gc()
+  return(T)
+}
+
+# keep only personality-outcome associations in the unmoderated
+# models or the moderator association in the moderated models
+cmb_res <- fx_res %>% 
+  filter((Moderator == "none" & names == "p_value")|
+         (Moderator != "none" & grepl("p_value:", names)) &
+         (!Moderator %in% c("reliability", "predInt"))) %>%
+  mutate(study = "Overall", type = "fixed") %>%
+  full_join(
+    rx_res %>% 
+      filter((Moderator == "none" & names == "p_value")|
+             (Moderator != "none" & grepl("p_value:", names)) &
+         (!Moderator %in% c("reliability", "predInt"))) %>% 
+      mutate(type = "random")
+  ) 
+
+# run the plot function
+cmb_res %>%
+  group_by(Outcome, Moderator) %>%
+  nest() %>%
+  ungroup() %>%
+  mutate(pmap(list(data, Outcome, Moderator), plot_fun))
+```
+
+##### Fixed-Effect Forest Plots  
+Now that we have plots of both mega-analytic and study-specific effects, we'll plot just the mega-analytic effecs for each moderator for parsimony (i.e. each of the 196 personality-outcome associations or moderators of them in a single graph).  
+
+```{r fixed effect forest plots, eval = F}
+fx_plot_fun <- function(df, mod){
+  m <- mapvalues(mod, moderators$short_name, moderators$long_name, warn_missing = F)
+  d <- round(max(abs(1-min(df$Estimate_OR)), abs(1-max(df$Estimate_OR))), 2)
+  lim <- if(mod == "none"){c(.8, 1.2)} else{c(1-d-(d/2.5), 1+d+(d/2.5))}
+  brk <- if(mod == "none"){seq(.85, 1.15, .15)} else{round(c(1-d-(d/5), 1, 1+d+(d/5)),2)}
+  lab <- if(mod == "none"){c(".85", "1", "1.15")} else{str_remove(round(c(1-d-(d/5), 1, 1+d+(d/5)),2), "^0")}
+  shapes <- c(15, 16, 17, 18)[1:length(unique(df$names))]
+  lt <- rep("solid", length(unique(df$names)))
+  titl <- if(mod == "none"){NULL} else {sprintf("%s Moderation of Personality-Outcome Associations", m)}
+  leg <- if(length(unique(df$names)) > 1){"bottom"} else {"none"}
+  p <- df %>%
+    mutate(Q5.5_OR = ifelse(Q5.5_OR < lim[1], lim[1], Q5.5_OR),
+           Q94.5_OR = ifelse(Q94.5_OR > lim[2], lim[2], Q94.5_OR)) %>% 
+  ggplot(aes(x = Outcome, y = Estimate_OR)) +
+    scale_y_continuous(limits = lim, breaks = brk, labels = lab) + 
+    scale_size_manual(values = c(1.6, 1.2)) +
+    scale_shape_manual(values = shapes) +
+    scale_color_manual(values = c("blue", "black")) +
+    scale_linetype_manual(values = lt) +
+    geom_hline(aes(yintercept = 1), size = .25, color = "gray50") +
+    geom_errorbar(aes(ymin = Q5.5_OR, ymax = Q94.5_OR, linetype = names)
+                  , width = 0
+                  , position = position_dodge(width = .9)) + 
+    geom_point(aes(color = sig, size = sig, shape = names)
+                  , position = position_dodge(width = .9)) +
+    labs(x = NULL, y = "Odds Ratio", title = titl) +
+    facet_grid(~Trait, scales = "free_y", space = "free") +
+    coord_flip() +
+    theme_classic() +
+    theme(legend.position = leg,
+          plot.title = element_text(face = "bold", size = rel(1.2), hjust = .5),
+          panel.background = element_rect(color = "black", fill = "white"),
+          strip.background = element_blank(),
+          strip.text = element_text(face = "bold", color = "black", size = rel(1.4)),
+          axis.text = element_text(color = "black"),
+          axis.text.y = element_text(size = rel(1)))
+ggsave(file = sprintf("%s/results/psm/matched/plots/overall forest/%s_fixed.png", res_path, mod), width = 7, height = 6)
+save(p, file = sprintf("%s/results/psm/matched/plots/overall forest/rdata/%s_fixed.RData", res_path, mod))
+rm(p)
+gc()
+return(T)
+}
+
+fx_res %>% 
+    filter((Moderator == "none" & names == "p_value")|
+         (Moderator != "none" & grepl("p_value:", names))) %>%
+    mutate(sig = ifelse(sign(Q5.5) == sign(Q94.5), "sig", "ns"),
+           sig = factor(sig, levels = c("sig","ns")),
+           Trait = factor(Trait, levels = traits$short_name),
+           Outcome = factor(Outcome, levels = outcomes$short_name, labels = str_wrap(outcomes$long_name, 15)),
+           Outcome = forcats::fct_rev(Outcome))  %>%
+  group_by(Moderator) %>%
+  nest() %>%
+  ungroup() %>%
+  mutate(map2(data, Moderator, fx_plot_fun))
+```
+
+
+#### Tables  
+##### Study-Specific  
+First, I'll create tables of personality-outcome associations for each moderator (including unmoderated results) and create a table with both the mega-analytic and study-specific associations across traits and outcomes.   
+```{r study specific tables, eval = F}
+psm_tab_fun <- function(d, mod){
+  t_cols <- rep(1, 5); names(t_cols) <- traits$long_name
+  m <- mapvalues(mod, moderators$short_name, moderators$long_name, warn_missing = F)
+  # restructure data for tabling
+  tab <- d %>%
+    # format values rounded to 2 decimal places and bolded if significant
+    mutate_at(vars(Estimate_OR:Q94.5_OR), ~sprintf("%.2f", .)) %>%
+    mutate(est = sprintf("%s [%s, %s]", Estimate_OR, Q5.5_OR, Q94.5_OR),
+           est = ifelse(sig == "sig", sprintf("<strong>%s</strong>", est), est)) %>%
+    select(Trait, Outcome, study, names, est) %>%
+    # spread it wide and order Outcomes, columns, and studies
+    pivot_wider(names_from = "Trait" , values_from = "est", names_sep = "_") %>%
+    left_join(crossing(Outcome = outcomes$short_name, Trait = traits$short_name, study = "Overall", value  = NA_character_, names = unique(d$names)) %>% spread(Trait, value)) %>%
+    mutate(Outcome = factor(Outcome, levels = outcomes$short_name, outcomes$long_name),
+           study = factor(study, levels = c("Overall", studies_long))) %>%
+    arrange(Outcome, study) 
+  # a little bit of housekeeping so moderators play nicely together
+  mod_old <- unique(d$names)
+  mod_num <- length(mod_old)
+  if(mod_num == 1){
+    keep <- c("study", traits$short_name)
+    cols <- c("Study", rep("OR [CI]", times = 5))
+    t_cols <- c(" " = 1, t_cols)
+    algn <- c("r", rep("c", 5))
+  } else {
+    keep <- c("study", "names", traits$short_name)
+    cols <- c("Study", "Moderator", rep("OR [CI]", times = 5))
+    mod_new <- str_replace(str_remove(mod_old, "p_value:"), mod, paste(m, " ", sep =""))
+    tab <- tab %>% mutate(names = mapvalues(names, mod_old, mod_new))
+    t_cols <- c(" " = 2, t_cols)
+    algn <- c("r", "r", rep("c", 5))
+  }
+  cap <- if(mod == "none") "Mega-Analytic and Study-Specific Personality-Outcome Associations in Matched Samples" else sprintf("Mega-Analytic and Study-Specific %s Moderation of Personality-Outcome Associations in Matched Samples", m)
+  
+ rs <- tab %>% group_by(Outcome) %>% tally() %>% 
+    mutate(end = cumsum(n), start = lag(end) + 1, start = ifelse(is.na(start), 1, start))
+  
+  tab %>%
+    select(one_of(keep)) %>% 
+    kable(.
+          , "html"
+          , escape = F
+          , col.names = cols
+          , align = algn
+          , caption = cap) %>%
+    kable_styling(full_width = F) %>% 
+    add_header_above(t_cols) %>%
+    collapse_rows(1, valign = "top") %>%
+    kableExtra::group_rows("Mortality", rs$start[1], rs$end[1], label_row_css = NULL) %>%
+    kableExtra::group_rows("Major Health Event", rs$start[2], rs$end[2], label_row_css = NULL) %>%
+    kableExtra::group_rows("Mental Health Event", rs$start[3], rs$end[3], label_row_css = NULL) %>%
+    kableExtra::group_rows("Child Birth",rs$start[4], rs$end[4], label_row_css = NULL) %>%
+    kableExtra::group_rows("Move in with a partner", rs$start[5], rs$end[5], label_row_css = NULL) %>%
+    kableExtra::group_rows("Marriage", rs$start[6], rs$end[6], label_row_css = NULL) %>%
+    kableExtra::group_rows("Divorce", rs$start[7], rs$end[7], label_row_css = NULL) %>%
+    kableExtra::group_rows("Child Moves Out", rs$start[8], rs$end[8], label_row_css = NULL) %>%
+    kableExtra::group_rows("Higher Education", rs$start[9], rs$end[9], label_row_css = NULL)  %>%
+    kableExtra::group_rows("First Job", rs$start[10], rs$end[10], label_row_css = NULL) %>%
+    kableExtra::group_rows("Unemployment", rs$start[11], rs$end[11], label_row_css = NULL) %>%
+    kableExtra::group_rows("Retirement", rs$start[12], rs$end[12], label_row_css = NULL) %>%
+    kableExtra::group_rows("Volunteering", rs$start[13], rs$end[13], label_row_css = NULL) %>%
+    kableExtra::group_rows("Criminality", rs$start[14], rs$end[14], label_row_css = NULL) %>%
+    footnote("<em>OR</em> = Odds Ratio; <em>UI</em> = 89% Bayesian Uncertainty Interval. Bold indicates model terms whose 89% UI of log odds did not overlap with 0.", escape = F)  %>%
+    save_kable(., file = sprintf("%s/results/psm/matched/tables/study specific/%s.html", res_path, mod))
+}
+
+cmb_res %>%
+  mutate(sig = ifelse(sign(Q5.5) == sign(Q94.5), "sig", "ns")) %>%
+  select(-(Estimate:Q94.5)) %>%
+  group_by(Moderator) %>%
+  nest() %>%
+  ungroup() %>%
+  # filter(Moderator == "none") %>%
+  mutate(map2(data, Moderator, possibly(psm_tab_fun, NA_real_)))
+```
+
+##### Fixed Effects  
+Next, I'll create more parsimonious tables for each moderator.  
+```{r psm fixed effect tables, eval = F}
+psm_fxd_tab_fun <- function(d, mod){
+  m <- mapvalues(mod, moderators$short_name, moderators$long_name, warn_missing = F)
+  t_cols <- c(2, rep(1, 5)); names(t_cols) <- c(" ", traits$long_name)
+  cap <- if(mod == "none") "Mega-Analytic Personality-Outcome Associations in Matched Samples" else sprintf("Mega-Analytic %s Moderation of Personality-Outcome Associations in Matched Samples", m)
+  d %>% 
+    mutate_at(vars(Estimate_OR:Q94.5_OR), ~sprintf("%.2f", .)) %>%
+    mutate(est = sprintf("%s<br>[%s, %s]", Estimate_OR, Q5.5_OR, Q94.5_OR),
+           est = ifelse(sig == "sig", sprintf("<strong>%s</strong>", est), est)) %>%
+    select(Trait, Outcome, Term = names, est) %>%
+    # spread it wide and order Outcomes, columns, and studies
+    pivot_wider(names_from = "Trait" , values_from = "est", names_sep = "_") %>%
+    left_join(crossing(Outcome = outcomes$short_name, Trait = traits$short_name, value  = NA_character_, Term = unique(d$names)) %>% spread(Trait, value)) %>%
+    select(Outcome, Term, one_of(traits$short_name)) %>%
+    mutate(Term = str_to_title(str_replace(str_remove(Term, "p_value:"), mod, paste(m, " ", sep =""))),
+           Outcome = factor(Outcome, levels = outcomes$short_name, labels = outcomes$long_name)) %>%
+    arrange(Outcome) %>%
+    kable(.
+          , "html"
+          , escape = F
+          , col.names = c("Outcome", "Term", rep("OR [CI]", times = 5))
+          , align = c("r", "r", rep("c", 5))
+          , caption = cap) %>%
+    kable_styling(full_width = F) %>%
+    add_header_above(t_cols) %>%
+    footnote("<em>OR</em> = Odds Ratio; <em>UI</em> = 89% Bayesian Uncertainty Interval. Bold indicates model terms whose 89% UI of log odds did not overlap with 0.", escape = F) %>%
+    save_kable(., file = sprintf("%s/results/psm/matched/tables/fixed/%s.html", res_path, mod))
+}
+
+fx_res %>%
+  filter((Moderator == "none" & names == "p_value")|
+         (Moderator != "none" & grepl("p_value:", names))) %>%
+  mutate(sig = ifelse(sign(Q5.5) == sign(Q94.5), "sig", "ns")) %>%
+  select(-(Estimate:Q94.5)) %>%
+  group_by(Moderator) %>%
+  nest() %>%
+  ungroup() %>%
+  mutate(tab = map2(data, Moderator, psm_fxd_tab_fun))
+
+r_cols <- c(1, rep(1, 14)); names(r_cols) <- c(" ", outcomes$long_name)
+rs <- tibble(start = seq(from = 1, by = 10, length.out = 14),
+            end = seq(from = 10, by = 10, length.out = 14))
+
+fx_res %>%
+  filter((Moderator != "none" & grepl("p_value:", names))) %>%
+  mutate(sig = ifelse(sign(Q5.5) == sign(Q94.5), "sig", "ns")) %>%
+  select(-(Estimate:Q94.5)) %>%mutate_at(vars(Estimate_OR:Q94.5_OR), ~sprintf("%.2f", .)) %>%
+    mutate(est = sprintf("%s<br>[%s, %s]", Estimate_OR, Q5.5_OR, Q94.5_OR),
+           est = ifelse(sig == "sig", sprintf("<strong>%s</strong>", est), est)) %>%
+    select(Trait, Outcome, Term = names, est) %>%
+    # spread it wide and order Outcomes, columns, and studies
+    pivot_wider(names_from = "Outcome" , values_from = "est", names_sep = "_") %>%
+  mutate(Term = str_remove(Term, "p_value:"),
+         Term = factor(Term, levels = moderators$short_name, labels = moderators$breaks),
+           Trait = factor(Trait, levels = traits$short_name, labels = traits$long_name)) %>%
+  filter(!is.na(Term)) %>%
+    arrange(Trait, Term) %>%
+    select(Term, one_of(outcomes$short_name)) %>%
+    kable(.
+          , "html"
+          , escape = F
+          , col.names = c( "Term", rep("OR [CI]", times = 14))
+          , align = c(  "r", rep("c", 14))
+          , caption = "Mega-Analytic Moderators of Personality-Outcome Associations in Matched Samples" ) %>%
+    kable_styling(full_width = F) %>%
+    kableExtra::group_rows("Extraversion", rs$start[1], rs$end[1], label_row_css = NULL) %>%
+    kableExtra::group_rows("Agreeableness", rs$start[2], rs$end[2], label_row_css = NULL) %>%
+    kableExtra::group_rows("Conscientiousness", rs$start[3], rs$end[3], label_row_css = NULL) %>%
+    kableExtra::group_rows("Neuroticism",rs$start[4], rs$end[4], label_row_css = NULL) %>%
+    kableExtra::group_rows("Openness to Experience", rs$start[5], rs$end[5], label_row_css = NULL) %>%
+    # collapse_rows(1, valign = "top") %>%
+    add_header_above(r_cols) %>%
+    footnote("<em>OR</em> = Odds Ratio; <em>UI</em> = 89% Bayesian Uncertainty Interval. Bold indicates model terms whose 89% UI of log odds did not overlap with 0. Binary variables were dummy coded such that the label to the right of the 'v' indicates the reference group.", escape = F) %>% save_kable(., file = sprintf("%s/results/psm/matched/tables/fixed/all_moderators.html", res_path))
+```
+
+##### Significant Fixed Effects  
+```{r sig fx}
+fx_me <- fx_res %>%
+  filter(Moderator == "none" & names == "p_value" &
+        sign(Q5.5) == sign(Q94.5))
+fx_me
+
+fx_mod <- fx_res %>%
+  filter(grepl("p_value:", names) & sign(Q5.5) == sign(Q94.5)) 
+fx_mod
+```
+
+### Variance-Covariance Matrices  
+```{r vc mats}
+load_fun <- function(file, ob){
+  load(sprintf("%s/results/psm/matched/vc/%s", res_path, file))
+  get(ls()[ls() == ob])
+}
+
+vc_fun <- function(vc){
+  vc$sd %>% 
+    data.frame() %>%
+    rownames_to_column("names") %>%
+    as_tibble()
+}
+
+vc_res <- tibble(file = list.files(sprintf("%s/results/psm/matched/vc", res_path))) %>%
+  separate(file, c("scrap", "Trait", "Outcome", "Moderator"), sep = "_", remove = F) %>%
+  mutate(Moderator = str_remove(Moderator, ".RData"),
+         vc = map(file, ~load_fun(., "vc")),
+         sd = map(vc, vc_fun))  %>%
+  select(-scrap, -file)
+vc_res
+```
+
+#### Tables  
+```{r vc tables, eval = F}
+vc_var <- vc_res %>% 
+  select(-vc) %>%
+  filter(!Moderator %in% c("reliability", "predInt"))%>%
+  unnest(sd) %>%
+  filter((Moderator == "none" & names == "p_value") |
+         (Moderator != "none" & grepl("p_value:", names))) %>% 
+  filter(complete.cases(.))
+  # mutate(sig = ifelse(sign(Q5.5) == sign(Q94.5), "sig", "ns")) %>%
+  # mutate_at(vars(Estimate, Q5.5, Q94.5), ~(.)^2)
+
+hcols <- rep(1,6)
+names(hcols) <- c(" ", traits$short_name)
+vc_var %>%
+  filter(Moderator == "none") %>%
+  mutate_at(vars(Estimate, Q5.5, Q94.5), 
+    ~ifelse(abs(.) < .01, sprintf("%.3f", .), sprintf("%.2f", .))) %>%
+  mutate_at(vars(Estimate, Q5.5, Q94.5), ~str_remove(., "^0")) %>%
+  mutate(est = sprintf("%s<br>[%s,%s]", Estimate, Q5.5, Q94.5),
+         Outcome = factor(Outcome, levels = outcomes$short_name, labels =  outcomes$long_name)) %>%
+  select(Trait, Outcome, est) %>%
+  filter(complete.cases(.)) %>%
+  pivot_wider(names_from = "Trait"
+              , values_from = "est") %>% 
+  select(Outcome, all_of(traits$short_name)) %>%
+  arrange(Outcome) %>%
+  kable(.
+        , "html"
+        , escape = F
+        , align = c("r", rep("c", 5))
+        , col.names = c("Outcome", rep("b [CI]", 5))) %>%
+  kable_styling(full_width = F) %>%
+  add_header_above(hcols) %>%
+  save_kable(., file = sprintf("%s/results/psm/matched/tables/level 2/p_value_none.html", res_path))
+
+hcols <- rep(1,6)
+names(hcols) <- c(" ", traits$short_name)
+vc_var %>%
+  mutate_at(vars(Estimate, Q5.5, Q94.5), ~sprintf("%.3f", .)) %>%
+  mutate_at(vars(Estimate, Q5.5, Q94.5), ~str_remove(., "^0")) %>%
+  mutate(est = sprintf("%s<br>[%s, %s]", Estimate, Q5.5, Q94.5),
+         names = str_remove(names, "p_value:"),
+         names = factor(names, c("p_value", moderators$short_name), c("None", moderators$long_name)),
+         Outcome = factor(Outcome, levels = outcomes$short_name, labels =  outcomes$long_name)) %>%
+  select(Trait, Outcome, Moderator = names, est) %>%
+  filter(complete.cases(.)) %>%
+  pivot_wider(names_from = "Trait"
+              , values_from = "est") %>% 
+  select(Outcome, Moderator, all_of(traits$short_name)) %>%
+  arrange(Outcome, Moderator) %>%
+  select(-Outcome) %>%
+  kable(.
+        , "html"
+        , escape = F
+        , align = c("r", rep("c", 5))
+        , col.names = c("Moderator", rep("b [CI]", 5))) %>%
+  kable_styling(full_width = F) %>%
+  add_header_above(hcols) %>%
+  save_kable(., file = sprintf("%s/results/psm/matched/tables/level 2/all_mods.html", res_path))
+
+vc_tab_fun <- function(d, mod){
+  hcols <- c(2, rep(1,5))
+  names(hcols) <- c(" ", traits$short_name)
+  d %>%
+  mutate_at(vars(Estimate, Q5.5, Q94.5), ~sprintf("%.3f", .)) %>%
+  mutate_at(vars(Estimate, Q5.5, Q94.5), ~str_remove(., "^0")) %>%
+  mutate(est = sprintf("%s<br>[%s, %s]", Estimate, Q5.5, Q94.5),
+         names = str_remove(names, "p_value:"),
+         names = factor(names, c("p_value", moderators$short_name), c("None", moderators$long_name)),
+         Outcome = factor(Outcome, levels = outcomes$short_name, labels =  outcomes$long_name)) %>%
+  select(Trait, Outcome, Moderator = names, est) %>%
+  filter(complete.cases(.)) %>%
+  pivot_wider(names_from = "Trait"
+              , values_from = "est") %>% 
+  select(Outcome, Moderator, all_of(traits$short_name)) %>%
+  arrange(Outcome, Moderator) %>%
+  # select(-Outcome) %>%
+  kable(.
+        , "html"
+        , escape = F
+        , align = c("r", "r", rep("c", 5))
+        , col.names = c("Outcome", "Moderator", rep("b [CI]", 5))) %>%
+  kable_styling(full_width = F) %>%
+  add_header_above(hcols) %>%
+  save_kable(., file = sprintf("%s/results/psm/matched/tables/level 2/%s.html", res_path, mod))
+}
+
+vc_var %>% 
+  filter(Moderator != "none") %>%
+  group_by(Moderator) %>% 
+  nest() %>%
+  ungroup() %>%
+  mutate(map2(data, Moderator, vc_tab_fun))
+```
+
+### Simple Effects  
+```{r load psm simple effects, eval = F}
+load_fun <- function(file, ob){
+  load(sprintf("%s/results/psm/matched/predicted/%s", res_path, file))
+  get(ls()[ls() == ob])
+}
+
+fx_pred <- tibble(file = list.files(sprintf("%s/results/psm/matched/predicted", res_path))) %>%
+  separate(file, c("scrap", "type", "Trait", "Outcome", "Moderator"), sep = "_", remove = F) %>%
+  mutate(Moderator = str_remove(Moderator, ".RData"),
+         fx = map(file, ~load_fun(., "pred.fx")),
+         rx = map(file, ~load_fun(., "pred.rx")))  %>%
+  select(-scrap, -type, -file)
+
+# random effects predictions
+rx_pred <- fx_pred %>% select(-fx)
+# fixed effect predictions
+fx_pred <- fx_pred %>% select(-rx)
+```
+
+#### All Fixed-Effect Simple Effects  
+```{r psm simple effect plots, eval = F}
+simp_eff_fun <- function(df, outcome, mod){ 
+  print(paste(outcome, mod))
+  o <- mapvalues(outcome, outcomes$short_name, outcomes$long_name, warn_missing = F)
+  m <- mapvalues(mod, moderators$mod, moderators$mod_name, warn_missing = F)
+  d <- round(max(abs(1-min(df$Estimate_OR)), abs(1-max(df$Estimate_OR))), 2)
+  mini <- if(d > 2) .05 else 1-(d+(d/5)) 
+  maxi <- if(d > 2) 2.05 else 1+d+(d/5)
+  lim <- c(mini, maxi)
+  brk <- if(d > 2) c(0, 1, 2) else{round(c(1-d-(d/10), 1, 1+d+(d/10)),2)}
+  lab <- if(d > 2){c("0", "1", "2")} else{str_remove(c(round(1-d-(d/10),2), 1, round(1+d+(d/10),2)), "^0")}
+  titl <- if(mod == "none"){o} else {sprintf("%s: Personality x %s Simple Effects", o, m)}
+  df <- df %>% unclass %>% data.frame
+  df$mod_value <- df[,mod]
+  df <- df %>% select(-all_of(mod)) %>% as_tibble
+  if(class(df$mod_value) == "factor"){df <- df %>% mutate(mod_fac = factor(mod_value))} 
+  else{df <- df %>%
+    group_by(Trait) %>%
+    mutate(mod_fac = factor(mod_value, levels = unique(mod_value), labels = c("-1 SD", "M", "+1 SD"))) %>%
+    ungroup()
+  }
+  lt <- c("dotted", "solid", "dashed")[1:length(unique(df$mod_fac))]
+  
+  df %>%
+    mutate(Trait = factor(Trait, levels = traits$short_name, labels = traits$long_name),
+           Q5.5_OR = ifelse(Q5.5_OR < mini, mini, Q5.5_OR),
+           Q94.5_OR = ifelse(Q94.5_OR > maxi, maxi, Q94.5_OR)) %>%
+    ggplot(aes(x = p_value
+               , y = Estimate_OR
+               , group  = mod_fac))  +
+      scale_y_continuous(limits = lim
+                         , breaks = brk
+                         , labels = lab) +
+      scale_linetype_manual(values = lt) +
+      geom_hline(aes(yintercept = 1), size = .25) +
+      geom_ribbon(aes(ymin = Q5.5_OR
+                      , ymax = Q94.5_OR
+                      , fill = mod_fac)
+                  , alpha = .25) +
+      geom_line(aes(linetype = mod_fac)) +
+      labs(x = "Personality (POMP)"
+           , y = "Odds Ratio"
+           , title = titl
+           , linetype = m
+           , fill = m) +
+      facet_wrap(~Trait, nrow = 3) +
+      theme_classic() +
+      theme(legend.position = "bottom"
+            , plot.title = element_text(face = "bold", size = rel(1.2), hjust = .5)
+            , strip.background = element_rect(fill = "black")
+            , strip.text = element_text(face = "bold", color = "white")
+            , axis.text = element_text(color = "black"))
+  ggsave(file = sprintf("%s/results/psm/matched/plots/simple effects/%s/matched_%s.pdf", res_path, mod, outcome), width = 6, height = 6)
+}
+
+fx_pred %>%
+  filter(!Moderator %in% c("SES", "reliability", "predInt")) %>%
+  group_by(Outcome, Moderator) %>%
+  nest() %>%
+  ungroup() %>%
+  mutate(data = map(data, ~(.) %>% unnest(fx) %>% mutate_at(vars(Estimate, Q5.5, Q94.5), lst(OR = exp))),
+         plot = pmap(list(data, Outcome, Moderator), simp_eff_fun))
+```
+
+#### Reliable Simple Effects  
+```{r, eval = F}
+sig_simp_eff_fun <- function(df, mod){ 
+  print(paste(mod))
+  num_sig <- nrow(df %>% select(Trait, Outcome) %>% distinct())
+  ncols <- if(num_sig%/%5>=2) 5 else 3
+  nrows <- ceiling(num_sig / ncols)
+  m <- mapvalues(mod, moderators$short_name, moderators$long_name, warn_missing = F)
+  d <- round(max(abs(1-min(df$Estimate_OR)), abs(1-max(df$Estimate_OR))), 2)
+  mini <- if(d > 2) .05 else 1-(d+(d/5)) 
+  maxi <- if(d > 2) 2.05 else 1+d+(d/5)
+  lim <- c(mini, maxi)
+  brk <- if(d > 2) c(0, 1, 2) else{round(c(1-d-(d/10), 1, 1+d+(d/10)),2)}
+  lab <- if(d > 2){c("0", "1", "2")} else{str_remove(c(round(1-d-(d/10),2), 1, round(1+d+(d/10),2)), "^0")}
+  titl <- sprintf("Simple Effects of %s Moderating Personality-Outcome Associations", m)
+  df <- df %>% unclass %>% data.frame
+  df$mod_value <- df[,mod]
+  df <- df %>% select(-all_of(mod)) %>% as_tibble
+  if(class(df$mod_value) == "factor"){df <- df %>% mutate(mod_fac = factor(mod_value))} 
+  else{df <- df %>%
+    group_by(Trait, Outcome) %>%
+    mutate(mod_fac = factor(mod_value, levels = unique(mod_value), labels = c("-1 SD", "M", "+1 SD"))) %>%
+    ungroup()
+  }
+  lt <- c("dotted", "solid", "dashed")[1:length(unique(df$mod_fac))]
+  shrt_levs <- paste(rep(outcomes$short_name, each = 14), rep(traits$short_name, times = 14))
+  long_levs <- paste(rep(outcomes$long_name, each = 14), rep(traits$long_name, times = 14), sep = "\n")
+  df %>%
+    unite(levs, Outcome, Trait, sep = " ") %>%
+    mutate(levs = factor(levs, shrt_levs, long_levs),
+           Q5.5_OR = ifelse(Q5.5_OR < mini, mini, Q5.5_OR),
+           Q94.5_OR = ifelse(Q94.5_OR > maxi, maxi, Q94.5_OR)) %>%
+    ggplot(aes(x = p_value
+               , y = Estimate_OR
+               , group  = mod_fac))  +
+      scale_y_continuous(limits = lim
+                         , breaks = brk
+                         , labels = lab) +
+      scale_linetype_manual(values = lt) +
+      geom_hline(aes(yintercept = 1), size = .25, color = "gray50") +
+      geom_ribbon(aes(ymin = Q5.5_OR
+                      , ymax = Q94.5_OR
+                      , fill = mod_fac)
+                  , alpha = .25) +
+      geom_line(aes(linetype = mod_fac)) +
+      labs(x = "Personality (POMP)"
+           , y = "Odds Ratio"
+           , title = titl
+           , linetype = m
+           , fill = m) +
+      facet_wrap(~levs, ncol = ncols, nrow = nrows) +
+      theme_classic() +
+      theme(legend.position = "bottom"
+            , panel.background = element_rect(color = "black", fill = "white")
+            , plot.title = element_text(face = "bold", size = rel(1.2), hjust = .5)
+            , strip.background = element_blank()#element_rect(fill = "black")
+            , strip.text = element_text(color = "black")
+            , axis.text = element_text(color = "black"))
+  ggsave(file = sprintf("%s/results/psm/matched/plots/simple effects/reliable/matched_%s.pdf", res_path, mod), width = ncols*2+2, height = nrows*2)
+}
+
+sig_mod <- fx_res %>% 
+  filter(Moderator != "none" & 
+         grepl("p_value:", names) &
+         (sign(Q5.5) == sign(Q94.5))) %>%
+  select(Trait, Outcome, Moderator) %>% 
+  distinct() %>%
+  mutate(sig = "sig")
+
+fx_pred %>%
+  filter(!Moderator %in% c("SES")) %>%
+  left_join(sig_mod) %>%
+  filter(!is.na(sig)) %>%
+  arrange(Moderator, Outcome) %>%
+  group_by(Moderator) %>%
+  nest() %>%
+  ungroup() %>%
+  mutate(data = map(data, ~(.) %>% unnest(fx) %>% mutate_at(vars(Estimate, Q5.5, Q94.5), lst(OR = exp))),
+         plot = map2(data, Moderator, sig_simp_eff_fun))
+```

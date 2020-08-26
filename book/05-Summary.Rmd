@@ -1,0 +1,48 @@
+# Summarizing Result Implications {#Summary}  
+
+## PSM Moderators  
+```{r}
+mod_sum <- sig_mod %>%
+  group_by(Trait, Outcome) %>%
+  summarize(Moderator = paste(Moderator, collapse = "<br>")) %>%
+  ungroup() %>%
+  full_join(crossing(
+    Trait = traits$short_name
+    , Outcome = outcomes$short_name)
+    ) %>%
+  mutate(Trait = factor(Trait, traits$short_name), 
+         Outcome = factor(Outcome, levels = outcomes$short_name, labels = outcomes$long_name)) %>%
+  rename(PSM = Moderator)
+```
+
+
+## SCA Key Variables  
+```{r sca summary key vars}
+sca_sum <- spec_summ %>%
+  select(Trait, Outcome, key_var) %>%
+  mutate(Trait = factor(Trait, levels = traits$long_name, labels = traits$short_name),
+         Outcome = factor(Outcome, levels = outcomes$short_name, labels = outcomes$long_name)) %>%
+  mutate(key_var = str_replace_all(key_var, ", ", "<br>")) %>% 
+  rename(SCA = key_var)
+```
+
+## Table of Key Variables  
+```{r}
+levs <- paste(rep(c("PSM", "SCA"), times = 14), rep(traits$short_name, each = 2), sep = "_")
+mod_sum %>%
+  full_join(sca_sum) %>%
+  pivot_longer(names_to = "Method"
+               , values_to = "key_var"
+               , cols = c("PSM", "SCA")) %>%
+  pivot_wider(names_from = "Trait", values_from = "key_var") %>%
+  arrange(Outcome) %>%
+  select(Outcome, Method, all_of(traits$short_name)) %>%
+  kable(., "html"
+        , escape = F
+        , caption = c("<strong>Table 9</strong><br><em>Significant Moderators of Propensity Score Matched Models and Critical Covariates of Specification Curve Analyses")) %>%
+  kable_styling(full_width = F) %>%
+  collapse_rows(1, valign = "top") %>%
+  add_footnote("PSM = Propensity Score Matched Models. SCA = Specification Curve Analyses. All variables indicate either significant moderators of personality-outcome associations in the propensity score matched study or critical covariates (in terms of direction, magnitude, and significance) in the specification curve analyses.", notation = "none") %>%
+  save_kable(file = sprintf("%s/results/tab_9_summary.html", wd))
+```
+
