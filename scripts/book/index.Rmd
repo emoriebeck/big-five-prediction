@@ -1,0 +1,142 @@
+--- 
+title: "A Mega-Analysis of Personality Predictions: Robustness and Boundary Conditions"
+author: "Emorie D. Beck"
+institution: "Washington University in St. Louis"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+documentclass: book
+bibliography: [book.bib, packages.bib]
+biblio-style: apalike
+delete_merged_file: false
+description: "This is a minimal example of using the bookdown package to write a book. The output format for this example is bookdown::gitbook."
+editor_options: 
+  chunk_output_type: console
+---
+
+# Workspace  
+## Packages  
+
+```{r, echo = F}
+knitr::opts_chunk$set(echo = TRUE, warning = F, message = F, error = F)
+options(knitr.kable.NA = '')
+```
+
+
+```{r, echo = F}
+load_url <- function (url, ..., sha1 = NULL) {
+  # based very closely on code for devtools::source_url
+  stopifnot(is.character(url), length(url) == 1)
+  temp_file <- tempfile()
+  on.exit(unlink(temp_file))
+  request <- httr::GET(url)
+  httr::stop_for_status(request)
+  writeBin(httr::content(request, type = "raw"), temp_file)
+  file_sha1 <- digest::digest(file = temp_file, algo = "sha1")
+  if (is.null(sha1)) {
+    message("SHA-1 hash of file is ", file_sha1)
+  }
+  else {
+    if (nchar(sha1) < 6) {
+      stop("Supplied SHA-1 hash is too short (must be at least 6 characters)")
+    }
+    file_sha1 <- substr(file_sha1, 1, nchar(sha1))
+    if (!identical(file_sha1, sha1)) {
+      stop("SHA-1 hash of downloaded file (", file_sha1, 
+           ")\n  does not match expected value (", sha1, 
+           ")", call. = FALSE)
+    }
+  }
+  load(temp_file, envir = .GlobalEnv)
+}
+
+```
+
+
+```{r packages}
+library(knitr)
+library(kableExtra)
+library(readxl)
+library(psych)
+library(brms)
+library(mice)
+library(fixest)
+library(parallel)
+library(MuMIn)
+library(MatchIt)
+library(haven)
+library(broom.mixed)
+library(rstan)
+library(tidybayes)
+library(shiny)
+library(plyr)
+library(tidyverse)
+library(furrr)
+```
+
+
+## Directory Path  
+```{r path}
+res_path <- "https://github.com/emoriebeck/selection/blob/master"
+wd <- "/Volumes/Emorie Beck/projects/selection"
+```
+
+## Codebook  
+Each study has a separate codebook indexing matching, covariate, personality, and outcome variables. Moreover, these codebooks contain information about the original scale of the variable, any recoding of the variable (including binarizing outcomes, changing the scale, and removing missing data), reverse coding of scale variables, categories, etc.  
+```{r codebook}
+# list of all codebook sheets
+sheets <- sprintf("%s/codebooks/master_codebook_01.24.20.xlsx", wd) %>% excel_sheets()
+
+# function for reading in sheets
+read_fun <- function(x){
+  sprintf("%s/codebooks/master_codebook_01.24.20.xlsx", wd) %>% read_xlsx(., sheet = x)
+}
+
+# read in sheets and index source
+codebook <- tibble(
+  study = sheets,
+  codebook = map(study, read_fun)
+)
+
+## short and long versions of names of all categories for later use
+studies <- c("addhealth", "bhps", "gsoep", "hilda", "hrs", "liss", "midus", "nlsy", "shp", "wls")
+studies_long <- c("Add Health", "BHPS", "GSOEP", "HILDA", "HRS", "LISS", "MIDUS", "NLSY", "SHP", "WLS")
+
+traits <- codebook$codebook[[2]] %>% filter(category == "pers") %>% 
+  select(long_name = Construct, short_name = name)
+
+outcomes <- codebook$codebook[[2]] %>% filter(category == "out") %>%
+  select(long_name = Construct, short_name = name)
+
+moderators <- codebook$codebook[[2]] %>% filter(category == "mod") %>%
+  select(long_name = Construct, short_name = name, breaks, mod, mod_name)
+```
+
+
+## Other Supporting Documents  
+```{r other docs}
+# used personality waves 
+p_waves <- sprintf("%s/codebooks/personality_waves.xlsx", wd) %>% read_xlsx()
+# used covariates for specifications 
+specifications <- sprintf("%s/codebooks/specifications.xlsx", wd) %>% read_xlsx()
+# coded specificatoin curve results
+spec_summ <- sprintf("%s/results/sca/SCA_summary.xlsx", wd) %>% read_xlsx()
+
+# occupation code converters 
+occ90to00 <- sprintf("%s/codebooks/occ_90-00.xls", wd) %>% read_xls() %>% mutate_at(vars(OCC90, OCC00), as.numeric)
+occ70to90 <- sprintf("%s/codebooks/occ1970_occ1990dd.dta", wd) %>% read_dta() %>%
+  setNames(c("OCC70", "OCC90"))
+occ80to90 <- sprintf("%s/codebooks/occ1980_occ1990dd.dta", wd) %>% read_dta() %>%
+  setNames(c("OCC80", "OCC90"))
+
+# npb codes for ses
+npb <- sprintf("%s/codebooks/npb.xlsx", wd) %>% read_xlsx() %>% 
+  setNames(c("OCC00", "NPB", "desc"))
+```
+
+
+```{r include=FALSE}
+# automatically create a bib database for R packages
+knitr::write_bib(c(
+  .packages(), 'bookdown', 'knitr', 'rmarkdown'
+), 'packages.bib')
+```

@@ -1,0 +1,14 @@
+"NA" "chldbrth" "grsWages" 1 4
+"NA" "chldbrth" "grsWages" 2 4
+"NA" "chldbrth" "grsWages" 3 4
+"NA" "chldbrth" "grsWages" 4 4
+"NA" "chldbrth" "grsWages" 5 4
+"NA" "mntlhlthevnt" "grsWages" 1 4
+"NA" "mntlhlthevnt" "grsWages" 2 4
+"NA" "mntlhlthevnt" "grsWages" 3 4
+"NA" "mntlhlthevnt" "grsWages" 4 4
+"NA" "mntlhlthevnt" "grsWages" 5 4
+"NA" "mortality" "grsWages" 1 4
+"NA" "mortality" "grsWages" 2 4
+"NA" "mortality" "grsWages" 3 4
+"NA" "mortality" "grsWages" 4 4

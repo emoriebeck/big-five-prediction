@@ -1,0 +1,42 @@
+
+### test 1 - Rstan recommended makevars for linux
+# CXX14FLAGS=-O3 -march=native -mtune=native -fPIC
+# CXX14=g++
+
+### test 2 - direct path
+# CXX14FLAGS=-O3 -march=native -mtune=native -fPIC
+# CXX14 = "/export/gcc-5.5.0/bin/g++"
+
+### test 3 - direct path (no quotes)
+# CXX14FLAGS=-O3 -march=native -mtune=native -fPIC
+# CXX14=/export/gcc-5.5.0/bin/g++
+
+### test 4 - direct path + Malcolm's recommendation
+# CXX14FLAGS=-O3 -march=native -mtune=native -fPIC
+# CXX14="/export/gcc-5.5.0/bin/g++"
+# CXX14FLAGS += -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION
+
+### test 5 - direct path (no quotes) + Malcolm's recommendation
+# CXX14FLAGS=-O3 -march=native -mtune=native -fPIC
+# CXX14=/export/gcc-5.5.0/bin/g++
+# CXX14FLAGS += -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION
+
+### test 6 - direct path + Malcolm's recommendation plus a small tweak from Stan-dev
+# CXX14FLAGS=-O3 -std=c++14 -march=native -mtune=native -fPIC
+# CXX14="/export/gcc-5.5.0/bin/g++"
+# CXX14FLAGS += -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION
+
+### test 7 - direct path (no quotes) + Malcolm's recommendation plus a small tweak from Stan-dev
+# CXX14FLAGS=-O3 -std=c++14 -march=native -mtune=native -fPIC
+# CXX14=/export/gcc-5.5.0/bin/g++
+# CXX14FLAGS += -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION
+
+### test 8 - Rstan recommended makevars for linux + Malcolm recommendation
+# CXX14FLAGS=-O3 -march=native -mtune=native -fPIC
+# CXX14=g++
+# CXX14FLAGS += -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION
+
+### test 9 - direct path (no quotes) + Malcolm's recommendation plus a small tweak from Stan-dev
+CXX14FLAGS=-O3 -std=c++14 -march=native -mtune=native -fPIC
+CXX14=g++
+CXX14FLAGS += -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION

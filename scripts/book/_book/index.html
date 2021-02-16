@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>A Mega-Analysis of Personality Predictions: Robustness and Boundary Conditions</title>
+  <meta name="description" content="This is a minimal example of using the bookdown package to write a book. The output format for this example is bookdown::gitbook." />
+  <meta name="generator" content="bookdown 0.20 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="A Mega-Analysis of Personality Predictions: Robustness and Boundary Conditions" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="This is a minimal example of using the bookdown package to write a book. The output format for this example is bookdown::gitbook." />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="A Mega-Analysis of Personality Predictions: Robustness and Boundary Conditions" />
+  
+  <meta name="twitter:description" content="This is a minimal example of using the bookdown package to write a book. The output format for this example is bookdown::gitbook." />
+  
+
+<meta name="author" content="Emorie D. Beck" />
+
+
+<meta name="date" content="2020-07-01" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+
+<link rel="next" href="dataCleaning.html"/>
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">A Minimal Book Example</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Workspace</a><ul>
+<li class="chapter" data-level="1.1" data-path="index.html"><a href="index.html#packages"><i class="fa fa-check"></i><b>1.1</b> Packages</a></li>
+<li class="chapter" data-level="1.2" data-path="index.html"><a href="index.html#directory-path"><i class="fa fa-check"></i><b>1.2</b> Directory Path</a></li>
+<li class="chapter" data-level="1.3" data-path="index.html"><a href="index.html#codebook"><i class="fa fa-check"></i><b>1.3</b> Codebook</a></li>
+<li class="chapter" data-level="1.4" data-path="index.html"><a href="index.html#other-supporting-documents"><i class="fa fa-check"></i><b>1.4</b> Other Supporting Documents</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="dataCleaning.html"><a href="dataCleaning.html"><i class="fa fa-check"></i><b>2</b> Data Cleaning</a><ul>
+<li class="chapter" data-level="2.1" data-path="dataCleaning.html"><a href="dataCleaning.html#add-health"><i class="fa fa-check"></i><b>2.1</b> Add Health</a><ul>
+<li class="chapter" data-level="2.1.1" data-path="dataCleaning.html"><a href="dataCleaning.html#load-data"><i class="fa fa-check"></i><b>2.1.1</b> Load Data</a></li>
+<li class="chapter" data-level="2.1.2" data-path="dataCleaning.html"><a href="dataCleaning.html#matching-variables"><i class="fa fa-check"></i><b>2.1.2</b> Matching Variables</a></li>
+<li class="chapter" data-level="2.1.3" data-path="dataCleaning.html"><a href="dataCleaning.html#personality-variables"><i class="fa fa-check"></i><b>2.1.3</b> Personality Variables</a></li>
+<li class="chapter" data-level="2.1.4" data-path="dataCleaning.html"><a href="dataCleaning.html#outcome-variables"><i class="fa fa-check"></i><b>2.1.4</b> Outcome Variables</a></li>
+<li class="chapter" data-level="2.1.5" data-path="dataCleaning.html"><a href="dataCleaning.html#covariates"><i class="fa fa-check"></i><b>2.1.5</b> Covariates</a></li>
+<li class="chapter" data-level="2.1.6" data-path="dataCleaning.html"><a href="dataCleaning.html#imputation"><i class="fa fa-check"></i><b>2.1.6</b> Imputation</a></li>
+</ul></li>
+<li class="chapter" data-level="2.2" data-path="dataCleaning.html"><a href="dataCleaning.html#us"><i class="fa fa-check"></i><b>2.2</b> US</a><ul>
+<li class="chapter" data-level="2.2.1" data-path="dataCleaning.html"><a href="dataCleaning.html#load-data-1"><i class="fa fa-check"></i><b>2.2.1</b> Load Data</a></li>
+<li class="chapter" data-level="2.2.2" data-path="dataCleaning.html"><a href="dataCleaning.html#outcome-variables-1"><i class="fa fa-check"></i><b>2.2.2</b> Outcome Variables</a></li>
+</ul></li>
+<li class="chapter" data-level="2.3" data-path="dataCleaning.html"><a href="dataCleaning.html#bhps"><i class="fa fa-check"></i><b>2.3</b> BHPS</a><ul>
+<li class="chapter" data-level="2.3.1" data-path="dataCleaning.html"><a href="dataCleaning.html#load-data-2"><i class="fa fa-check"></i><b>2.3.1</b> Load Data</a></li>
+<li class="chapter" data-level="2.3.2" data-path="dataCleaning.html"><a href="dataCleaning.html#matching-variables-1"><i class="fa fa-check"></i><b>2.3.2</b> Matching Variables</a></li>
+<li class="chapter" data-level="2.3.3" data-path="dataCleaning.html"><a href="dataCleaning.html#personality-variables-1"><i class="fa fa-check"></i><b>2.3.3</b> Personality Variables</a></li>
+<li class="chapter" data-level="2.3.4" data-path="dataCleaning.html"><a href="dataCleaning.html#outcome-variables-2"><i class="fa fa-check"></i><b>2.3.4</b> Outcome Variables</a></li>
+<li class="chapter" data-level="2.3.5" data-path="dataCleaning.html"><a href="dataCleaning.html#covariates-1"><i class="fa fa-check"></i><b>2.3.5</b> Covariates</a></li>
+<li class="chapter" data-level="2.3.6" data-path="dataCleaning.html"><a href="dataCleaning.html#imputation-1"><i class="fa fa-check"></i><b>2.3.6</b> Imputation</a></li>
+</ul></li>
+<li class="chapter" data-level="2.4" data-path="dataCleaning.html"><a href="dataCleaning.html#gsoep"><i class="fa fa-check"></i><b>2.4</b> GSOEP</a><ul>
+<li class="chapter" data-level="2.4.1" data-path="dataCleaning.html"><a href="dataCleaning.html#load-data-3"><i class="fa fa-check"></i><b>2.4.1</b> Load Data</a></li>
+<li class="chapter" data-level="2.4.2" data-path="dataCleaning.html"><a href="dataCleaning.html#matching-variables-2"><i class="fa fa-check"></i><b>2.4.2</b> Matching Variables</a></li>
+<li class="chapter" data-level="2.4.3" data-path="dataCleaning.html"><a href="dataCleaning.html#personality-variables-2"><i class="fa fa-check"></i><b>2.4.3</b> Personality Variables</a></li>
+<li class="chapter" data-level="2.4.4" data-path="dataCleaning.html"><a href="dataCleaning.html#outcome-variables-3"><i class="fa fa-check"></i><b>2.4.4</b> Outcome Variables</a></li>
+<li class="chapter" data-level="2.4.5" data-path="dataCleaning.html"><a href="dataCleaning.html#covariates-2"><i class="fa fa-check"></i><b>2.4.5</b> Covariates</a></li>
+<li class="chapter" data-level="2.4.6" data-path="dataCleaning.html"><a href="dataCleaning.html#imputation-2"><i class="fa fa-check"></i><b>2.4.6</b> Imputation</a></li>
+</ul></li>
+<li class="chapter" data-level="2.5" data-path="dataCleaning.html"><a href="dataCleaning.html#hilda"><i class="fa fa-check"></i><b>2.5</b> HILDA</a><ul>
+<li class="chapter" data-level="2.5.1" data-path="dataCleaning.html"><a href="dataCleaning.html#load-data-4"><i class="fa fa-check"></i><b>2.5.1</b> Load Data</a></li>
+<li class="chapter" data-level="2.5.2" data-path="dataCleaning.html"><a href="dataCleaning.html#matching-variables-3"><i class="fa fa-check"></i><b>2.5.2</b> Matching Variables</a></li>
+<li class="chapter" data-level="2.5.3" data-path="dataCleaning.html"><a href="dataCleaning.html#personality-variables-3"><i class="fa fa-check"></i><b>2.5.3</b> Personality Variables</a></li>
+<li class="chapter" data-level="2.5.4" data-path="dataCleaning.html"><a href="dataCleaning.html#outcome-variables-4"><i class="fa fa-check"></i><b>2.5.4</b> Outcome Variables</a></li>
+<li class="chapter" data-level="2.5.5" data-path="dataCleaning.html"><a href="dataCleaning.html#covariates-3"><i class="fa fa-check"></i><b>2.5.5</b> Covariates</a></li>
+<li class="chapter" data-level="2.5.6" data-path="dataCleaning.html"><a href="dataCleaning.html#imputation-3"><i class="fa fa-check"></i><b>2.5.6</b> Imputation</a></li>
+</ul></li>
+<li class="chapter" data-level="2.6" data-path="dataCleaning.html"><a href="dataCleaning.html#hrs"><i class="fa fa-check"></i><b>2.6</b> HRS</a><ul>
+<li class="chapter" data-level="2.6.1" data-path="dataCleaning.html"><a href="dataCleaning.html#load-data-5"><i class="fa fa-check"></i><b>2.6.1</b> Load Data</a></li>
+<li class="chapter" data-level="2.6.2" data-path="dataCleaning.html"><a href="dataCleaning.html#matching-variables-4"><i class="fa fa-check"></i><b>2.6.2</b> Matching Variables</a></li>
+<li class="chapter" data-level="2.6.3" data-path="dataCleaning.html"><a href="dataCleaning.html#personality-variables-4"><i class="fa fa-check"></i><b>2.6.3</b> Personality Variables</a></li>
+<li class="chapter" data-level="2.6.4" data-path="dataCleaning.html"><a href="dataCleaning.html#outcome-variables-5"><i class="fa fa-check"></i><b>2.6.4</b> Outcome Variables</a></li>
+<li class="chapter" data-level="2.6.5" data-path="dataCleaning.html"><a href="dataCleaning.html#covariates-4"><i class="fa fa-check"></i><b>2.6.5</b> Covariates</a></li>
+<li class="chapter" data-level="2.6.6" data-path="dataCleaning.html"><a href="dataCleaning.html#imputation-4"><i class="fa fa-check"></i><b>2.6.6</b> Imputation</a></li>
+</ul></li>
+<li class="chapter" data-level="2.7" data-path="dataCleaning.html"><a href="dataCleaning.html#liss"><i class="fa fa-check"></i><b>2.7</b> LISS</a><ul>
+<li class="chapter" data-level="2.7.1" data-path="dataCleaning.html"><a href="dataCleaning.html#load-data-6"><i class="fa fa-check"></i><b>2.7.1</b> Load Data</a></li>
+<li class="chapter" data-level="2.7.2" data-path="dataCleaning.html"><a href="dataCleaning.html#matching-variables-5"><i class="fa fa-check"></i><b>2.7.2</b> Matching Variables</a></li>
+<li class="chapter" data-level="2.7.3" data-path="dataCleaning.html"><a href="dataCleaning.html#personality-variables-5"><i class="fa fa-check"></i><b>2.7.3</b> Personality Variables</a></li>
+<li class="chapter" data-level="2.7.4" data-path="dataCleaning.html"><a href="dataCleaning.html#outcome-variables-6"><i class="fa fa-check"></i><b>2.7.4</b> Outcome Variables</a></li>
+<li class="chapter" data-level="2.7.5" data-path="dataCleaning.html"><a href="dataCleaning.html#covariates-5"><i class="fa fa-check"></i><b>2.7.5</b> Covariates</a></li>
+<li class="chapter" data-level="2.7.6" data-path="dataCleaning.html"><a href="dataCleaning.html#imputation-5"><i class="fa fa-check"></i><b>2.7.6</b> Imputation</a></li>
+</ul></li>
+<li class="chapter" data-level="2.8" data-path="dataCleaning.html"><a href="dataCleaning.html#midus"><i class="fa fa-check"></i><b>2.8</b> MIDUS</a><ul>
+<li class="chapter" data-level="2.8.1" data-path="dataCleaning.html"><a href="dataCleaning.html#load-data-7"><i class="fa fa-check"></i><b>2.8.1</b> Load Data</a></li>
+<li class="chapter" data-level="2.8.2" data-path="dataCleaning.html"><a href="dataCleaning.html#matching-variables-6"><i class="fa fa-check"></i><b>2.8.2</b> Matching Variables</a></li>
+<li class="chapter" data-level="2.8.3" data-path="dataCleaning.html"><a href="dataCleaning.html#personality-variables-6"><i class="fa fa-check"></i><b>2.8.3</b> Personality Variables</a></li>
+<li class="chapter" data-level="2.8.4" data-path="dataCleaning.html"><a href="dataCleaning.html#outcome-variables-7"><i class="fa fa-check"></i><b>2.8.4</b> Outcome Variables</a></li>
+<li class="chapter" data-level="2.8.5" data-path="dataCleaning.html"><a href="dataCleaning.html#covariates-6"><i class="fa fa-check"></i><b>2.8.5</b> Covariates</a></li>
+<li class="chapter" data-level="2.8.6" data-path="dataCleaning.html"><a href="dataCleaning.html#imputation-6"><i class="fa fa-check"></i><b>2.8.6</b> Imputation</a></li>
+</ul></li>
+<li class="chapter" data-level="2.9" data-path="dataCleaning.html"><a href="dataCleaning.html#nlsy"><i class="fa fa-check"></i><b>2.9</b> NLSY</a><ul>
+<li class="chapter" data-level="2.9.1" data-path="dataCleaning.html"><a href="dataCleaning.html#load-data-8"><i class="fa fa-check"></i><b>2.9.1</b> Load Data</a></li>
+<li class="chapter" data-level="2.9.2" data-path="dataCleaning.html"><a href="dataCleaning.html#matching-variables-7"><i class="fa fa-check"></i><b>2.9.2</b> Matching Variables</a></li>
+<li class="chapter" data-level="2.9.3" data-path="dataCleaning.html"><a href="dataCleaning.html#personality-variables-7"><i class="fa fa-check"></i><b>2.9.3</b> Personality Variables</a></li>
+<li class="chapter" data-level="2.9.4" data-path="dataCleaning.html"><a href="dataCleaning.html#outcome-variables-8"><i class="fa fa-check"></i><b>2.9.4</b> Outcome Variables</a></li>
+<li class="chapter" data-level="2.9.5" data-path="dataCleaning.html"><a href="dataCleaning.html#covariates-7"><i class="fa fa-check"></i><b>2.9.5</b> Covariates</a></li>
+<li class="chapter" data-level="2.9.6" data-path="dataCleaning.html"><a href="dataCleaning.html#imputation-7"><i class="fa fa-check"></i><b>2.9.6</b> Imputation</a></li>
+</ul></li>
+<li class="chapter" data-level="2.10" data-path="dataCleaning.html"><a href="dataCleaning.html#shp"><i class="fa fa-check"></i><b>2.10</b> SHP</a><ul>
+<li class="chapter" data-level="2.10.1" data-path="dataCleaning.html"><a href="dataCleaning.html#load-data-9"><i class="fa fa-check"></i><b>2.10.1</b> Load Data</a></li>
+<li class="chapter" data-level="2.10.2" data-path="dataCleaning.html"><a href="dataCleaning.html#matching-variables-8"><i class="fa fa-check"></i><b>2.10.2</b> Matching Variables</a></li>
+<li class="chapter" data-level="2.10.3" data-path="dataCleaning.html"><a href="dataCleaning.html#personality-variables-8"><i class="fa fa-check"></i><b>2.10.3</b> Personality Variables</a></li>
+<li class="chapter" data-level="2.10.4" data-path="dataCleaning.html"><a href="dataCleaning.html#outcome-variables-9"><i class="fa fa-check"></i><b>2.10.4</b> Outcome Variables</a></li>
+<li class="chapter" data-level="2.10.5" data-path="dataCleaning.html"><a href="dataCleaning.html#covariates-8"><i class="fa fa-check"></i><b>2.10.5</b> Covariates</a></li>
+<li class="chapter" data-level="2.10.6" data-path="dataCleaning.html"><a href="dataCleaning.html#imputation-8"><i class="fa fa-check"></i><b>2.10.6</b> Imputation</a></li>
+</ul></li>
+<li class="chapter" data-level="2.11" data-path="dataCleaning.html"><a href="dataCleaning.html#wls"><i class="fa fa-check"></i><b>2.11</b> WLS</a><ul>
+<li class="chapter" data-level="2.11.1" data-path="dataCleaning.html"><a href="dataCleaning.html#load-data-10"><i class="fa fa-check"></i><b>2.11.1</b> Load Data</a></li>
+<li class="chapter" data-level="2.11.2" data-path="dataCleaning.html"><a href="dataCleaning.html#matching-variables-9"><i class="fa fa-check"></i><b>2.11.2</b> Matching Variables</a></li>
+<li class="chapter" data-level="2.11.3" data-path="dataCleaning.html"><a href="dataCleaning.html#personality-variables-9"><i class="fa fa-check"></i><b>2.11.3</b> Personality Variables</a></li>
+<li class="chapter" data-level="2.11.4" data-path="dataCleaning.html"><a href="dataCleaning.html#outcome-variables-10"><i class="fa fa-check"></i><b>2.11.4</b> Outcome Variables</a></li>
+<li class="chapter" data-level="2.11.5" data-path="dataCleaning.html"><a href="dataCleaning.html#covariates-9"><i class="fa fa-check"></i><b>2.11.5</b> Covariates</a></li>
+<li class="chapter" data-level="2.11.6" data-path="dataCleaning.html"><a href="dataCleaning.html#imputation-9"><i class="fa fa-check"></i><b>2.11.6</b> Imputation</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="propensity-score-matching-psm.html"><a href="propensity-score-matching-psm.html"><i class="fa fa-check"></i><b>3</b> Propensity Score Matching {PSM}</a><ul>
+<li class="chapter" data-level="3.1" data-path="propensity-score-matching-psm.html"><a href="propensity-score-matching-psm.html#part-1-data"><i class="fa fa-check"></i><b>3.1</b> Part 1: Data</a><ul>
+<li class="chapter" data-level="3.1.1" data-path="propensity-score-matching-psm.html"><a href="propensity-score-matching-psm.html#outcomes-and-personality"><i class="fa fa-check"></i><b>3.1.1</b> Outcomes and Personality</a></li>
+<li class="chapter" data-level="3.1.2" data-path="propensity-score-matching-psm.html"><a href="propensity-score-matching-psm.html#combine-matching-and-outcome-variables"><i class="fa fa-check"></i><b>3.1.2</b> Combine Matching and Outcome Variables</a></li>
+</ul></li>
+<li class="chapter" data-level="3.2" data-path="propensity-score-matching-psm.html"><a href="propensity-score-matching-psm.html#part-2-run-matching"><i class="fa fa-check"></i><b>3.2</b> Part 2: Run Matching</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="propensity-score-matching-psm.html"><a href="propensity-score-matching-psm.html#run-models"><i class="fa fa-check"></i><b>3.2.1</b> Run Models</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="propensity-score-matching-psm.html"><a href="propensity-score-matching-psm.html#part-3-balance"><i class="fa fa-check"></i><b>3.3</b> Part 3: Balance</a><ul>
+<li class="chapter" data-level="3.3.1" data-path="propensity-score-matching-psm.html"><a href="propensity-score-matching-psm.html#run"><i class="fa fa-check"></i><b>3.3.1</b> Run</a></li>
+</ul></li>
+<li class="chapter" data-level="3.4" data-path="propensity-score-matching-psm.html"><a href="propensity-score-matching-psm.html#part-4-descriptives"><i class="fa fa-check"></i><b>3.4</b> Part 4: Descriptives</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html"><i class="fa fa-check"></i><b>4</b> PSM Models {PSM Mods}</a><ul>
+<li class="chapter" data-level="4.1" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#part-5-data-setup"><i class="fa fa-check"></i><b>4.1</b> Part 5: Data Setup</a><ul>
+<li class="chapter" data-level="4.1.1" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#personality"><i class="fa fa-check"></i><b>4.1.1</b> Personality</a></li>
+<li class="chapter" data-level="4.1.2" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#moderators"><i class="fa fa-check"></i><b>4.1.2</b> Moderators</a></li>
+<li class="chapter" data-level="4.1.3" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#outcomes"><i class="fa fa-check"></i><b>4.1.3</b> Outcomes</a></li>
+</ul></li>
+<li class="chapter" data-level="4.2" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#part-6-models"><i class="fa fa-check"></i><b>4.2</b> Part 6: Models</a><ul>
+<li class="chapter" data-level="4.2.1" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#matched-model-function"><i class="fa fa-check"></i><b>4.2.1</b> Matched Model Function</a></li>
+<li class="chapter" data-level="4.2.2" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#setup-cluster-jobs"><i class="fa fa-check"></i><b>4.2.2</b> Setup Cluster Jobs</a></li>
+</ul></li>
+<li class="chapter" data-level="4.3" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#part-7-compile-cluster-jobs"><i class="fa fa-check"></i><b>4.3</b> Part 7: Compile Cluster Jobs</a><ul>
+<li class="chapter" data-level="4.3.1" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#moderator-predicted-values"><i class="fa fa-check"></i><b>4.3.1</b> Moderator Predicted Values</a></li>
+<li class="chapter" data-level="4.3.2" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#compilation-and-summary-function"><i class="fa fa-check"></i><b>4.3.2</b> Compilation and Summary Function</a></li>
+<li class="chapter" data-level="4.3.3" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#run-compilation"><i class="fa fa-check"></i><b>4.3.3</b> Run Compilation</a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#part-8-tables-and-plots"><i class="fa fa-check"></i><b>4.4</b> Part 8: Tables and Plots</a><ul>
+<li class="chapter" data-level="4.4.1" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#summaries"><i class="fa fa-check"></i><b>4.4.1</b> Summaries</a></li>
+<li class="chapter" data-level="4.4.2" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#variance-covariance-matrices"><i class="fa fa-check"></i><b>4.4.2</b> Variance-Covariance Matrices</a></li>
+<li class="chapter" data-level="4.4.3" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#simple-effects"><i class="fa fa-check"></i><b>4.4.3</b> Simple Effects</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="specification-curve-analysis.html"><a href="specification-curve-analysis.html"><i class="fa fa-check"></i><b>5</b> Specification Curve Analysis</a><ul>
+<li class="chapter" data-level="5.1" data-path="dataCleaning.html"><a href="dataCleaning.html#load-data"><i class="fa fa-check"></i><b>5.1</b> Load Data</a><ul>
+<li class="chapter" data-level="5.1.1" data-path="dataCleaning.html"><a href="dataCleaning.html#covariates"><i class="fa fa-check"></i><b>5.1.1</b> Covariates</a></li>
+<li class="chapter" data-level="5.1.2" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#outcomes"><i class="fa fa-check"></i><b>5.1.2</b> Outcomes</a></li>
+<li class="chapter" data-level="5.1.3" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#personality"><i class="fa fa-check"></i><b>5.1.3</b> Personality</a></li>
+<li class="chapter" data-level="5.1.4" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#moderators"><i class="fa fa-check"></i><b>5.1.4</b> Moderators</a></li>
+</ul></li>
+<li class="chapter" data-level="5.2" data-path="specification-curve-analysis.html"><a href="specification-curve-analysis.html#sca-data-setup"><i class="fa fa-check"></i><b>5.2</b> SCA Data Setup</a></li>
+<li class="chapter" data-level="5.3" data-path="specification-curve-analysis.html"><a href="specification-curve-analysis.html#functions"><i class="fa fa-check"></i><b>5.3</b> Functions</a><ul>
+<li class="chapter" data-level="5.3.1" data-path="specification-curve-analysis.html"><a href="specification-curve-analysis.html#permutation-samples"><i class="fa fa-check"></i><b>5.3.1</b> Permutation Samples</a></li>
+<li class="chapter" data-level="5.3.2" data-path="specification-curve-analysis.html"><a href="specification-curve-analysis.html#permutation-models"><i class="fa fa-check"></i><b>5.3.2</b> Permutation Models</a></li>
+<li class="chapter" data-level="5.3.3" data-path="specification-curve-analysis.html"><a href="specification-curve-analysis.html#terms-and-formulas"><i class="fa fa-check"></i><b>5.3.3</b> Terms and Formulas</a></li>
+<li class="chapter" data-level="5.3.4" data-path="specification-curve-analysis.html"><a href="specification-curve-analysis.html#full-models-and-workspace-setup"><i class="fa fa-check"></i><b>5.3.4</b> Full Models and Workspace Setup</a></li>
+<li class="chapter" data-level="5.3.5" data-path="specification-curve-analysis.html"><a href="specification-curve-analysis.html#specifications-and-permutations-for-cluster"><i class="fa fa-check"></i><b>5.3.5</b> Specifications and Permutations for Cluster</a></li>
+</ul></li>
+<li class="chapter" data-level="5.4" data-path="specification-curve-analysis.html"><a href="specification-curve-analysis.html#setup"><i class="fa fa-check"></i><b>5.4</b> Setup</a><ul>
+<li class="chapter" data-level="5.4.1" data-path="index.html"><a href="index.html#workspace"><i class="fa fa-check"></i><b>5.4.1</b> Workspace</a></li>
+<li class="chapter" data-level="5.4.2" data-path="specification-curve-analysis.html"><a href="specification-curve-analysis.html#job-arrays-for-the-cluster"><i class="fa fa-check"></i><b>5.4.2</b> Job Arrays for the Cluster</a></li>
+</ul></li>
+<li class="chapter" data-level="5.5" data-path="specification-curve-analysis.html"><a href="specification-curve-analysis.html#re-compiling"><i class="fa fa-check"></i><b>5.5</b> Re-Compiling</a><ul>
+<li class="chapter" data-level="5.5.1" data-path="specification-curve-analysis.html"><a href="specification-curve-analysis.html#raw-data-functions"><i class="fa fa-check"></i><b>5.5.1</b> Raw Data Functions</a></li>
+<li class="chapter" data-level="5.5.2" data-path="specification-curve-analysis.html"><a href="specification-curve-analysis.html#perm-data-functions"><i class="fa fa-check"></i><b>5.5.2</b> Perm Data Functions</a></li>
+<li class="chapter" data-level="5.5.3" data-path="specification-curve-analysis.html"><a href="specification-curve-analysis.html#inferential-based-tests"><i class="fa fa-check"></i><b>5.5.3</b> Inferential-Based Tests</a></li>
+<li class="chapter" data-level="5.5.4" data-path="specification-curve-analysis.html"><a href="specification-curve-analysis.html#plotting-function"><i class="fa fa-check"></i><b>5.5.4</b> Plotting Function</a></li>
+<li class="chapter" data-level="5.5.5" data-path="specification-curve-analysis.html"><a href="specification-curve-analysis.html#compiling-function"><i class="fa fa-check"></i><b>5.5.5</b> Compiling Function</a></li>
+</ul></li>
+<li class="chapter" data-level="5.6" data-path="specification-curve-analysis.html"><a href="specification-curve-analysis.html#results"><i class="fa fa-check"></i><b>5.6</b> Results</a><ul>
+<li class="chapter" data-level="5.6.1" data-path="psm-models-psm-mods.html"><a href="psm-models-psm-mods.html#tables"><i class="fa fa-check"></i><b>5.6.1</b> Tables</a></li>
+</ul></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">A Mega-Analysis of Personality Predictions: Robustness and Boundary Conditions</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="header">
+<h1 class="title">A Mega-Analysis of Personality Predictions: Robustness and Boundary Conditions</h1>
+<p class="author"><em>Emorie D. Beck</em></p>
+<p class="date"><em>2020-07-01</em></p>
+</div>
+<div id="workspace" class="section level1">
+<h1><span class="header-section-number">Chapter 1</span> Workspace</h1>
+<div id="packages" class="section level2">
+<h2><span class="header-section-number">1.1</span> Packages</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">library</span>(knitr)</a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw">library</span>(kableExtra)</a>
+<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="kw">library</span>(readxl)</a>
+<a class="sourceLine" id="cb1-4" data-line-number="4"><span class="kw">library</span>(psych)</a>
+<a class="sourceLine" id="cb1-5" data-line-number="5"><span class="kw">library</span>(brms)</a>
+<a class="sourceLine" id="cb1-6" data-line-number="6"><span class="kw">library</span>(mice)</a>
+<a class="sourceLine" id="cb1-7" data-line-number="7"><span class="kw">library</span>(fixest)</a>
+<a class="sourceLine" id="cb1-8" data-line-number="8"><span class="kw">library</span>(parallel)</a>
+<a class="sourceLine" id="cb1-9" data-line-number="9"><span class="kw">library</span>(MuMIn)</a>
+<a class="sourceLine" id="cb1-10" data-line-number="10"><span class="kw">library</span>(MatchIt)</a>
+<a class="sourceLine" id="cb1-11" data-line-number="11"><span class="kw">library</span>(haven)</a>
+<a class="sourceLine" id="cb1-12" data-line-number="12"><span class="kw">library</span>(broom.mixed)</a>
+<a class="sourceLine" id="cb1-13" data-line-number="13"><span class="kw">library</span>(rstan)</a>
+<a class="sourceLine" id="cb1-14" data-line-number="14"><span class="kw">library</span>(tidybayes)</a>
+<a class="sourceLine" id="cb1-15" data-line-number="15"><span class="kw">library</span>(shiny)</a>
+<a class="sourceLine" id="cb1-16" data-line-number="16"><span class="kw">library</span>(plyr)</a>
+<a class="sourceLine" id="cb1-17" data-line-number="17"><span class="kw">library</span>(tidyverse)</a>
+<a class="sourceLine" id="cb1-18" data-line-number="18"><span class="kw">library</span>(furrr)</a></code></pre></div>
+</div>
+<div id="directory-path" class="section level2">
+<h2><span class="header-section-number">1.2</span> Directory Path</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1">res_path &lt;-<span class="st"> &quot;https://github.com/emoriebeck/selection/blob/master&quot;</span></a>
+<a class="sourceLine" id="cb2-2" data-line-number="2">wd &lt;-<span class="st"> &quot;/Volumes/Emorie Beck/projects/selection&quot;</span></a></code></pre></div>
+</div>
+<div id="codebook" class="section level2">
+<h2><span class="header-section-number">1.3</span> Codebook</h2>
+<p>Each study has a separate codebook indexing matching, covariate, personality, and outcome variables. Moreover, these codebooks contain information about the original scale of the variable, any recoding of the variable (including binarizing outcomes, changing the scale, and removing missing data), reverse coding of scale variables, categories, etc.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="co"># list of all codebook sheets</span></a>
+<a class="sourceLine" id="cb3-2" data-line-number="2">sheets &lt;-<span class="st"> </span><span class="kw">sprintf</span>(<span class="st">&quot;%s/codebooks/master_codebook_01.24.20.xlsx&quot;</span>, wd) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">excel_sheets</span>()</a>
+<a class="sourceLine" id="cb3-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb3-4" data-line-number="4"><span class="co"># function for reading in sheets</span></a>
+<a class="sourceLine" id="cb3-5" data-line-number="5">read_fun &lt;-<span class="st"> </span><span class="cf">function</span>(x){</a>
+<a class="sourceLine" id="cb3-6" data-line-number="6">  <span class="kw">sprintf</span>(<span class="st">&quot;%s/codebooks/master_codebook_01.24.20.xlsx&quot;</span>, wd) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">read_xlsx</span>(., <span class="dt">sheet =</span> x)</a>
+<a class="sourceLine" id="cb3-7" data-line-number="7">}</a>
+<a class="sourceLine" id="cb3-8" data-line-number="8"></a>
+<a class="sourceLine" id="cb3-9" data-line-number="9"><span class="co"># read in sheets and index source</span></a>
+<a class="sourceLine" id="cb3-10" data-line-number="10">codebook &lt;-<span class="st"> </span><span class="kw">tibble</span>(</a>
+<a class="sourceLine" id="cb3-11" data-line-number="11">  <span class="dt">study =</span> sheets,</a>
+<a class="sourceLine" id="cb3-12" data-line-number="12">  <span class="dt">codebook =</span> <span class="kw">map</span>(study, read_fun)</a>
+<a class="sourceLine" id="cb3-13" data-line-number="13">)</a>
+<a class="sourceLine" id="cb3-14" data-line-number="14"></a>
+<a class="sourceLine" id="cb3-15" data-line-number="15"><span class="co">## short and long versions of names of all categories for later use</span></a>
+<a class="sourceLine" id="cb3-16" data-line-number="16">studies &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;addhealth&quot;</span>, <span class="st">&quot;bhps&quot;</span>, <span class="st">&quot;gsoep&quot;</span>, <span class="st">&quot;hilda&quot;</span>, <span class="st">&quot;hrs&quot;</span>, <span class="st">&quot;liss&quot;</span>, <span class="st">&quot;midus&quot;</span>, <span class="st">&quot;nlsy&quot;</span>, <span class="st">&quot;shp&quot;</span>, <span class="st">&quot;wls&quot;</span>)</a>
+<a class="sourceLine" id="cb3-17" data-line-number="17">studies_long &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Add Health&quot;</span>, <span class="st">&quot;BHPS&quot;</span>, <span class="st">&quot;GSOEP&quot;</span>, <span class="st">&quot;HILDA&quot;</span>, <span class="st">&quot;HRS&quot;</span>, <span class="st">&quot;LISS&quot;</span>, <span class="st">&quot;MIDUS&quot;</span>, <span class="st">&quot;NLSY&quot;</span>, <span class="st">&quot;SHP&quot;</span>, <span class="st">&quot;WLS&quot;</span>)</a>
+<a class="sourceLine" id="cb3-18" data-line-number="18"></a>
+<a class="sourceLine" id="cb3-19" data-line-number="19">traits &lt;-<span class="st"> </span>codebook<span class="op">$</span>codebook[[<span class="dv">2</span>]] <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(category <span class="op">==</span><span class="st"> &quot;pers&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb3-20" data-line-number="20"><span class="st">  </span><span class="kw">select</span>(<span class="dt">long_name =</span> Construct, <span class="dt">short_name =</span> name)</a>
+<a class="sourceLine" id="cb3-21" data-line-number="21"></a>
+<a class="sourceLine" id="cb3-22" data-line-number="22">outcomes &lt;-<span class="st"> </span>codebook<span class="op">$</span>codebook[[<span class="dv">2</span>]] <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(category <span class="op">==</span><span class="st"> &quot;out&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb3-23" data-line-number="23"><span class="st">  </span><span class="kw">select</span>(<span class="dt">long_name =</span> Construct, <span class="dt">short_name =</span> name)</a>
+<a class="sourceLine" id="cb3-24" data-line-number="24"></a>
+<a class="sourceLine" id="cb3-25" data-line-number="25">moderators &lt;-<span class="st"> </span>codebook<span class="op">$</span>codebook[[<span class="dv">2</span>]] <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(category <span class="op">==</span><span class="st"> &quot;mod&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb3-26" data-line-number="26"><span class="st">  </span><span class="kw">select</span>(<span class="dt">long_name =</span> Construct, <span class="dt">short_name =</span> name, breaks, mod, mod_name)</a></code></pre></div>
+</div>
+<div id="other-supporting-documents" class="section level2">
+<h2><span class="header-section-number">1.4</span> Other Supporting Documents</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="co"># used personality waves </span></a>
+<a class="sourceLine" id="cb4-2" data-line-number="2">p_waves &lt;-<span class="st"> </span><span class="kw">sprintf</span>(<span class="st">&quot;%s/codebooks/personality_waves.xlsx&quot;</span>, wd) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">read_xlsx</span>()</a>
+<a class="sourceLine" id="cb4-3" data-line-number="3"><span class="co"># used covariates for specifications </span></a>
+<a class="sourceLine" id="cb4-4" data-line-number="4">specifications &lt;-<span class="st"> </span><span class="kw">sprintf</span>(<span class="st">&quot;%s/codebooks/specifications.xlsx&quot;</span>, wd) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">read_xlsx</span>()</a>
+<a class="sourceLine" id="cb4-5" data-line-number="5"><span class="co"># coded specificatoin curve results</span></a>
+<a class="sourceLine" id="cb4-6" data-line-number="6">spec_summ &lt;-<span class="st"> </span><span class="kw">sprintf</span>(<span class="st">&quot;%s/results/sca/SCA_summary.xlsx&quot;</span>, wd) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">read_xlsx</span>()</a>
+<a class="sourceLine" id="cb4-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb4-8" data-line-number="8"><span class="co"># occupation code converters </span></a>
+<a class="sourceLine" id="cb4-9" data-line-number="9">occ90to00 &lt;-<span class="st"> </span><span class="kw">sprintf</span>(<span class="st">&quot;%s/codebooks/occ_90-00.xls&quot;</span>, wd) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">read_xls</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">mutate_at</span>(<span class="kw">vars</span>(OCC90, OCC00), as.numeric)</a>
+<a class="sourceLine" id="cb4-10" data-line-number="10">occ70to90 &lt;-<span class="st"> </span><span class="kw">sprintf</span>(<span class="st">&quot;%s/codebooks/occ1970_occ1990dd.dta&quot;</span>, wd) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">read_dta</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb4-11" data-line-number="11"><span class="st">  </span><span class="kw">setNames</span>(<span class="kw">c</span>(<span class="st">&quot;OCC70&quot;</span>, <span class="st">&quot;OCC90&quot;</span>))</a>
+<a class="sourceLine" id="cb4-12" data-line-number="12">occ80to90 &lt;-<span class="st"> </span><span class="kw">sprintf</span>(<span class="st">&quot;%s/codebooks/occ1980_occ1990dd.dta&quot;</span>, wd) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">read_dta</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb4-13" data-line-number="13"><span class="st">  </span><span class="kw">setNames</span>(<span class="kw">c</span>(<span class="st">&quot;OCC80&quot;</span>, <span class="st">&quot;OCC90&quot;</span>))</a>
+<a class="sourceLine" id="cb4-14" data-line-number="14"></a>
+<a class="sourceLine" id="cb4-15" data-line-number="15"><span class="co"># npb codes for ses</span></a>
+<a class="sourceLine" id="cb4-16" data-line-number="16">npb &lt;-<span class="st"> </span><span class="kw">sprintf</span>(<span class="st">&quot;%s/codebooks/npb.xlsx&quot;</span>, wd) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">read_xlsx</span>() <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb4-17" data-line-number="17"><span class="st">  </span><span class="kw">setNames</span>(<span class="kw">c</span>(<span class="st">&quot;OCC00&quot;</span>, <span class="st">&quot;NPB&quot;</span>, <span class="st">&quot;desc&quot;</span>))</a></code></pre></div>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+
+<a href="dataCleaning.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/rstudio/bookdown-demo/edit/master/index.Rmd",
+"text": "Edit"
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["bookdown-demo.pdf", "bookdown-demo.epub"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>

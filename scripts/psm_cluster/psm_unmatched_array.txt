@@ -1,0 +1,27 @@
+#!/bin/bash
+#PBS -m n
+## Give the job a name to help keep track of running jobs
+#PBS -N psm_unmatched
+# specify the array
+# PBS -t 1-1372%%200
+#PBS -t 1-3
+# Specify the resources needed
+#PBS -l nodes=1:ppn=1,mem=6gb,walltime=168:00:00
+
+## merge standard error and output
+#PBS -j oe
+
+# Use the old queue for testing
+#PBS -q old_route
+
+export PARAMS=`cat ${HOME}/psm_matched_args.txt |
+  sed -n ${PBS_ARRAYID}p`
+
+# Load the environmental variables necessary for running R
+module load R-3.6.1
+
+cat ~/.R/Makevars 
+
+## Run R script based on the array number. 
+# Run R script based on the array number. 
+Rscript psm_unmatched_run.R 

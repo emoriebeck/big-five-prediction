@@ -1,0 +1,24 @@
+#!/bin/bash
+#PBS -m n
+## Give the job a name to help keep track of running jobs
+#PBS -N psm_reliability
+# specify the array
+#PBS -t 250-980
+# Specify the resources needed
+#PBS -l nodes=1:ppn=8,mem=4gb,walltime=24:00:00
+
+## merge standard error and output
+#PBS -j oe
+
+export PARAMS=`cat ${HOME}/psm_matched_args.txt |
+  sed -n ${PBS_ARRAYID}p`
+
+# Load the environmental variables necessary for running R
+module load R-3.6.1
+
+cat ~/.R/Makevars 
+
+cd /scratch/edbeck
+
+## Run R script based on the array number. 
+Rscript psm_matched_run_pe8_24.R 

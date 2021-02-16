@@ -1,0 +1,713 @@
+# Specification Curve Analysis  
+
+## Load Data  
+### Covariates  
+```{r sca cov, eval = F}
+loadRData <- function(fileName, type){
+#loads an RData file, and returns it
+    path <- sprintf("%s/data/imputed/%s_imputed_small.RData", wd, fileName)
+    load(path)
+    get(ls()[grepl(type, ls())])
+}
+
+studies <- c("addhealth", "bhps", "gsoep", "hilda", "hrs", "liss", "midus", "nlsy", "shp", "wls")
+studies_long <- c("Add Health", "BHPS", "GSOEP", "HILDA", "HRS", "LISS", "MIDUS", "NLSY", "SHP", "WLS")
+studies_num <- 1:10
+
+sca_cov <- tibble(study = studies) %>%
+  mutate(data = map(study, ~loadRData(., "SCA_imp")),
+         data = map(data, ~(.) %>% mutate(
+           p_year = as.numeric(p_year), SID = as.character(SID))),
+         study = mapvalues(study, studies, studies_long)) %>%
+  unnest(data) %>%
+  filter(age < 100)
+
+sca_cov_fun <- function(item){
+  p_waves %>% 
+    filter(p_item == item) %>% 
+    select(study = Study, Used) %>%
+    full_join(sca_cov) %>%
+    filter(p_year == Used) %>%
+    distinct() %>%
+    select(-Used) %>%
+    mutate(BMI = ifelse(is.nan(BMI) | is.infinite(BMI), NA, BMI))
+}
+
+sca_cov <- tibble(Trait = unique(p_waves$p_item)) %>%
+  mutate(data = map(Trait, sca_cov_fun))
+```
+
+### Outcomes  
+```{r sca out, eval = F}
+loadRData <- function(fileName, type){
+#loads an RData file, and returns it
+    path <- sprintf("%s/data/clean/%s_cleaned.RData", wd, fileName)
+    load(path)
+    get(ls()[grepl(type, ls())])
+}
+
+sca_out <- tibble(study = studies) %>%
+  mutate(data = map(study, ~loadRData(., "out")),
+         data = map(data, ~(.) %>% mutate(p_year = as.numeric(p_year), SID = as.character(SID))),
+         study = mapvalues(study, studies, studies_long)) %>%
+  unnest(data) %>%
+  filter(!grepl("sep", name)) %>%
+  select(study, SID, name, p_year, value) %>%
+  filter(complete.cases(.)) %>%
+  distinct() %>%
+  group_by(study, p_year, SID, name) %>%
+  summarize(value = max(value, na.rm = T)) %>%
+  ungroup() %>%
+  spread(name, value) %>%
+  full_join(p_waves %>% select(study = Study, p_item, Used)) %>%
+  filter(p_year == Used) %>%
+  select(-p_year, -Used) %>%
+  group_by(p_item) %>%
+  nest() %>%
+  ungroup() %>%
+  mutate(data = map(data, ~(.) %>% gather(Outcome, value, -study, -SID, na.rm = T))) %>%
+  rename(Trait = p_item)
+```
+
+### Personality
+```{r sca pers, eval = F}
+sca_pers <- tibble(study = studies) %>%
+  mutate(data = map(study, ~loadRData(., "pers")),
+         data = map(data, ~(.) %>% ungroup() %>% mutate(year = as.numeric(year), SID = as.character(SID))),
+         study = mapvalues(study, studies, studies_long)) %>%
+  unnest(data) %>%
+  filter(!is.na(name) & !is.na(value)) %>%
+  full_join(p_waves %>% select(study = Study, name = p_item, Used)) %>%
+  filter(year == Used) %>%
+  select(study:value) %>%
+  group_by(name) %>%
+  nest() %>%
+  ungroup() %>%
+  rename(Trait = name)
+```
+
+### Moderators  
+```{r sca mod, eval = F}
+mod_data <- tibble(study = studies) %>%
+  mutate(data = map(study, ~loadRData(., "alpha")),
+         data = map(data, ~(.) %>% ungroup() %>% mutate(year = as.numeric(year))),
+         study = mapvalues(study, studies, studies_long)) %>%
+  unnest(data) %>%
+  mutate(alpha = map(alpha, possibly(~(.)$total[[1]], NA_real_))) %>% 
+  filter(!is.na(name)) %>%
+  select(study, p_item = name, year, alpha) %>%
+  unnest(alpha) %>%
+  full_join(p_waves %>% select(p_item, study = Study, Used, predInt)) %>%
+  filter(year == Used) %>%
+  select(-Used) %>%
+  rename(Trait = p_item, reliability = alpha)
+```
+
+## SCA Data Setup  
+```{r sca data setup, eval = F}
+factor_fun <- function(x){if(is.numeric(x)){diff(range(x, na.rm = T)) %in% 1:2} else{F}}
+
+sca_data_fun <- function(trait, outcome){
+  df1 <- (sca_pers %>% filter(Trait == trait))$data[[1]] %>% select(study, SID, p_value = value) %>%
+    full_join((sca_out %>% filter(Trait == trait))$data[[1]] %>% filter(Outcome == outcome) %>% select(study, SID, o_value = value)) %>%
+    filter(complete.cases(.)) %>%
+    mutate(o_value = factor(ifelse(as.numeric(as.character(o_value)) > 1, 1, o_value))) %>%
+    full_join((sca_cov %>% filter(Trait == trait))$data[[1]] %>% select(-p_year)) %>%
+    full_join(mod_data %>% filter(Trait == trait) %>% select(-Trait, -year)) %>%
+    mutate_if(factor_fun, as.factor) %>%
+    filter(!is.na(o_value) & !is.na(p_value)) %>%
+    group_by(study) %>%
+    mutate_at(vars(p_value, grsWages, SRhealth, BMI, exercise, parOccPrstg,
+                 parOccPrstg, numKids), 
+            ~((. - min(., na.rm = T))/(max(., na.rm = T) - min(., na.rm = T))*10)) %>%
+    mutate_if(is.numeric, ~ifelse(is.nan(.) | is.infinite(.), NA, .)) %>%
+    mutate(age = scale(age, center = T, scale = F)) %>%
+    ungroup() #%>%
+  if(trait == "IQ"){df1<-df1 %>% mutate_at(vars(physhlthevnt,numKids), ~ifelse(study == "NLSY" & is.na(.), 0, .))}
+    # mutate_at(vars(education, parEdu), ~ifelse(!is.na(.), as.numeric(as.character(.)) - 1, 0))
+  save(df1, file = sprintf("%s/data/sca/sca_%s_%s.RData", wd, trait, outcome))
+}
+```
+
+```{r sca data run, eval = F}
+sca_nested <- crossing(
+  Trait = unique(sca_cov$Trait),
+  Outcome = unique(sca_out$data[[1]]$Outcome)
+  ) %>%
+  filter(Trait == "N") %>%
+  mutate(data = map2(Trait, Outcome, sca_data_fun))
+
+rm(list = c("sca_out", "sca_pers", "sca_cov"))
+```
+
+## Functions  
+### Permutation Samples  
+```{r sca sample fun}
+sample_fun <- function(i, dfx){
+  (dfx %>% select(study, SID, p_value) %>%
+     group_by(study) %>%
+     mutate(p_value = sample(p_value, n(), replace = F)) %>%
+     ungroup())$p_value 
+}
+```
+
+### Permutation Models  
+```{r sca perm fun}
+perm_fun <- function(i, df3, f1, po){
+  n <- df3$n
+  po <- po[n]
+  which(n %in% 1:length(po))
+  x <- df3 %>% select(-p_value) %>% mutate(p_value = po)
+  start <- Sys.time()
+  fit2  <- femlm(formula(f1), data = x, family = "logit")
+  print(Sys.time() - start)
+  par2 <- coef(fit2)["p_value"]
+  ci2 <- as.matrix(confint(fit2, parm="p_value")[1,])
+  # tidy2 <- tidy(fit2, effects = "fixed", conf.int = T) %>% 
+  #   filter(term == "p_value") %>%
+  #   select(estimate, conf.low, conf.high) %>%
+  #   as.matrix()
+  tidy2 <- c(par2, ci2)
+  names(tidy2) <- c("p_value", "ci_lower", "ci_upper")
+  rm(list = c("x", "df3", "fit2"))
+  gc()
+  return(tidy2)
+}
+```
+
+### Terms and Formulas  
+```{r sca terms}
+sca_term_fun <- function(trait, outcome){
+  terms <- c("p_value", (specifications %>% select(name, Effect, one_of(outcome)) %>% filter(complete.cases(.)) %>%
+                           mutate(name = ifelse(Effect == "moderator", paste(name, ": p_value", sep = " "), name)))$name)
+}
+
+sca_formula_fun <- function(terms){
+  f <- paste("o_value ~ ", # outcome 
+             paste(terms, collapse = " + "), # fixed effects 
+             "| study", collapse = "") # random effects
+}
+```
+
+### Full Models and Workspace Setup
+```{r sca workspace}
+sca_setup_fun <- function(trait, outcome, fixed = "p_value"){
+  terms <- sca_term_fun(trait, outcome)
+  terms <- if(trait == "OP" & outcome == "mvInPrtnr"){terms[terms != "alcohol"]}
+  f <- sca_formula_fun(terms)
+  # wd <- "~/selection"
+  load(sprintf("%s/data/sca/sca_%s_%s.RData", wd, trait, outcome))
+  df1 <- df1 
+  std <- df1 %>%
+    group_by(study, o_value) %>%
+    tally() %>%
+    full_join(crossing(study = unique(.$study), o_value = factor(c(0,1))))
+  std <- unique(std$study[std$n < 50 | is.na(std$n)])
+  df1 <- df1 %>% 
+    filter(!study %in% std) %>% 
+    mutate(o_value = as.numeric(as.character(o_value)),
+           n = row_number()) 
+  df2 <- df1 %>%
+    select(study, SID, p_value, o_value, n, one_of(terms)) %>% 
+    filter(complete.cases(.)) #%>%
+    # mutate_if(is.factor, factor)
+  
+  
+  start <- Sys.time()
+  # optCtrl=list(maxfun=2e5))
+  full_mod <- femlm(formula(f), data = df2, family = "logit")
+  # full_mod <- glmer(formula(f), data = df1, family = "binomial", na.action = "na.omit", control = cntrl)
+  print(Sys.time() - start)
+  gmCall <- get_call(full_mod)
+  gmEnv <- parent.frame()
+  gmFormulaEnv <- environment(as.formula(formula(full_mod), env = gmEnv))
+  
+  # set up terms
+  
+  allTerms <- allTerms0 <- getAllTerms.fixest(full_mod, terms)
+  deps <- attr(allTerms0, "deps")
+  fixed <- union(fixed, rownames(deps)[rowSums(deps, na.rm = TRUE) == 
+                                         ncol(deps)])
+  fixed <- c(fixed, allTerms[allTerms %in% "(Intercept)"])
+  nFixed <- length(fixed)
+  gmCoefNames <- gmCoefNames0 <- names(coef(full_mod))
+  
+  # this chunk makes sure that interactions include main effects
+  varsOrder <- order(allTerms %in% fixed)
+  termsOrder <- order(gmCoefNames %in% fixed)
+  allTerms <- allTerms[varsOrder]
+  gmCoefNames <- gmCoefNames[termsOrder]
+  di <- match(allTerms, rownames(deps))
+  deps <- deps[di, di, drop = FALSE]
+  
+  # setup output
+  nVars <- length(allTerms)
+  nTerms <- length(gmCoefNames)
+  # rvNcol <- nVars + 3L + 2
+  # rtNcol <- nTerms + 3L + 2
+  # resultChunkSize <- 1000000L
+  # rval <- matrix(NA_real_, ncol = rtNcol, nrow = resultChunkSize)
+  
+  nFixed <- 2  # p_value & intercept
+  nVariants <- 1L
+  nov <- as.integer(nVars - nFixed)
+  ncomb <- (2L^nov) 
+  comb.sfx <- rep(TRUE, nFixed)
+  comb.seq <- if (nov != 0L) {seq_len(nov)}
+  # ord <- integer(resultChunkSize)
+  
+  pval_out <- sapply(1:500, function(x){sample_fun(x, df1)}) # change back to 500
+  # perm_res <- array(NA_real_, c(10, 3, resultChunkSize)) # change back to 500
+  # no_cores <- detectCores() - 1
+  
+  k <- 0L
+  save(list = ls(all.names = TRUE), 
+       file = sprintf("%s/results/sca_workspace/sca_workspace_%s_%s.RData", wd, outcome, trait))
+  return(ncomb)
+}
+``` 
+
+### Specifications and Permutations for Cluster  
+```{r sca run}
+sca_run_fun <- function(trait, outcome, min, max){
+  load(sprintf("/scratch/edbeck/sca_workspace/sca_workspace_%s_%s.RData", wd, outcome, trait))
+  k <- 0L
+  seq_comb <- seq(min, max, 1)
+  # seq_comb <- seq_comb[1:2] # remove after testing
+  
+  res <- lapply(seq_comb, function(iComb){
+    varComb <- iComb%%nVariants
+    jComb <- (iComb - varComb)%/%nVariants
+    if (varComb == 0L) {
+      isok <- TRUE
+      comb <- c(as.logical(intToBits(jComb)[comb.seq]), 
+                comb.sfx)
+      nvar <- sum(comb) - 1
+      if (!formula_margin_check(comb, deps)) {
+        isok <- FALSE
+        res <- NA
+      }
+      new_terms <- allTerms[comb]
+      if(sum(grepl(":", new_terms)) > 1){
+        isok <- FALSE
+        res <- NA
+      }
+    }
+    if (!isok) {
+      res <- NA
+    } else{
+      f1 <- paste("o_value ~ ", # outcome
+                  paste(new_terms[new_terms != "(Intercept)"], collapse = " + "), # fixed effects
+                  " | study", collapse = "")
+      std <- df1 %>%
+        group_by(study, o_value) %>%
+        tally() %>%
+        full_join(crossing(study = unique(.$study), o_value = c(0,1)))
+      std <- unique(std$study[std$n < 50 | is.na(std$n)])
+      df3 <- df1 %>%
+        filter(!study %in% std) %>% 
+        select(study:o_value, n, one_of(new_terms)) %>%
+        mutate(o_value = as.numeric(as.character(o_value))) %>%
+        filter(complete.cases(.)) 
+      #   filter(study %in% std) 
+      fit <- femlm(formula(f1), data = df3, family = "logit")
+      print("made it to creating fit")
+      mci1 <- confint(fit, parm = "p_value")
+      mcoef1 <- matchCoef(fit, all.terms = gmCoefNames)
+      ll1    <- logLik(fit)
+      bic1 <- BIC(fit)
+      nobs1  <- nobs(fit)
+      psr1 <- fit$pseudo_r2
+      row1   <- c(mcoef1[gmCoefNames], ci.lower = mci1[1,1], ci.upper = mci1[1,2],
+                  bic = bic1, psr2 = psr1, ll = ll1)
+      perm1 <- t(sapply(1:500, function(ii) perm_fun(ii, df3, f1, as.numeric(pval_out[,ii]))))
+      print(Sys.time() - start)
+      
+      k <- k + 1L
+      print(sprintf("%s %s %s", iComb, f1, k))
+      res <- list(rval = row1, perm_res = perm1, ord = iComb)
+      rm(list = c("row1", "perm1", "fit", "mci1", "mcoef1", "ll1", "nobs1"))
+      gc()
+    }
+    return(res)
+  })
+  
+  res <- res[!is.na(res)]
+  
+  rval <- ldply(res, `[[`, 1)
+  perm_res <- llply(res, `[[`, 2)
+  ord <- laply(res, `[[`, 3)
+  perm_res <- abind::abind(perm_res, along = 3)
+  
+  # colnames(rval) <- c(gmCoefNames, "ci.lower", "ci.upper", "df", "ll")
+  row.names(rval) <- ord
+  # rval[, seq_along(gmCoefNames)] <- rval[, v <- order(termsOrder)]
+  save(rval, file = sprintf("/scratch/edbeck/raw/raw_%s_%s_%s_%s.RData", trait, outcome, min, max))
+  save(perm_res, file = sprintf("/scratch/edbeck/perm/perm_%s_%s_%s_%s.RData", trait, outcome, min, max))
+}
+```
+
+## Setup  
+### Workspace  
+```{r sca func}
+source(sprintf("%s/scripts/mumin_fun.R", wd))
+```
+
+```{r sca setup run, eval = F}
+sca_nested <- crossing(
+  Trait = unique(p_waves$p_item),
+  Outcome = (codebook$codebook[[2]] %>% filter(category == "out"))$name
+) %>% 
+  # filter(Trait == "OP" & Outcome == "mvInPrtnr") %>%
+  mutate(sca = pmap(list(Trait, Outcome, "p_value"), sca_setup_fun))
+```
+
+### Job Arrays for the Cluster  
+```{r sca job arrays, eval = F}
+spl_fun <- function(trait, outcome){
+  print(paste(trait, outcome))
+  load(sprintf("%s/results/sca_workspace/sca_workspace_%s_%s.RData", wd, outcome, trait))
+  x <- seq(0,ncomb,1)
+  seq_comb = split(x, sort(x%%150))
+}
+
+done <- tibble(file = list.files(sprintf("%s/results/sca/perm", wd))) %>% 
+  separate(file, c("scrap", "Trait", "Outcome", "min", "max"), sep = "_") %>%
+  mutate(perm = "done", max = str_remove_all(max, ".RData")) %>%
+  select(-scrap)  %>%
+  mutate_at(vars(min, max), as.numeric) 
+
+sca_jobs <- crossing(
+  Trait = unique(p_waves$p_item), 
+  Outcome = (codebook$codebook[[2]] %>% filter(category == "out"))$name
+) %>%
+  # filter(Outcome %in% c("mvInPrtnr", "frstjob") | 
+  #       (Trait %in% c("E", "SS", "SWL") & Outcome %in% c("physhlthevnt", "mntlhlthevnt"))) %>%
+  mutate(data = map2(Trait, Outcome, possibly(spl_fun, NA_real_))) %>%
+  unnest(data) %>%
+  mutate(min = map_dbl(data, min),
+         max = map_dbl(data, max)) %>%
+  select(trait = Trait, outcome = Outcome, min, max) %>%
+  write.table(., file = sprintf("%s/scripts/sca_cluster/sca_args.txt", wd), row.names = F, col.names = F)
+```
+
+## Re-Compiling  
+### Raw Data Functions  
+```{r sca raw fun}
+# read raw data 
+raw_read_fun <- function(file){
+  load(sprintf("%s/results/sca/raw/%s", wd, file))
+  rval <- rval %>% 
+    mutate(ci.lower = ifelse(is.na(ci.lower), -.01, ci.lower),
+           ci.upper = ifelse(is.na(ci.upper), -.01, ci.upper))
+  return(rval)
+}
+
+# determine dominant sign for personality-outcome association
+dom_sign_fun <- function(p){
+  signs <- sign(p)
+  dom<-if(sum(signs == 1, na.rm = T) > sum(signs == -1, na.rm = T)){1} else {-1}
+  num_dom <- sum(signs == dom, na.rm = T)
+  return(c("dom_sign" = dom, "num_dom" = num_dom))
+}
+
+# determine number of significant dominant signs
+num_sig_fun <- function(l, u, p, dom){
+  sum(sign(l) == sign(u) & sign(p) == dom, na.rm = T)
+}
+```
+
+### Perm Data Functions  
+```{r sca perm funs}
+# read in permuted data  
+perm_read_fun <- function(file){
+  file <- str_replace(file, "raw", "perm")
+  load(sprintf("%s/results/sca/perm/%s", wd, file))
+  if(any(is.na(perm_res))){
+    perm_res[,2,] <- apply(perm_res[,2,], 1, function(x) {x[is.na(x)] <- -.01; x}) %>% t()
+    perm_res[,3,] <- apply(perm_res[,3,], 1, function(x) {x[is.na(x)] <- -.01; x}) %>% t()
+  }
+  return(perm_res)
+}
+
+# calculate median and quantiles of permuted personality-outcome associations  
+sum_fun <- function(x){
+  t(apply(x[,1,], 2, function(y) c(median(y, na.rm = T), quantile(y, prob = c(.15, .85), na.rm = T)))) %>% 
+    data.frame() %>% 
+    setNames(c("perm_median", "perm_lower", "perm_upper"))
+}
+```
+
+### Inferential-Based Tests  
+Simonsohn et al. define 3 inferential-based tests: 
+1. the median overall point estimate within each specification curve.  
+2. the percentage of specifications that are of the dominant sign.  
+3. the percentage of specifications with the dominant sign that are also significant.   
+
+```{r sca perm test}
+# median permuted personality-outcome association for each model
+perm_med_fun <- function(m){
+  apply(m[, 1, ], 1, function(x){ # m[, 1, ] = p_value column for each specification with length = 500 perm
+    median(x, na.rm = T)
+  })
+}
+
+# number of (out of 500) dominant permuted sign of personality-outcome associations for each  model  
+perm_dom_sign_fun <- function(m){
+  sapply(1:500, function(i){
+    x <- m[i, 1, ]
+    signs <- sign(x)
+    dom <- if(sum(signs == 1, na.rm = T) > sum(signs == -1, na.rm = T)){1} else {-1}
+    num_dom <- sum(signs == dom, na.rm = T)
+    return(c("dom_sign" = dom, "num_dom" = num_dom))
+    # return(dom)
+  }, simplify = T) %>% t()
+}
+
+# number of (out of 500) dominant and significant permuted sign of personality-outcome associations for each  model  
+perm_sig_fun <- function(m, dom){
+  apply(m, 1, function(x){
+    sum(sign(x[2,]) == sign(x[3,]) & sign(x[1,]) == dom, na.rm = T)
+  })
+}
+
+# combine permuted results across different models 
+# previously split up to run smaller batches of models
+combine_fun <- function(d1){
+  m<-abind::abind(d1, along = 3)
+  perm_med <- perm_med_fun(m)
+  perm_sign <- perm_dom_sign_fun(m)
+  perm_num_sign <- perm_sign[,"num_dom"]; perm_sign <- perm_sign[,"dom_sign"]
+  perm_sig <- perm_sig_fun(m, perm_sign["dom_sign"])
+  tibble(perm_med, perm_sign, perm_num_sign, perm_sig)
+}
+
+# compute inferential permutation tests by comparing raw results to each of the permutations  
+perm_inf_test_fun <- function(perm,med, sign, sig){
+  tibble(med_test = sum(abs(perm$perm_med) > abs(med))/500,
+         sign_test = sum(perm$perm_num_sign > sign)/500,
+         sig = sum(perm$perm_sig > sig)/500)
+}
+```
+
+### Plotting Function  
+```{r sca plot fun}
+# plot the results
+sca_plot_fun <- function(d1, type, trait, outcome){
+  d <- round(max(abs(1-min(exp(d1$p_value))), abs(1-exp(max(d1$p_value)))), 2)
+  lim <- c(1-d-(d/2.5), 1+d+(d/2.5))
+  brk <- round(c(1-d-(d/5), 1, 1+d+(d/5)),2)
+  lab <- str_remove(round(c(1-d-(d/5), 1, 1+d+(d/5)),2), "^0")
+  ns <- diff(lim) / 100;  sg <- diff(lim) / 50
+  top <- d1 %>%
+    arrange(p_value) %>%
+    mutate(sig = ifelse(sign(ci.lower) == sign(ci.upper), "sig", "ns"),
+           specification = 1:n()) %>%
+    mutate_at(vars(-(Min:Max), -n, -(bic:specification)), exp) %>%
+    mutate(p_min = ifelse(sig == "sig", p_value - sg, p_value - ns),
+           p_max = ifelse(sig == "sig", p_value + sg, p_value + ns)) %>%
+    ggplot(aes(x = specification, y = p_value)) +
+      scale_y_continuous(limits = lim, breaks = brk, labels = lab) +
+      scale_color_manual(values = c("black", "red")) +
+      geom_hline(aes(yintercept = 1), linetype = "dashed") +
+      geom_linerange(aes(ymin = p_min, ymax = p_max, color = sig), size = .05) +
+      # geom_errorbar(aes(color = sig, ymin = ci.lower, ymax = ci.upper), 
+              # width = 0, size = .01, alpha = .4) +
+      # geom_point(shape = "|", aes(color = sig), size = .25) +
+      labs(x = "\nSpecification Number", 
+             y = str_wrap(sprintf("Effect of %s on %s (OR)\n", trait, outcome), 30), 
+             title = bquote(.(trait) %->% .(outcome))) + 
+      theme_minimal(base_size = 11) +
+      theme(legend.title = element_text(size = 10),
+            legend.text = element_text(size = 9),
+            axis.text = element_text(color = "black"),
+            axis.line = element_line(colour = "black"),
+            legend.position = "none",
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            panel.border = element_blank(),
+            panel.background = element_blank(),
+            plot.title = element_text(hjust = .5, face = "bold"))
+  
+  if(type == "perm"){
+    top <- top + 
+      geom_smooth(aes(y = perm_lower), color = "gray", linetype = "dotted", se = F) +
+      geom_smooth(aes(y = perm_upper), color = "gray", linetype = "dotted", se = F) +
+      geom_smooth(aes(y = perm_median), color = "lightblue", linetype = "dashed", se = F) 
+  }
+  
+  bottom <- d1 %>% 
+    arrange(p_value) %>%
+    mutate(sig = ifelse(sign(ci.lower) == sign(ci.upper), "sig", "ns"),
+           specification = 1:n(),
+           # model = fct_reorder(specification, .x = p_value, .fun = min)
+           ) %>%
+    select(-(perm_median:perm_upper), -(bic:ll)) %>%
+    gather(variable, value, -(Min:n), -(ci.lower:specification)) %>% 
+    mutate(value = ifelse(!is.na(value), "|", "")) %>%
+    ggplot(aes(specification, variable, color = sig)) +
+      # geom_point(aes(size = sig), shape = "|") +
+      geom_text(aes(label = value), size = rel(2)) +
+      scale_color_manual(values = c("black", "red")) +
+      # scale_size_manual(values = c(2,3))+
+      labs(x = "\nSpecification Number", y = "Variables\n") + 
+      theme_minimal(base_size = 11) +
+      theme(legend.title = element_text(size = 10),
+            legend.text = element_text(size = 9),
+            axis.text = element_text(color = "black"),
+            axis.line = element_line(colour = "black"),
+            legend.position = "none",
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            panel.border = element_blank(),
+            panel.background = element_blank())
+  
+  p_val = cowplot::plot_grid(top, bottom, ncol = 1, align = "v", labels = c('A', 'B'))
+  # file <- sprintf("%s/results/sca/plots/%s/sca_%s_%s.pdf", wd, type, outcome, trait)
+  # ggsave(p_val, width = 12, height = 8, file = file)
+  outcome <- mapvalues(outcome, outcomes$long_name, outcomes$short_name, warn_missing = F)
+  trait <- mapvalues(trait, traits$long_name, traits$short_name, warn_missing = F)
+  file <- sprintf("%s/results/sca/plots/png/%s_%s_%s.png", wd, type, outcome, trait)
+  ggsave(p_val, width = 12, height = 8, file = file)
+}
+```
+
+### Compiling Function  
+```{r sca res compile, eval = F}
+# Compile the results 
+# written as below because of RAM issues. Everything done at once.
+sca_compile_fun <- function(trait, outcome, d){
+  # bring in raw data 
+  raw <- d %>% 
+    mutate(raw = map(files, raw_read_fun),
+           Min = as.numeric(Min)) %>%
+    select(-files, -type, -scrap) %>%
+    arrange(Min) %>% 
+    unnest(raw) %>% 
+    mutate(n = 1:n())
+  # get values for inferential tests
+  med_size <- median(raw$p_value)
+  dom_sign <- dom_sign_fun(raw$p_value)
+  sig_sign <- with(raw, num_sig_fun(ci.lower, ci.upper, p_value, dom_sign["dom_sign"]))
+  raw_test <- c(med_size, dom_sign, sig_sign)
+  names(raw_test) <- c("med_size", "dom_sign", "num_dom", "sig_sign")
+  
+  # bring in permutations
+  perm <- d  %>% 
+    mutate(data = map(files, perm_read_fun),
+           quant = map(data, sum_fun),
+           Min = as.numeric(Min)) %>%
+  select(-files, -type, -scrap) %>%
+  arrange(Min) 
+  # get values for inferential test
+  perm_test <- combine_fun(perm$data)
+  
+  # perform inferential permutation test
+  test <- perm_inf_test_fun(perm_test, med_size, dom_sign["num_dom"], sig_sign)
+  
+  # plotting 
+  d <- perm %>% select(-data) %>% unnest(quant) %>% mutate(n = 1:n()) %>%
+    full_join(raw)
+  
+  sca_plot_fun(d, "raw", trait, outcome)
+  sca_plot_fun(d, "perm", trait, outcome)
+  
+  results <- list(inf_test = test, raw_test = raw_test, perm_test = perm_test)
+  save(results,  file = sprintf("%s/results/sca/inf_test/%s_%s.RData", wd, outcome, trait))
+  rm(list = c("d", "test", "raw_test", "perm_test", "perm", "raw"))
+  gc()
+  return(results)
+}
+
+done <- tibble(
+  files = sprintf("%s/results/sca/plots/png", wd) %>% list.files()
+) %>%
+  separate(files, c("scrap", "Outcome", "Trait"), sep = "_") %>%
+  mutate(Trait = str_remove(Trait, ".png"),
+         done = "done") %>%
+  group_by(Outcome,Trait) %>%
+  filter(n()==2) %>%
+  ungroup() %>%
+  select(-scrap) %>%
+  distinct()
+
+plan(multiprocess(workers = 5L))
+sca_res_nested <- tibble(
+  files = sprintf("%s/results/sca/raw", wd) %>% list.files()
+) %>% 
+  separate(files, c("type", "Trait", "Outcome", "Min", "Max", "scrap"), remove = F) %>%
+  arrange(Min) %>%
+  group_by(Trait, Outcome) %>% 
+  nest() %>% 
+  filter(map(data, nrow) == 150) %>%
+  ungroup() %>%
+  full_join(done) %>%
+  filter(is.na(done)) %>%
+  mutate(Trait = mapvalues(Trait, traits$short_name, traits$long_name),
+         Outcome = mapvalues(Outcome, outcomes$short_name, outcomes$long_name)) %>%
+  mutate(#results = pmap(list(Trait, Outcome, data), sca_compile_fun))
+         results = future_pmap(list(Trait, Outcome, data)
+         , sca_compile_fun
+         , .progress = T
+         , .options = future_options(
+           globals = c("combine_fun", "dom_sign_fun", "num_sig_fun",
+                       "perm_dom_sign_fun", "perm_inf_test_fun",
+                       "perm_med_fun", "perm_read_fun", "wd", 
+                       "perm_sig_fun", "raw_read_fun", "read_fun",
+                       "sca_plot_fun", "sum_fun", "traits", "outcomes")
+           , packages = c("plyr", "tidyverse", "cowplot", "abind"))))
+closeAllConnections()
+```
+
+## Results  
+### Tables  
+```{r sca tab}
+read_fun <- function(file){
+  load(sprintf("%s/results/sca/inf_test/%s", wd, file))
+  return(results)
+}
+
+sca_res <- tibble(
+  files = sprintf("%s/results/sca/inf_test", wd) %>% list.files()
+) %>% 
+  separate(files, c("Outcome", "Trait"), sep = "_", remove = F) %>%
+  mutate(Trait = str_remove(Trait, ".RData"),
+         data = map(files, read_fun),
+         inf_test = map(data, ~(.)$inf_test),
+         raw_test = map(data, ~(.)$raw_test),
+         perm_test = map(data, ~(.)$perm_test))
+
+sca_res %>% 
+  select(Outcome, Trait, inf_test) %>%
+  unnest(inf_test) %>%
+  mutate(num_sig = rowSums(cbind(med_test, sign_test, sig) < (.05/3))) %>%
+  group_by(Outcome, num_sig) %>%
+  tally() %>%
+  spread(num_sig, n)
+
+t_names <- c(1, rep(3, 14))
+
+sca_res %>% 
+  select(Outcome, Trait, inf_test) %>%
+  unnest(inf_test) %>%
+  pivot_longer(cols = c("med_test", "sign_test", "sig")
+               , names_to = "Test"
+               , values_to = "val") %>%
+  mutate(Trait = mapvalues(Trait, traits$long_name, traits$short_name)) %>%
+  pivot_wider(names_from = "Trait", values_from = "val") %>%
+  select(Outcome, Test, all_of(traits$short_name)) %>%
+  mutate(Test = mapvalues(Test, c("med_test", "sign_test", "sig"), c("Median", "Sign", "Significance"))) %>%
+  mutate_at(vars(-Outcome, -Test), ~ifelse(. < .05, sprintf("<strong>%.2f</strong",.), sprintf("%.2f",.))) %>%
+  kable(.
+        , "html"
+        , escape = F
+        , align = c("r", "r", rep("c", 14))
+        , caption = "Results of the Permuation Based Inference Tests from Specification Curve Analyses") %>%
+  kable_styling(full_width = F) %>%
+  collapse_rows(1:2
+                , valign = "top"
+                , row_group_label_position = "stack") %>%
+  footnote("Median = Percentage of permutations in which the raw median effect size of the dominant sign was larger than the permuted median effect size; Sign = Percentage of permutations in which the total number of raw specifications of the dominant sign was greater than permuted. Signifiance = Percentage of permutations in which the total number of raw, significant specifications of the dominant sign was greater than the permuted.") %>%
+  save_kable(., file = sprintf("%s/results/sca/inferential_tests.html", wd))
+```
+

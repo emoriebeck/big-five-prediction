@@ -1,0 +1,11 @@
+"N" "vlntred" "parOccPrstg" 5 4
+"OP" "crim" "parOccPrstg" 1 4
+"OP" "crim" "parOccPrstg" 2 4
+"OP" "crim" "parOccPrstg" 3 4
+"OP" "crim" "parOccPrstg" 4 4
+"OP" "crim" "parOccPrstg" 5 4
+"PA" "retired" "parOccPrstg" 1 4
+"PA" "retired" "parOccPrstg" 2 4
+"PA" "retired" "parOccPrstg" 3 4
+"PA" "retired" "parOccPrstg" 4 4
+"PA" "retired" "parOccPrstg" 5 4

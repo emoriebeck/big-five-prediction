@@ -1,0 +1,15 @@
+"SS" "chldbrth" "parEdu" 1 4
+"SS" "chldbrth" "parEdu" 2 4
+"SS" "chldbrth" "parEdu" 3 4
+"SS" "chldbrth" "parEdu" 4 4
+"SS" "chldbrth" "parEdu" 5 4
+"SS" "chldmvout" "parEdu" 1 4
+"SS" "chldmvout" "parEdu" 2 4
+"SS" "chldmvout" "parEdu" 3 4
+"SS" "chldmvout" "parEdu" 4 4
+"SS" "chldmvout" "parEdu" 5 4
+"SS" "crim" "parEdu" 1 4
+"SS" "crim" "parEdu" 2 4
+"SS" "crim" "parEdu" 3 4
+"SS" "crim" "parEdu" 4 4
+"SS" "crim" "parEdu" 5 4
