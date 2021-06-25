@@ -434,14 +434,14 @@ combine_fun <- function(trait, outcome, mod, prob){
   if(mod != "none"){
     pred.fx <- fx_pred_fun(fits, m, pr)
     pred.rx <- rx_pred_fun(fits, m, pr)
-    save(pred.fx, pred.rx, file = sprintf("%s/results/psm/matched/89-CI/predicted/matched_pred_%s_%s_%s.RData", wd, trait, outcome, mod))
+    save(pred.fx, pred.rx, file = sprintf("%s/results/psm/matched/95-CI/predicted/matched_pred_%s_%s_%s.RData", wd, trait, outcome, mod))
     rm(list = c("pred.fx", "pred.rx"))
   }
 # save variance covariance matrix, fixed and random summaries, 
 # and posterior draws to folders
-  save(vc, file = sprintf("%s/results/psm/matched/89-CI/vc/matched_%s_%s_%s.RData", wd, trait, outcome, mod))
-  save(fx, rx, file = sprintf("%s/results/psm/matched/89-CI/summary/matched_%s_%s_%s.RData", wd, trait, outcome, mod))
-  save(fx.draws, tau.draws, file = sprintf("%s/results/psm/matched/89-CI/draws/matched_%s_%s_%s.RData", wd, trait, outcome, mod))
+  save(vc, file = sprintf("%s/results/psm/matched/95-CI/vc/matched_%s_%s_%s.RData", wd, trait, outcome, mod))
+  save(fx, rx, file = sprintf("%s/results/psm/matched/95-CI/summary/matched_%s_%s_%s.RData", wd, trait, outcome, mod))
+  save(fx.draws, tau.draws, file = sprintf("%s/results/psm/matched/95-CI/draws/matched_%s_%s_%s.RData", wd, trait, outcome, mod))
   # remove objects from local enviornment and clean up the garbage
   rm(list = c("fits", "fx", "rx", "fx.draws", "tau.draws"))
   gc()
@@ -453,7 +453,7 @@ combine_fun <- function(trait, outcome, mod, prob){
 # get a list of models
 files <- list.files(sprintf("%s/results/psm/matched/models", wd))
 
-done <- tibble(file = list.files(sprintf("%s/results/psm/matched/89-CI/summary", wd))) %>%
+done <- tibble(file = list.files(sprintf("%s/results/psm/matched/95-CI/summary", wd))) %>%
   separate(file, c("scrap", "Trait", "Outcome", "Moderator"), sep = "_") %>%
   mutate(Moderator = str_remove(Moderator, ".RData"), 
          Done = "done")
@@ -480,12 +480,12 @@ closeAllConnections()
 ```{r load psm mod summaries}
 # short function for reading in model results
 load_fun <- function(file, ob){
-  load(sprintf("%s/results/psm/matched/89-CI/summary/%s", wd, file))
+  load(sprintf("%s/results/psm/matched/95-CI/summary/%s", wd, file))
   get(ls()[ls() == ob])
 }
 
 # load in fixed and random summaries
-fx_res <- tibble(file = list.files(sprintf("%s/results/psm/matched/89-CI/summary", wd))) %>%
+fx_res <- tibble(file = list.files(sprintf("%s/results/psm/matched/95-CI/summary", wd))) %>%
   separate(file, c("scrap", "Trait", "Outcome", "Moderator"), sep = "_", remove = F) %>%
   filter(Trait %in% traits$short_name) %>%
   mutate(Moderator = str_remove(Moderator, ".RData"),
@@ -580,8 +580,8 @@ plot_fun <- function(df, outcome, mod){
             strip.background = element_rect(fill = "black"),
             strip.text = element_text(face = "bold", color = "white"),
             axis.text = element_text(color = "black"))
-  ggsave(p, file = sprintf("%s/results/psm/matched/89-CI/plots/study specific forest/%s/matched_%s.pdf", wd, mod, outcome), width = 7, height = 4)
-  save(p, file = sprintf("%s/results/psm/matched/89-CI/plots/study specific forest/rdata/matched_%s_%s.RData", wd, outcome, mod))
+  ggsave(p, file = sprintf("%s/results/psm/matched/95-CI/plots/study specific forest/%s/matched_%s.pdf", wd, mod, outcome), width = 7, height = 4)
+  save(p, file = sprintf("%s/results/psm/matched/95-CI/plots/study specific forest/rdata/matched_%s_%s.RData", wd, outcome, mod))
   rm(p)
   gc()
   return(T)
@@ -650,8 +650,8 @@ fx_plot_fun <- function(df, mod){
           strip.text = element_text(face = "bold", color = "black", size = rel(1.4)),
           axis.text = element_text(color = "black"),
           axis.text.y = element_text(size = rel(1)))
-ggsave(file = sprintf("%s/results/psm/matched/89-CI/plots/overall forest/%s_fixed.png", wd, mod), width = 7, height = 6)
-save(p, file = sprintf("%s/results/psm/matched/89-CI/plots/overall forest/rdata/%s_fixed.RData", wd, mod))
+ggsave(file = sprintf("%s/results/psm/matched/95-CI/plots/overall forest/%s_fixed.png", wd, mod), width = 7, height = 6)
+save(p, file = sprintf("%s/results/psm/matched/95-CI/plots/overall forest/rdata/%s_fixed.RData", wd, mod))
 rm(p)
 gc()
 return(T)
@@ -739,7 +739,7 @@ psm_tab_fun <- function(d, mod){
     kableExtra::group_rows("Volunteering", rs$start[13], rs$end[13], label_row_css = NULL) %>%
     kableExtra::group_rows("Criminality", rs$start[14], rs$end[14], label_row_css = NULL) %>%
     footnote("<em>OR</em> = Odds Ratio; <em>UI</em> = 89% Bayesian Uncertainty Interval. Bold indicates model terms whose 89% UI of log odds did not overlap with 0.", escape = F)  %>%
-    save_kable(., file = sprintf("%s/results/psm/matched/89-CI/tables/study specific/%s.html", wd, mod))
+    save_kable(., file = sprintf("%s/results/psm/matched/95-CI/tables/study specific/%s.html", wd, mod))
 }
 
 cmb_res %>%
@@ -780,7 +780,7 @@ psm_fxd_tab_fun <- function(d, mod){
     kable_styling(full_width = F) %>%
     add_header_above(t_cols) %>%
     footnote("<em>OR</em> = Odds Ratio; <em>UI</em> = 89% Bayesian Uncertainty Interval. Bold indicates model terms whose 89% UI of log odds did not overlap with 0.", escape = F) %>%
-    save_kable(., file = sprintf("%s/results/psm/matched/89-CI/tables/fixed/%s.html", wd, mod))
+    save_kable(., file = sprintf("%s/results/psm/matched/95-CI/tables/fixed/%s.html", wd, mod))
 }
 
 fx_res %>%
@@ -826,7 +826,7 @@ fx_res %>%
     kableExtra::group_rows("Openness to Experience", rs$start[5], rs$end[5]) %>%
     # collapse_rows(1, valign = "top") %>%
     add_header_above(r_cols) %>%
-    footnote("<em>OR</em> = Odds Ratio; <em>UI</em> = 89% Bayesian Uncertainty Interval. Bold indicates model terms whose 89% UI of log odds did not overlap with 0. Binary variables were dummy coded such that the label to the right of the 'v' indicates the reference group.", escape = F) %>% save_kable(., file = sprintf("%s/results/psm/matched/89-CI/tables/fixed/all_moderators.html", wd))
+    footnote("<em>OR</em> = Odds Ratio; <em>UI</em> = 89% Bayesian Uncertainty Interval. Bold indicates model terms whose 89% UI of log odds did not overlap with 0. Binary variables were dummy coded such that the label to the right of the 'v' indicates the reference group.", escape = F) %>% save_kable(., file = sprintf("%s/results/psm/matched/95-CI/tables/fixed/all_moderators.html", wd))
 ```
 
 ##### Significant Fixed Effects  
@@ -844,7 +844,7 @@ fx_mod
 ### Variance-Covariance Matrices  
 ```{r vc mats}
 load_fun <- function(file, ob){
-  load(sprintf("%s/results/psm/matched/89-CI/vc/%s", wd, file))
+  load(sprintf("%s/results/psm/matched/95-CI/vc/%s", wd, file))
   get(ls()[ls() == ob])
 }
 
@@ -855,7 +855,7 @@ vc_fun <- function(vc){
     as_tibble()
 }
 
-vc_res <- tibble(file = list.files(sprintf("%s/results/psm/matched/89-CI/vc", wd))) %>%
+vc_res <- tibble(file = list.files(sprintf("%s/results/psm/matched/95-CI/vc", wd))) %>%
   separate(file, c("scrap", "Trait", "Outcome", "Moderator"), sep = "_", remove = F) %>%
   filter(Trait %in% traits$short_name) %>%
   mutate(Moderator = str_remove(Moderator, ".RData"),
@@ -899,7 +899,7 @@ vc_var %>%
         , col.names = c("Outcome", rep("b [CI]", 5))) %>%
   kable_styling(full_width = F) %>%
   add_header_above(hcols) %>%
-  save_kable(., file = sprintf("%s/results/psm/matched/89-CI/tables/level 2/p_value_none.html", wd))
+  save_kable(., file = sprintf("%s/results/psm/matched/95-CI/tables/level 2/p_value_none.html", wd))
 
 hcols <- rep(1,6)
 names(hcols) <- c(" ", traits$short_name)
@@ -924,7 +924,7 @@ vc_var %>%
         , col.names = c("Moderator", rep("b [CI]", 5))) %>%
   kable_styling(full_width = F) %>%
   add_header_above(hcols) %>%
-  save_kable(., file = sprintf("%s/results/psm/matched/89-CI/tables/level 2/all_mods.html", wd))
+  save_kable(., file = sprintf("%s/results/psm/matched/95-CI/tables/level 2/all_mods.html", wd))
 
 vc_tab_fun <- function(d, mod){
   hcols <- c(2, rep(1,5))
@@ -950,7 +950,7 @@ vc_tab_fun <- function(d, mod){
         , col.names = c("Outcome", "Moderator", rep("b [CI]", 5))) %>%
   kable_styling(full_width = F) %>%
   add_header_above(hcols) %>%
-  save_kable(., file = sprintf("%s/results/psm/matched/89-CI/tables/level 2/%s.html", wd, mod))
+  save_kable(., file = sprintf("%s/results/psm/matched/95-CI/tables/level 2/%s.html", wd, mod))
 }
 
 vc_var %>% 
@@ -964,11 +964,11 @@ vc_var %>%
 ### Simple Effects  
 ```{r load psm simple effects, eval = F}
 load_fun <- function(file, ob){
-  load(sprintf("%s/results/psm/matched/89-CI/predicted/%s", wd, file))
+  load(sprintf("%s/results/psm/matched/95-CI/predicted/%s", wd, file))
   get(ls()[ls() == ob])
 }
 
-fx_pred <- tibble(file = list.files(sprintf("%s/results/psm/matched/89-CI/predicted", wd))) %>%
+fx_pred <- tibble(file = list.files(sprintf("%s/results/psm/matched/95-CI/predicted", wd))) %>%
   separate(file, c("scrap", "type", "Trait", "Outcome", "Moderator"), sep = "_", remove = F) %>%
   filter(Trait %in% traits$short_name) %>%
   mutate(Moderator = str_remove(Moderator, ".RData"),
@@ -1035,7 +1035,7 @@ simp_eff_fun <- function(df, outcome, mod){
             , strip.background = element_rect(fill = "black")
             , strip.text = element_text(face = "bold", color = "white")
             , axis.text = element_text(color = "black"))
-  ggsave(file = sprintf("%s/results/psm/matched/89-CI/plots/simple effects/%s/matched_%s.pdf", wd, mod, outcome), width = 6, height = 6)
+  ggsave(file = sprintf("%s/results/psm/matched/95-CI/plots/simple effects/%s/matched_%s.pdf", wd, mod, outcome), width = 6, height = 6)
 }
 
 fx_pred %>%
@@ -1105,8 +1105,8 @@ sig_simp_eff_fun <- function(df, mod){
             , strip.background = element_blank()#element_rect(fill = "black")
             , strip.text = element_text(color = "black")
             , axis.text = element_text(color = "black"))
-  ggsave(p, file = sprintf("%s/results/psm/matched/89-CI/plots/simple effects/reliable/matched_%s.pdf", wd, mod), width = ncols*2+2, height = nrows*2)
-  save(p, file = sprintf("%s/results/psm/matched/89-CI/plots/simple effects/reliable/matched_%s.RData", wd, mod))
+  ggsave(p, file = sprintf("%s/results/psm/matched/95-CI/plots/simple effects/reliable/matched_%s.pdf", wd, mod), width = ncols*2+2, height = nrows*2)
+  save(p, file = sprintf("%s/results/psm/matched/95-CI/plots/simple effects/reliable/matched_%s.RData", wd, mod))
 }
 
 sig_mod <- fx_res %>% 
@@ -1131,13 +1131,13 @@ fx_pred %>%
 
 #### Supplementary Figure S1  
 ```{r, fig.cap = "Figure S1. Simple effects of all personality-outcome associations that were reliably moderated by age. Each panel indicates a separate personality-outcome association in terms of the odds ratio associated with a particular personality score for different age groups. Solid lines represent within-study-centered average age (i.e. 0), while dashed and dotted lines represent individuals in each study 1 SD above or below the study-centered average age, respectively. Shaded regions represent the 89% credible interval around the fitted estimates. Personality characteristics are presented as Percentage of Maximum Possible (POMP), which ranges from 0-10 for each study, such that 10 represents the maximum possible score, while 0 represents the minimum possible score.", fig.width=10, fig.height=6}
-load(sprintf("%s/results/psm/matched/89-CI/plots/simple effects/reliable/matched_%s.RData", res_path, "age"))
+load(sprintf("%s/results/psm/matched/95-CI/plots/simple effects/reliable/matched_%s.RData", res_path, "age"))
 p
 ```
 
 #### Supplementary Figure S2  
 ```{r, fig.cap = "Figure S2. Simple effects of all personality-outcome associations that were reliably moderated by gender (0 = male, 1 = female). Each panel indicates a separate personality-outcome association in terms of the odds ratio associated with a particular personality score for different gender groups. Dotted lines represent individuals who identified as male, while solid lines represent individuals who identified as female. Shaded regions represent the 89% credible interval around the fitted estimates. Personality characteristics are presented as Percentage of Maximum Possible (POMP), which ranges from 0-10 for each study, such that 10 represents the maximum possible score, while 0 represents the minimum possible score.", fig.width=10, fig.height=6}
-load(sprintf("%s/results/psm/matched/89-CI/plots/simple effects/reliable/matched_%s.RData", res_path, "gender"))
+load(sprintf("%s/results/psm/matched/95-CI/plots/simple effects/reliable/matched_%s.RData", res_path, "gender"))
 p
 ```
 
